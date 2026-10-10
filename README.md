@@ -91,7 +91,7 @@ The four tracks (Web / Next.js, Consumer Mobile / Expo, Autonomous Agents / Pyth
 
 ## Integration catalog (`src/config/integrations.ts`)
 
-The **Next.js** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.1.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8; see that repo's `VERIFICATION.md`). Every other framework, Wallet and Pay.sh are still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
+The **Next.js** and **Node.js** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.2.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8, Express 5.2.1 with `@x402/express` 2.28.0; see that repo's `VERIFICATION.md`). Expo, Python, Wallet and Pay.sh are still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
 
 `id`, `name`, `description`, `tech`, `external` service, `compatibility[framework]` (`ok` RDY · `server` +SRV · `unverified` UNV · `na` N/A), a `reasons` string for each framework, `worksWith` (advisory), `requires` (hard dependencies; the builder warns if they are off), `prerequisites`, `implementationStatus`, `verifiedOn` (frameworks with a verified template), and `files`, `packages` and `env` for each framework.
 
