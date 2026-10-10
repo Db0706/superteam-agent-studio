@@ -16,7 +16,7 @@ import { listZipEntries } from "@/lib/scaffold/zip-entries";
 
 const ROOT = join(process.cwd(), VENDOR_DIR);
 const MODULES = ["gemini", "payments", "spending", "paidapi"];
-const FRAMEWORKS = ["next", "node", "python"] as const;
+const FRAMEWORKS = ["next", "node", "python", "expo"] as const;
 const FULL = { name: "My Paid Agent", framework: "next", integrations: ["gemini", "payments", "spending", "paidapi"] };
 const FULL_NODE = { ...FULL, name: "My Paid Service", framework: "node" };
 
@@ -66,7 +66,7 @@ describe("vendored scaffold repository", () => {
     expect(JSON.parse(readFileSync(join(ROOT, "catalog.json"), "utf8"))).toEqual(catalog());
   });
 
-  it("Next.js, Node.js and Python have templates, each with the four verified modules", () => {
+  it("every framework has a template, each with the four verified modules", () => {
     expect(Object.keys(ZIP_MODULES)).toEqual([...FRAMEWORKS]);
     for (const fw of FRAMEWORKS) expect(ZIP_MODULES[fw]).toEqual(expect.arrayContaining(MODULES));
   });
@@ -78,7 +78,7 @@ describe("vendored scaffold repository", () => {
 
   it("contains no env file other than .env.example", () => {
     const files = walk(ROOT);
-    const envFiles = ["templates/nextjs/base/.env.example", "templates/node/base/.env.example", "templates/python/base/.env.example"];
+    const envFiles = ["templates/expo/base/.env.example", "templates/nextjs/base/.env.example", "templates/node/base/.env.example", "templates/python/base/.env.example"];
     expect(files.filter((f) => /(^|\/)\.env/.test(f))).toEqual(envFiles);
     for (const file of envFiles) {
       for (const line of readFileSync(join(ROOT, file), "utf8").split("\n")) {
@@ -130,15 +130,34 @@ describe("composeScaffold", () => {
 
   it.each(FRAMEWORKS)("keeps payments on Solana devnet and secrets empty (%s)", (framework) => {
     const { files } = composeScaffold(ROOT, { framework, modules: MODULES });
-    const env = files.find((f) => f.path === ".env.example")!.data.toString("utf8");
+    // Expo keeps every secret in its companion server, never in the app.
+    const envPath = framework === "expo" ? "companion-server/.env.example" : ".env.example";
+    const env = files.find((f) => f.path === envPath)!.data.toString("utf8");
     expect(env).toMatch(/^X402_NETWORK=solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1$/m);
     expect(env).toMatch(/^AGENT_PRIVATE_KEY=$/m);
     expect(env).toMatch(/^GEMINI_API_KEY=$/m);
     expect(files.some((f) => /(^|\/)\.env(?!\.example$)/.test(f.path))).toBe(false);
   });
 
+  it("puts Expo secrets in the companion server, never in the app", () => {
+    const { files, manifest } = composeScaffold(ROOT, { framework: "expo", modules: ["gemini", "paidapi"] });
+    const appEnv = files.find((f) => f.path === ".env.example")!.data.toString("utf8");
+    expect(appEnv).not.toMatch(/GEMINI_API_KEY|AGENT_PRIVATE_KEY/);
+    expect(appEnv).toMatch(/^EXPO_PUBLIC_COMPANION_URL=$/m);
+    expect(manifest.env.every((e) => !e.secret)).toBe(true);
+    expect(manifest.companion).toMatchObject({ dir: "companion-server", framework: "node", modules: ["gemini", "payments", "spending", "paidapi"] });
+    expect(manifest.companion!.env.some((e) => e.key === "GEMINI_API_KEY" && e.secret)).toBe(true);
+    expect(files.map((f) => f.path)).toContain("companion-server/src/server.ts");
+  });
+
+  it("generates no companion server for a base-only Expo app", () => {
+    const { files, manifest } = composeScaffold(ROOT, { framework: "expo", modules: [] });
+    expect(files.some((f) => f.path.startsWith("companion-server/"))).toBe(false);
+    expect(manifest.companion).toBeUndefined();
+  });
+
   it("rejects unknown frameworks and modules", () => {
-    expect(() => composeScaffold(ROOT, { framework: "expo", modules: [] })).toThrow(/Unknown framework/);
+    expect(() => composeScaffold(ROOT, { framework: "flutter", modules: [] })).toThrow(/Unknown framework/);
     expect(() => composeScaffold(ROOT, { framework: "next", modules: ["wallet"] })).toThrow(/Unknown module/);
   });
 
@@ -184,20 +203,30 @@ describe("zipAvailability", () => {
     expect(zipAvailability(fw, [])).toEqual({ ok: true, modules: [] });
     expect(zipAvailability(fw, MODULES)).toEqual({ ok: true, modules: MODULES });
   });
-  it("explains why other frameworks stay previews", () => {
-    const r = zipAvailability("expo", []);
-    expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.reason).toMatch(/templates aren't built yet.*Only Next\.js, Node\.js and Python download today/);
+  it("explains why a framework without templates stays a preview", async () => {
+    vi.resetModules();
+    vi.doMock("../../vendor/agent-studio-scaffolds/catalog.json", () => ({ default: catalogJson.filter((c: { framework: string }) => c.framework !== "expo") }));
+    try {
+      const { zipAvailability: za } = await import("@/lib/scaffold/catalog");
+      const r = za("expo", []);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.reason).toMatch(/templates aren't built yet.*Only Next\.js, Node\.js and Python download today/);
+    } finally {
+      vi.doUnmock("../../vendor/agent-studio-scaffolds/catalog.json");
+      vi.resetModules();
+    }
   });
   it("keeps a catalog framework the composer can't build as a preview, not a 500", async () => {
     vi.resetModules();
-    vi.doMock("../../vendor/agent-studio-scaffolds/catalog.json", () => ({
-      default: [...catalogJson, { framework: "expo", modules: MODULES.map((id) => ({ id })) }],
-    }));
+    vi.doMock("@/lib/scaffold/frameworks", async () => {
+      const real = await vi.importActual<typeof import("@/lib/scaffold/frameworks")>("@/lib/scaffold/frameworks");
+      const dirs = Object.fromEntries(Object.entries(real.FRAMEWORK_DIRS).filter(([fw]) => fw !== "expo"));
+      return { FRAMEWORK_DIRS: dirs, isComposableFramework: (fw: string) => Object.hasOwn(dirs, fw) };
+    });
     try {
       const { ZIP_MODULES: zm, zipAvailability: za } = await import("@/lib/scaffold/catalog");
       const { createScaffoldHandler: create } = await import("@/lib/scaffold/handler");
-      expect(Object.keys(zm)).toEqual([...FRAMEWORKS]);
+      expect(Object.keys(zm)).toEqual(["next", "node", "python"]);
       expect(za("expo", ["gemini"]).ok).toBe(false);
       const res = await create()(
         new Request("http://localhost/api/scaffold", {
@@ -208,7 +237,7 @@ describe("zipAvailability", () => {
       );
       expect(res.status).toBe(422);
     } finally {
-      vi.doUnmock("../../vendor/agent-studio-scaffolds/catalog.json");
+      vi.doUnmock("@/lib/scaffold/frameworks");
       vi.resetModules();
     }
   });
@@ -270,7 +299,6 @@ describe("POST /api/scaffold handler", () => {
     ["bad name", post({ ...FULL, name: "9" }), 400],
     ["N/A capability", post({ ...FULL, framework: "python", integrations: ["wallet"] }), 400],
     ["oversized body", post({ ...FULL, name: "x".repeat(MAX_BODY_BYTES) }), 413],
-    ["framework without templates", post({ ...FULL, framework: "expo", integrations: ["gemini"] }), 422],
     ["capability without a template", post({ ...FULL, integrations: ["wallet"] }), 422],
   ])("rejects %s", async (_label, req, status) => {
     const res = await createScaffoldHandler()(req);
@@ -304,7 +332,7 @@ describe("rate limiter", () => {
 });
 
 describe("scaffoldGenerator", () => {
-  it("is the active generator and reports Next.js, Node.js and Python as verified", async () => {
+  it("is the active generator and reports every framework as verified", async () => {
     expect(getGenerator()).toBe(scaffoldGenerator);
     const templates = await scaffoldGenerator.listTemplates();
     for (const fw of FRAMEWORKS) {
@@ -313,11 +341,11 @@ describe("scaffoldGenerator", () => {
     expect(templates.filter((t) => !(FRAMEWORKS as readonly string[]).includes(t.framework)).every((t) => t.status === "provisional")).toBe(true);
   });
 
-  it("can download Next.js, Node.js and Python selections only", () => {
+  it("can download every framework, but not capabilities without a template", () => {
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["gemini"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "node", integrations: ["paidapi"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "python", integrations: ["gemini", "spending"] })).toBe(true);
-    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: [] })).toBe(false);
+    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: ["gemini"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["wallet"] })).toBe(false);
   });
 
@@ -336,7 +364,7 @@ describe("scaffoldGenerator", () => {
   it("refuses selections without templates before calling the server", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    await expect(scaffoldGenerator.generateProject({ name: "a-b-c", framework: "expo", integrations: [] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
+    await expect(scaffoldGenerator.generateProject({ name: "a-b-c", framework: "next", integrations: ["wallet"] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

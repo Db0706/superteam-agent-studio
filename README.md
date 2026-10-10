@@ -91,12 +91,12 @@ The four tracks (Web / Next.js, Consumer Mobile / Expo, Autonomous Agents / Pyth
 
 ## Integration catalog (`src/config/integrations.ts`)
 
-The **Next.js**, **Node.js** and **Python** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.3.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8, Express 5.2.1 with `@x402/express` 2.28.0; Python 3.10+ with `x402[httpx,svm]` 2.25.0, `google-genai` 2.29.0 and FastAPI 0.143.0; see that repo's `VERIFICATION.md`). Expo, Wallet and Pay.sh are still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
+The **Next.js**, **Node.js**, **Python** and **Expo** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.4.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8, Express 5.2.1 with `@x402/express` 2.28.0; Python 3.10+ with `x402[httpx,svm]` 2.25.0, `google-genai` 2.29.0 and FastAPI 0.143.0; Expo SDK 57 apps bundled for Android with no secrets inside; see that repo's `VERIFICATION.md`). Wallet and Pay.sh are still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
 
 `id`, `name`, `description`, `tech`, `external` service, `compatibility[framework]` (`ok` RDY · `server` +SRV · `unverified` UNV · `na` N/A), a `reasons` string for each framework, `worksWith` (advisory), `requires` (hard dependencies; the builder warns if they are off), `prerequisites`, `implementationStatus`, `verifiedOn` (frameworks with a verified template), and `files`, `packages` and `env` for each framework.
 
 Rules the builder enforces:
-- **Expo plus a +SRV capability** (Gemini, Payments, Paid API) adds a `companion-server/`. Secret env vars are written to `companion-server/.env.example`; only `EXPO_PUBLIC_*` values stay in the app. **Gemini and payment secrets never go in Android client code.**
+- **Expo plus a +SRV capability** (Gemini, Payments, Spending, Paid API) adds a `companion-server/`, generated from the verified Node.js template with the same capabilities. Secret env vars are written to `companion-server/.env.example`; only `EXPO_PUBLIC_*` values stay in the app. **Gemini and payment secrets never go in Android client code.**
 - **N/A combinations** can't be switched on. Switching framework unplugs them and shows a notice.
 - **Required capabilities** follow automatically. Switching on Paid API also switches on Payments and Spending Controls, and switching off Payments also switches off what needs it. Both show a notice. Shared links and restored selections are completed the same way (`normalizeIntegrations` in `integrations.ts`).
 - **Python** projects show `requirements.txt` and never `package.json`.
@@ -154,7 +154,7 @@ interface ScaffoldGenerator {
 - All event details, prizes, dates, the venue and the host role are placeholders (PROPOSED / SAMPLE / TBC). The "AGENT STUDIO by Superteam" wordmark and the "ST" tile are placeholder brand marks; replace them with approved assets.
 - The GitHub links point to `https://github.com/` until the repository exists (`src/config/site.ts`).
 - The compatibility matrix and package versions are illustrative.
-- No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist only for Next.js, Node.js and Python selections the scaffold repository has templates for.
+- No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist for all four frameworks (Next.js, Expo, Python, Node.js); Wallet and Pay.sh selections stay previews until they have templates.
 
 ## Changes from the prototype (deliberate, minimal)
 

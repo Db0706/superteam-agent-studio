@@ -1,0 +1,16 @@
+{
+  "id": "spending",
+  "kind": "module",
+  "framework": "expo",
+  "name": "Spending Controls",
+  "summary": "A total budget and a per-payment cap for the companion server's agent, checked before every automatic payment.",
+  "requires": ["payments"],
+  "companionModules": ["spending"],
+  "files": [],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {},
+  "env": [],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

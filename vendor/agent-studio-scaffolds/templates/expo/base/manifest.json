@@ -1,0 +1,73 @@
+{
+  "id": "base",
+  "kind": "base",
+  "framework": "expo",
+  "name": "Expo mobile app (Android)",
+  "description": "Expo + expo-router + TypeScript app. Every module is layered on top of this. Modules that need secrets add a companion server (the node template) in companion-server/.",
+  "requires": [],
+  "files": [
+    "app/_layout.tsx",
+    "app/index.tsx",
+    "components/Screen.tsx",
+    "lib/companion.ts",
+    "lib/modules.ts",
+    "app.json",
+    "metro.config.js",
+    "tsconfig.json",
+    "package.json",
+    ".gitignore",
+    ".env.example",
+    "README.md"
+  ],
+  "modulesFile": "lib/modules.ts",
+  "generatedFiles": ["lib/modules.ts", "package.json", ".env.example", "README.md", "studio.manifest.json"],
+  "dependencies": {
+    "expo": "57.0.25",
+    "expo-constants": "57.0.19",
+    "expo-linking": "57.0.11",
+    "expo-router": "57.0.23",
+    "expo-status-bar": "57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-screens": "4.26.2",
+    "react-native-worklets": "0.10.1"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "@types/react": "19.2.18"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "build": "expo export --platform android",
+    "typecheck": "tsc --noEmit"
+  },
+  "env": [],
+  "companion": {
+    "framework": "node",
+    "dir": "companion-server",
+    "name": "Companion server",
+    "scripts": {
+      "companion:install": "npm --prefix companion-server install",
+      "companion": "npm --prefix companion-server run dev"
+    },
+    "env": [
+      {
+        "key": "EXPO_PUBLIC_COMPANION_URL",
+        "example": "",
+        "required": false,
+        "secret": false,
+        "note": "Where the app finds companion-server/. Leave empty in development: the app uses the computer running `npm start`, port 3000. Set it to your deployed https:// URL for a release build. EXPO_PUBLIC_ values are built into the app, so never put a key here"
+      }
+    ],
+    "readme": "COMPANION.fragment.md"
+  },
+  "prerequisites": [
+    "Node.js 20.19.4 or newer (22 LTS recommended)",
+    "An Android phone with the Expo Go app, or an Android emulator from Android Studio"
+  ],
+  "readme": "README.fragment.md"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "paidapi",
+  "kind": "module",
+  "framework": "expo",
+  "name": "Paid API Example",
+  "summary": "The companion server sells GET /premium-data for devnet USDC; the Premium screen shows the price and lets the companion's agent buy it within its spending limits.",
+  "nav": { "label": "Premium data", "href": "/premium" },
+  "requires": ["payments", "spending"],
+  "companionModules": ["paidapi"],
+  "files": ["lib/paidapi/client.ts", "app/premium.tsx"],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {},
+  "env": [],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

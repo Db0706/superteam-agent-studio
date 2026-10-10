@@ -3,12 +3,13 @@ import type { FrameworkId } from "./schema";
 /**
  * Compatibility and template catalog.
  *
- * The Next.js, Node.js and Python entries for gemini, payments, spending and
- * paidapi match the agent-studio-scaffolds repository (scaffold v0.3.0, verified
- * 2026-10-10: install, typecheck, build/compile and offline tests pass, plus HTTP
- * smoke tests of the Node and Python services; see its VERIFICATION.md). Those
- * are listed in `verifiedOn`. Everything else is still provisional: Expo, Wallet
- * and Pay.sh have no real template yet. See README → "Integration catalog".
+ * The Next.js, Node.js, Python and Expo entries for gemini, payments, spending
+ * and paidapi match the agent-studio-scaffolds repository (scaffold v0.4.0,
+ * verified 2026-10-10: install, typecheck, build/compile and offline tests pass,
+ * plus HTTP smoke tests of the Node and Python services; Expo apps bundle for
+ * Android with no secrets inside, and their companion server is the verified
+ * Node template; see its VERIFICATION.md). Those are listed in `verifiedOn`.
+ * Wallet and Pay.sh have no real template yet. See README → "Integration catalog".
  */
 
 export type CompatStatus = "ok" | "server" | "unverified" | "na";
@@ -87,15 +88,24 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
     tech: "React Native + Expo",
     blurb: "For Android consumer applications.",
     useCase: "Track 02 · consumer Android apps. Secrets stay in a companion server, never in the app.",
-    envFile: ".env",
+    // The app holds no secrets; its only setting is the optional EXPO_PUBLIC_COMPANION_URL.
+    envFile: ".env.local",
     manager: "npm",
     manifest: "package.json",
-    baseFiles: ["app/_layout.tsx", "app/index.tsx", "components/Screen.tsx", "app.json", "tsconfig.json", "package.json", ".env.example", "README.md"],
+    baseFiles: [
+      "app/_layout.tsx", "app/index.tsx", "components/Screen.tsx", "lib/companion.ts", "lib/modules.ts",
+      "app.json", "metro.config.js", "tsconfig.json", "package.json", ".gitignore", ".env.example", "README.md", "studio.manifest.json",
+    ],
+    // Expo SDK 57: every native module pinned to what the SDK's bundledNativeModules.json expects.
     packages: {
-      base: [["expo", "~52.0.0"], ["expo-router", "~4.0.0"], ["react", "18.3.1"], ["react-native", "0.76.0"]],
-      dev: [["typescript", "^5.6.0"]],
+      base: [
+        ["expo", "57.0.25"], ["expo-constants", "57.0.19"], ["expo-linking", "57.0.11"], ["expo-router", "57.0.23"], ["expo-status-bar", "57.0.1"],
+        ["react", "19.2.3"], ["react-dom", "19.2.3"], ["react-native", "0.86.3"], ["react-native-reanimated", "4.5.1"],
+        ["react-native-safe-area-context", "5.7.0"], ["react-native-screens", "4.26.2"], ["react-native-worklets", "0.10.1"],
+      ],
+      dev: [["typescript", "6.0.3"], ["@types/react", "19.2.18"]],
     },
-    scripts: [["start", "expo start"], ["android", "expo run:android"]],
+    scripts: [["start", "expo start"], ["android", "expo start --android"], ["build", "expo export --platform android"], ["typecheck", "tsc --noEmit"]],
   },
   python: {
     id: "python",
@@ -169,20 +179,20 @@ export const INTEGRATIONS: IntegrationDef[] = [
     tech: "Google Gemini API · official SDK · function calling",
     external: { name: "Gemini API", description: "Free API key from Google AI Studio." },
     compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
-    reasons: { expo: "Adds a small server so your Gemini key never ships inside the app." },
+    reasons: { expo: "Adds a companion server (the Node.js template) so your Gemini key never ships inside the app." },
     worksWith: [],
     requires: [],
     prerequisites: ["Google account", "Gemini API key (free tier), added to .env yourself, never typed into this site"],
     implementationStatus: "provisional",
-    verifiedOn: ["next", "node", "python"],
+    verifiedOn: ["next", "node", "python", "expo"],
     files: {
       next: ["lib/ai/gemini.ts", "app/api/chat/route.ts", "app/chat/page.tsx"],
-      expo: ["lib/ai/client.ts", "companion-server/src/routes/ai.ts"],
+      expo: ["lib/ai/client.ts", "app/chat.tsx"],
       python: ["agent/ai/__init__.py", "agent/ai/gemini.py", "agent/routes/chat.py", "agent/commands/ask.py"],
       node: ["src/lib/ai/gemini.ts", "src/routes/chat.ts"],
     },
     packages: { next: [["@google/genai", "2.28.0"]], node: [["@google/genai", "2.28.0"]], python: [["google-genai", "2.29.0"]] },
-    env: { next: [GEMINI_KEY, GEMINI_MODEL], expo: [GEMINI_KEY], python: [GEMINI_KEY, GEMINI_MODEL], node: [GEMINI_KEY, GEMINI_MODEL] },
+    env: { next: [GEMINI_KEY, GEMINI_MODEL], expo: [GEMINI_KEY, GEMINI_MODEL], python: [GEMINI_KEY, GEMINI_MODEL], node: [GEMINI_KEY, GEMINI_MODEL] },
   },
   {
     id: "payments",
@@ -192,7 +202,7 @@ export const INTEGRATIONS: IntegrationDef[] = [
     tech: "x402 V2 · HTTP 402 + PAYMENT-* headers · USDC on Solana devnet",
     external: { name: "x402 facilitator", description: "Hosted service that verifies and settles payments. Uses Solana devnet while you build." },
     compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
-    reasons: { expo: "Adds a companion server that confirms payments for the app." },
+    reasons: { expo: "Adds a companion server (the Node.js template) that charges and pays; the app only reads prices." },
     worksWith: ["spending"],
     requires: [],
     prerequisites: [
@@ -200,10 +210,10 @@ export const INTEGRATIONS: IntegrationDef[] = [
       "Devnet test USDC from faucet.circle.com, no real money. No SOL needed: the facilitator pays fees",
     ],
     implementationStatus: "provisional",
-    verifiedOn: ["next", "node", "python"],
+    verifiedOn: ["next", "node", "python", "expo"],
     files: {
       next: ["lib/payments/config.ts", "lib/payments/server.ts", "lib/payments/client.ts", "scripts/keygen.ts", "scripts/wallets.ts"],
-      expo: ["lib/payments/client.ts", "companion-server/src/routes/pay.ts"],
+      expo: ["lib/payments/client.ts"],
       python: [
         "agent/payments/__init__.py", "agent/payments/config.py", "agent/payments/server.py", "agent/payments/client.py",
         "agent/commands/keygen.py", "agent/commands/wallets.py",
@@ -213,14 +223,13 @@ export const INTEGRATIONS: IntegrationDef[] = [
     packages: {
       // @solana/kit must stay on 5.x: @x402/svm's @solana-program/* deps peer-require kit ^5.
       next: [["@x402/core", "2.28.0"], ["@x402/next", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"]],
-      expo: [["@x402/fetch", "2.28.0"]],
       node: [["@x402/core", "2.28.0"], ["@x402/express", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"]],
       // solana 0.39 needs Python >= 3.11 and solders 0.28+ conflicts with solana 0.38, so both stay pinned.
       python: [["x402[httpx,svm]", "2.25.0"], ["solana", "0.38.0"], ["solders", "0.27.1"], ["httpx", "0.28.1"]],
     },
     env: {
       next: [FACILITATOR, NETWORK, PAY_TO, AGENT_KEY, RPC],
-      expo: [FACILITATOR, NETWORK, PAY_TO],
+      expo: [FACILITATOR, NETWORK, PAY_TO, AGENT_KEY, RPC],
       node: [FACILITATOR, NETWORK, PAY_TO, AGENT_KEY, RPC],
       python: [FACILITATOR, NETWORK, PAY_TO, AGENT_KEY, RPC],
     },
@@ -297,10 +306,10 @@ export const INTEGRATIONS: IntegrationDef[] = [
     requires: ["payments", "spending"],
     prerequisites: [],
     implementationStatus: "provisional",
-    verifiedOn: ["next", "node", "python"],
+    verifiedOn: ["next", "node", "python", "expo"],
     files: {
       next: ["app/api/premium/route.ts", "app/api/buy/route.ts", "app/premium/page.tsx", "lib/paidapi/buyer.ts", "scripts/pay.ts"],
-      expo: ["app/premium.tsx", "companion-server/src/routes/premium-data.ts"],
+      expo: ["lib/paidapi/client.ts", "app/premium.tsx"],
       python: ["agent/paidapi/__init__.py", "agent/paidapi/buyer.py", "agent/routes/premium_data.py", "agent/routes/buy.py", "agent/commands/buy.py"],
       node: ["src/routes/premium-data.ts", "src/routes/buy.ts", "src/lib/paidapi/buyer.ts", "examples/client.ts"],
     },
@@ -314,16 +323,16 @@ export const INTEGRATIONS: IntegrationDef[] = [
     description: "Set budgets and per-payment limits for autonomous payments.",
     tech: "Total budget · per-payment cap · devnet-USDC-only asset allow-list, checked before paying",
     external: null,
-    compatibility: { next: "ok", expo: "unverified", python: "ok", node: "ok" },
-    reasons: { expo: "Limits run on-device only and are not yet reviewed." },
+    compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
+    reasons: { expo: "Limits run in the companion server, next to the key they protect." },
     worksWith: ["payments"],
     requires: ["payments"],
     prerequisites: [],
     implementationStatus: "provisional",
-    verifiedOn: ["next", "node", "python"],
+    verifiedOn: ["next", "node", "python", "expo"],
     files: {
       next: ["lib/spending/policy.ts", "lib/spending/tracker.ts", "lib/spending/attach.ts", "scripts/test-spending.ts", "scripts/test-spending-x402.ts"],
-      expo: ["lib/payments/limits.ts"],
+      expo: [],
       python: [
         "agent/spending/__init__.py", "agent/spending/policy.py", "agent/spending/tracker.py", "agent/spending/attach.py",
         "tests/test_spending.py", "tests/test_spending_x402.py",
@@ -348,8 +357,8 @@ export const STATUS_META: Record<CompatStatus, { label: string; code: string }> 
   na: { label: "Not available", code: "N/A" },
 };
 
-/** Files added once when an Expo project needs a companion server. */
-export const COMPANION_FILES = ["companion-server/package.json", "companion-server/src/index.ts", "companion-server/.env.example"];
+/** Folder an Expo app's companion server (composed from the Node.js template) is generated into. */
+export const COMPANION_DIR = "companion-server";
 
 export function statusOf(id: IntegrationId, fw: FrameworkId): CompatStatus {
   return INTEGRATION_MAP[id]?.compatibility[fw] ?? "na";

@@ -756,5 +756,182 @@
         "readme": "README.fragment.md"
       }
     ]
+  },
+  {
+    "framework": "expo",
+    "base": {
+      "id": "base",
+      "kind": "base",
+      "framework": "expo",
+      "name": "Expo mobile app (Android)",
+      "description": "Expo + expo-router + TypeScript app. Every module is layered on top of this. Modules that need secrets add a companion server (the node template) in companion-server/.",
+      "requires": [],
+      "files": [
+        "app/_layout.tsx",
+        "app/index.tsx",
+        "components/Screen.tsx",
+        "lib/companion.ts",
+        "lib/modules.ts",
+        "app.json",
+        "metro.config.js",
+        "tsconfig.json",
+        "package.json",
+        ".gitignore",
+        ".env.example",
+        "README.md"
+      ],
+      "modulesFile": "lib/modules.ts",
+      "generatedFiles": [
+        "lib/modules.ts",
+        "package.json",
+        ".env.example",
+        "README.md",
+        "studio.manifest.json"
+      ],
+      "dependencies": {
+        "expo": "57.0.25",
+        "expo-constants": "57.0.19",
+        "expo-linking": "57.0.11",
+        "expo-router": "57.0.23",
+        "expo-status-bar": "57.0.1",
+        "react": "19.2.3",
+        "react-dom": "19.2.3",
+        "react-native": "0.86.3",
+        "react-native-reanimated": "4.5.1",
+        "react-native-safe-area-context": "5.7.0",
+        "react-native-screens": "4.26.2",
+        "react-native-worklets": "0.10.1"
+      },
+      "devDependencies": {
+        "typescript": "6.0.3",
+        "@types/react": "19.2.18"
+      },
+      "scripts": {
+        "start": "expo start",
+        "android": "expo start --android",
+        "build": "expo export --platform android",
+        "typecheck": "tsc --noEmit"
+      },
+      "env": [],
+      "companion": {
+        "framework": "node",
+        "dir": "companion-server",
+        "name": "Companion server",
+        "scripts": {
+          "companion:install": "npm --prefix companion-server install",
+          "companion": "npm --prefix companion-server run dev"
+        },
+        "env": [
+          {
+            "key": "EXPO_PUBLIC_COMPANION_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "Where the app finds companion-server/. Leave empty in development: the app uses the computer running `npm start`, port 3000. Set it to your deployed https:// URL for a release build. EXPO_PUBLIC_ values are built into the app, so never put a key here"
+          }
+        ],
+        "readme": "COMPANION.fragment.md"
+      },
+      "prerequisites": [
+        "Node.js 20.19.4 or newer (22 LTS recommended)",
+        "An Android phone with the Expo Go app, or an Android emulator from Android Studio"
+      ],
+      "readme": "README.fragment.md"
+    },
+    "modules": [
+      {
+        "id": "gemini",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Gemini AI",
+        "summary": "A chat screen that asks Google Gemini through your companion server. The key never ships in the app.",
+        "nav": {
+          "label": "Gemini chat",
+          "href": "/chat"
+        },
+        "requires": [],
+        "companionModules": [
+          "gemini"
+        ],
+        "files": [
+          "lib/ai/client.ts",
+          "app/chat.tsx"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paidapi",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Paid API Example",
+        "summary": "The companion server sells GET /premium-data for devnet USDC; the Premium screen shows the price and lets the companion's agent buy it within its spending limits.",
+        "nav": {
+          "label": "Premium data",
+          "href": "/premium"
+        },
+        "requires": [
+          "payments",
+          "spending"
+        ],
+        "companionModules": [
+          "paidapi"
+        ],
+        "files": [
+          "lib/paidapi/client.ts",
+          "app/premium.tsx"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "payments",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+        "summary": "Your companion server charges for endpoints with x402 V2 and pays with a devnet wallet. The app reads prices; keys stay on the server. Test money only.",
+        "requires": [],
+        "companionModules": [
+          "payments"
+        ],
+        "files": [
+          "lib/payments/client.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "spending",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Spending Controls",
+        "summary": "A total budget and a per-payment cap for the companion server's agent, checked before every automatic payment.",
+        "requires": [
+          "payments"
+        ],
+        "companionModules": [
+          "spending"
+        ],
+        "files": [],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      }
+    ]
   }
 ]
