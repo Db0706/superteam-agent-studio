@@ -2,6 +2,7 @@
 // Composes a runnable project from a base template plus modules.
 //
 //   node scripts/compose.mjs --framework next --modules gemini,payments,spending,paidapi --out out/my-app
+//   node scripts/compose.mjs --framework node --modules paidapi --out out/my-service
 //   node scripts/compose.mjs --list            # print the catalog (all templates + modules) as JSON
 //
 // No dependencies: this is the piece the Agent Studio generator will call (or port).
@@ -12,7 +13,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const FRAMEWORK_DIRS = { next: "templates/nextjs" };
+const FRAMEWORK_DIRS = { next: "templates/nextjs", node: "templates/node" };
 const SCAFFOLD_VERSION = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).version;
 
 const readJson = (p) => JSON.parse(readFileSync(p, "utf8"));
@@ -65,6 +66,8 @@ export function compose({ framework, modules: requested, out, name = "superteam-
   const { order, autoAdded } = resolveModules(modules, requested);
   const parts = [base, ...order.map((id) => modules[id])];
   const outDir = resolve(out);
+  // The generated module list (drives the home page / GET /). Its path differs per framework.
+  const modulesFile = base.modulesFile ?? "lib/modules.ts";
 
   if (existsSync(outDir)) rmSync(outDir, { recursive: true });
   mkdirSync(outDir, { recursive: true });
@@ -72,7 +75,8 @@ export function compose({ framework, modules: requested, out, name = "superteam-
   // 1. Files. Base files are copied first; modules may only add new files.
   const owners = new Map();
   for (const file of base.files) {
-    if (base.generatedFiles.includes(file) && file !== "lib/modules.ts") continue;
+    if (base.generatedFiles.includes(file) && file !== modulesFile) continue;
+    mkdirSync(dirname(join(outDir, file)), { recursive: true });
     cpSync(join(base.dir, file), join(outDir, file));
     owners.set(file, "base");
   }
@@ -117,18 +121,18 @@ export function compose({ framework, modules: requested, out, name = "superteam-
   }
   writeFileSync(join(outDir, ".env.example"), envText);
 
-  // 4. lib/modules.ts (drives the home page)
+  // 4. lib/modules.ts or src/modules.ts (drives the home page)
   const navModules = order.map((id) => ({
     id,
     name: modules[id].nav?.label ?? modules[id].name,
     ...(modules[id].nav?.href ? { href: modules[id].nav.href } : {}),
     summary: modules[id].summary,
   }));
-  const modulesTs = readFileSync(join(base.dir, "lib/modules.ts"), "utf8").replace(
+  const modulesTs = readFileSync(join(base.dir, modulesFile), "utf8").replace(
     /export const modules: StudioModule\[\] = \[\];/,
     `export const modules: StudioModule[] = ${JSON.stringify(navModules, null, 2)};`,
   );
-  writeFileSync(join(outDir, "lib/modules.ts"), modulesTs);
+  writeFileSync(join(outDir, modulesFile), modulesTs);
 
   // 5. README.md
   const readme = parts

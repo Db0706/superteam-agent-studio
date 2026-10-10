@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { FRAMEWORK_DIRS, isComposableFramework } from "./frameworks";
 
 /**
  * In-memory port of the scaffold repository's `scripts/compose.mjs`.
@@ -12,7 +13,7 @@ import { join } from "node:path";
  */
 
 export const VENDOR_DIR = "vendor/agent-studio-scaffolds";
-const FRAMEWORK_DIRS: Record<string, string> = { next: "templates/nextjs" };
+
 
 interface EnvDef {
   key: string;
@@ -30,6 +31,8 @@ interface PartManifest {
   requires: string[];
   files: string[];
   generatedFiles?: string[];
+  /** Base only: the generated module list path (compose.mjs default "lib/modules.ts"). */
+  modulesFile?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   scripts?: Record<string, string>;
@@ -114,8 +117,8 @@ export function loadFramework(root: string, framework: string): Framework {
   const key = `${root}\0${framework}`;
   const hit = cache.get(key);
   if (hit) return hit;
+  if (!isComposableFramework(framework)) throw new ScaffoldCompositionError(`Unknown framework "${framework}". Known: ${Object.keys(FRAMEWORK_DIRS).join(", ")}`);
   const dir = FRAMEWORK_DIRS[framework];
-  if (!dir) throw new ScaffoldCompositionError(`Unknown framework "${framework}". Known: ${Object.keys(FRAMEWORK_DIRS).join(", ")}`);
   const baseDir = join(root, dir, "base");
   const modulesDir = join(root, dir, "modules");
   const modules: Record<string, Part> = {};
@@ -174,11 +177,13 @@ export function composeScaffold(
   const parts = [base, ...order.map((id) => modules[id])];
   const out = new Map<string, Buffer>();
   const generated = base.generatedFiles ?? [];
+  // The generated module list (drives the home page / GET /). Its path differs per framework.
+  const modulesFile = base.modulesFile ?? "lib/modules.ts";
 
   // 1. Files. Base files first; modules may only add new files.
   const owners = new Map<string, string>();
   for (const file of base.files) {
-    if (generated.includes(file) && file !== "lib/modules.ts") continue;
+    if (generated.includes(file) && file !== modulesFile) continue;
     out.set(file, get(base, file));
     owners.set(file, "base");
   }
@@ -219,17 +224,17 @@ export function composeScaffold(
   }
   out.set(".env.example", Buffer.from(envText));
 
-  // 4. lib/modules.ts (drives the home page)
+  // 4. lib/modules.ts or src/modules.ts (drives the home page)
   const navModules = order.map((id) => ({
     id,
     name: modules[id].nav?.label ?? modules[id].name,
     ...(modules[id].nav?.href ? { href: modules[id].nav.href } : {}),
     summary: modules[id].summary,
   }));
-  const modulesTs = get(base, "lib/modules.ts")
+  const modulesTs = get(base, modulesFile)
     .toString("utf8")
     .replace(/export const modules: StudioModule\[\] = \[\];/, () => `export const modules: StudioModule[] = ${JSON.stringify(navModules, null, 2)};`);
-  out.set("lib/modules.ts", Buffer.from(modulesTs));
+  out.set(modulesFile, Buffer.from(modulesTs));
 
   // 5. README.md
   const readme = parts.map((p) => p.content.get("\0readme")!.toString("utf8").trim()).join("\n\n---\n\n");
