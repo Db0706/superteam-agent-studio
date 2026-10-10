@@ -1,0 +1,72 @@
+{
+  "id": "payments",
+  "kind": "module",
+  "framework": "next",
+  "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+  "summary": "Charge for API routes with x402 V2 and pay for them with a devnet wallet. Test money only.",
+  "requires": [],
+  "files": [
+    "lib/payments/config.ts",
+    "lib/payments/server.ts",
+    "lib/payments/client.ts",
+    "scripts/keygen.ts",
+    "scripts/wallets.ts"
+  ],
+  "dependencies": {
+    "@x402/core": "2.28.0",
+    "@x402/next": "2.28.0",
+    "@x402/fetch": "2.28.0",
+    "@x402/svm": "2.28.0",
+    "@solana/kit": "5.5.1"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
+  },
+  "scripts": {
+    "keygen": "tsx scripts/keygen.ts",
+    "wallets": "tsx scripts/wallets.ts"
+  },
+  "env": [
+    {
+      "key": "PAY_TO_ADDRESS",
+      "example": "",
+      "required": true,
+      "secret": false,
+      "note": "Your Solana devnet wallet address. Payments to your paid API arrive here."
+    },
+    {
+      "key": "X402_NETWORK",
+      "example": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+      "required": false,
+      "secret": false,
+      "note": "CAIP-2 id. Only Solana devnet is allowed by this template."
+    },
+    {
+      "key": "X402_FACILITATOR_URL",
+      "example": "https://x402.org/facilitator",
+      "required": false,
+      "secret": false,
+      "note": "Free public test facilitator: verifies + settles devnet payments and pays the SOL fees."
+    },
+    {
+      "key": "AGENT_PRIVATE_KEY",
+      "example": "",
+      "required": false,
+      "secret": true,
+      "note": "DEVNET-ONLY throwaway key for the paying side (buyer). Base58 or solana-keygen JSON array. Never commit."
+    },
+    {
+      "key": "SOLANA_RPC_URL",
+      "example": "https://api.devnet.solana.com",
+      "required": false,
+      "secret": false,
+      "note": "Optional devnet RPC used when building payments."
+    }
+  ],
+  "prerequisites": [
+    "A Solana devnet address to receive test payments (PAY_TO_ADDRESS); `npm run keygen -- --pay-to` makes one",
+    "To pay: a throwaway devnet keypair (`npm run keygen`) funded with devnet USDC from https://faucet.circle.com (no real money)",
+    "The receiving address also needs a devnet USDC token account: send it faucet USDC once"
+  ],
+  "readme": "README.fragment.md"
+}

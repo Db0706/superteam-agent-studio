@@ -121,7 +121,7 @@ There are 250 ideas across 26 industries, balanced across the four tracks (60-67
 
 Selection uses a **shuffle bag**: no idea repeats in a session while unseen ideas still match the filters, and the bag refills when they run out. Filters are industry, track, difficulty and application type. The Space bar triggers Surprise Me unless focus is in a control. By design there is **no "build this" shortcut**, so ideas stay prompts rather than identical projects. A unit test validates the schema and uniqueness.
 
-## Scaffold generator integration (Phase 2)
+## Scaffold generator and ZIP download
 
 `src/lib/project-builder/generator.ts` defines the boundary:
 
@@ -130,23 +130,30 @@ interface ScaffoldGenerator {
   capabilities: ("preview" | "zip")[];
   listTemplates(): Promise<TemplateSummary[]>;
   validateSelection(config: ProjectConfiguration): Promise<ValidationResult>;
+  zipAvailability(config: ProjectConfiguration): { ok: true; modules } | { ok: false; reason: string };
   generateProject(config: ProjectConfiguration): Promise<GenerateResult>; // { archive: Blob, filename, manifest, generatorVersion }
 }
 ```
 
-- Today `getGenerator()` returns `previewGenerator`. It validates the selection, lists templates (all `provisional`), and **throws `GeneratorUnavailableError`** from `generateProject`. The UI shows **"Generator integration coming next"**, and the **ZIP · SOON** button stays disabled until a generator has the `zip` capability.
-- To connect Phase 2:
-  1. Implement an HTTP-backed `ScaffoldGenerator`, for example `POST /api/scaffold` proxying to the scaffold repository's generator, with rate limiting and abuse controls.
-  2. Return it from `getGenerator()`.
-  3. In `ProjectBuilder.tsx`'s Output, wire the ZIP button to `generateProject` and trigger the download. Add an error/retry state; `GenState` already includes `"error"`.
-  4. Replace the catalog with the repository's template manifests (`agent-studio-scaffolds/catalog.json`), or validate the catalog against them.
+- `getGenerator()` returns `scaffoldGenerator`, which builds real projects through **`POST /api/scaffold`** (`src/app/api/scaffold/route.ts`, logic in `src/lib/scaffold/handler.ts`). `zipAvailability(config)` says per selection whether a ZIP is possible and why not: only **Next.js** has templates, and Wallet and Pay.sh have none yet, so those selections stay previews with a disabled **ZIP · PREVIEW ONLY** button that explains why. `listTemplates()` reports `next` as `verified` and the rest as `provisional`. `previewGenerator` is the no-ZIP fallback.
+- **Where templates come from.** A pinned copy of `Db0706/agent-studio-scaffolds` is vendored in `vendor/agent-studio-scaffolds/` (commit and version in `VENDOR.json`). The site needs no GitHub token and no network at runtime, and a deploy is reproducible. `next.config.ts` adds the folder to the route's output file tracing. To update it, commit in the scaffold repository, then:
+
+  ```bash
+  node scripts/vendor-scaffolds.mjs --ref <commit-or-tag>   # copies committed files only (git archive)
+  node scripts/vendor-scaffolds.mjs --check                 # vendor/ still matches the pinned commit
+  ```
+
+  The script refuses any env file other than `.env.example`, keys and keypairs.
+- **Composition.** `src/lib/scaffold/compose.ts` is an in-memory port of the scaffold repository's `scripts/compose.mjs`: nothing is written to disk. A unit test composes every module combination with both and requires byte-identical output and an identical `studio.manifest.json`, and another checks the vendored `catalog.json` is fresh. `src/lib/scaffold/zip.ts` writes the archive (deflate, deterministic timestamps, every file under `<project-name>/`).
+- **Route guarantees.** JSON only (415), body ≤ 2 KB (413), strict schema and `validateConfiguration` (400), no template for the selection (422), composed project ≤ 2 MB, `Cache-Control: no-store`. Rate limit: 10 ZIPs per client per minute and 120 overall, in memory per server instance (429 with `Retry-After`). The client key comes from `x-forwarded-for`, so behind a proxy that does not set it every visitor shares one bucket. **The ZIP never contains `.env.local` or any secret**: only `.env.example` with empty placeholders, and payments are Solana devnet only. Paths are checked again before zipping.
+- **UI.** After GENERATE PROJECT, **DOWNLOAD ZIP ↓** calls `generateProject` and saves `<name>.zip`. While it runs it shows BUILDING ZIP…; failures show `ZIP FAILED · <reason>` with **RETRY ZIP**. Any configuration change cancels a pending download.
 
 ## Known limitations
 
 - All event details, prizes, dates, the venue and the host role are placeholders (PROPOSED / SAMPLE / TBC). The "AGENT STUDIO by Superteam" wordmark and the "ST" tile are placeholder brand marks; replace them with approved assets.
 - The GitHub links point to `https://github.com/` until the repository exists (`src/config/site.ts`).
 - The compatibility matrix and package versions are illustrative.
-- No accounts, persistence beyond `localStorage`, analytics, real payments, AI inference or downloads, all by design for this phase.
+- No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist only for Next.js selections the scaffold repository has templates for.
 
 ## Changes from the prototype (deliberate, minimal)
 

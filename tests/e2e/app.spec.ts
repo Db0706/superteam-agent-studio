@@ -1,4 +1,25 @@
+import { readFileSync } from "node:fs";
+import { inflateRawSync } from "node:zlib";
 import { expect, test, type Page } from "@playwright/test";
+import { listZipEntries } from "../../src/lib/scaffold/zip-entries";
+
+/** Reads one entry's bytes from a ZIP (deflate or stored) with node:zlib. */
+function readZipEntry(zip: Buffer, path: string): Buffer {
+  const end = zip.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  let p = zip.readUInt32LE(end + 16);
+  for (let i = 0; i < zip.readUInt16LE(end + 10); i++) {
+    const nameLen = zip.readUInt16LE(p + 28);
+    const name = zip.subarray(p + 46, p + 46 + nameLen).toString("utf8");
+    if (name === path) {
+      const local = zip.readUInt32LE(p + 42);
+      const start = local + 30 + zip.readUInt16LE(local + 26) + zip.readUInt16LE(local + 28);
+      const body = zip.subarray(start, start + zip.readUInt32LE(p + 20));
+      return zip.readUInt16LE(p + 10) === 8 ? inflateRawSync(body) : body;
+    }
+    p += 46 + nameLen + zip.readUInt16LE(p + 30) + zip.readUInt16LE(p + 32);
+  }
+  throw new Error(`${path} not in ZIP`);
+}
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1440) < 1120;
 
@@ -160,16 +181,63 @@ test.describe("project builder", () => {
     await expect(page).toHaveURL(/fw=python/);
   });
 
-  test("generate shows an honest preview and no download", async ({ page }) => {
+  test("downloads a real Next.js project whose files match studio.manifest.json", async ({ page }) => {
+    await page.getByLabel("What are you building?").fill("Paid Research Agent");
+    // Paid API switches on Payments and Spending Controls automatically.
+    await page.getByRole("switch", { name: /Paid API/ }).click();
+    for (const name of [/Gemini AI/, /Internet-Native Payments/, /Spending Controls/, /Paid API/]) {
+      await expect(page.getByRole("switch", { name })).toHaveAttribute("aria-checked", "true");
+    }
+    await page.getByRole("button", { name: /GENERATE PROJECT/ }).click();
+    await expect(page.getByText("Ready to download.")).toBeVisible();
+
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "DOWNLOAD ZIP ↓" }).click()]);
+    expect(download.suggestedFilename()).toBe("paid-research-agent.zip");
+    const zip = readFileSync((await download.path())!);
+    const paths = listZipEntries(zip).map((e) => e.path);
+    expect(paths.every((p) => p.startsWith("paid-research-agent/"))).toBe(true);
+
+    const manifest = JSON.parse(readZipEntry(zip, "paid-research-agent/studio.manifest.json").toString("utf8"));
+    expect(manifest.framework).toBe("next");
+    expect(manifest.modules).toEqual(["gemini", "payments", "spending", "paidapi"]);
+    expect(paths.map((p) => p.slice("paid-research-agent/".length)).sort()).toEqual(manifest.files);
+    expect(paths.some((p) => /\.env(?!\.example$)/.test(p))).toBe(false);
+    const env = readZipEntry(zip, "paid-research-agent/.env.example").toString("utf8");
+    expect(env).toMatch(/^X402_NETWORK=solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1$/m);
+    expect(env).toMatch(/^AGENT_PRIVATE_KEY=$/m);
+    expect(JSON.parse(readZipEntry(zip, "paid-research-agent/package.json").toString("utf8")).name).toBe("paid-research-agent");
+
+    await expect(page.getByText(new RegExp(`SAVED paid-research-agent\\.zip · ${manifest.files.length} FILES`))).toBeVisible();
+  });
+
+  test("shows a retryable error when the generator fails", async ({ page }) => {
+    let calls = 0;
+    await page.route("**/api/scaffold", (route) =>
+      ++calls === 1 ? route.fulfill({ status: 503, json: { error: "Generator is busy. Try again.", retryable: true } }) : route.fallback(),
+    );
+    await page.getByRole("button", { name: /GENERATE PROJECT/ }).click();
+    await page.getByRole("button", { name: "DOWNLOAD ZIP ↓" }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "ZIP FAILED" })).toHaveText("ZIP FAILED · Generator is busy. Try again.");
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "RETRY ZIP" }).click()]);
+    expect(download.suggestedFilename()).toBe("my-first-ai-agent.zip");
+    await expect(page.getByRole("alert").filter({ hasText: "ZIP FAILED" })).toHaveCount(0);
+    await expect(page.getByText(/^SAVED my-first-ai-agent\.zip/)).toBeVisible();
+  });
+
+  test("frameworks without templates stay an honest preview with no download", async ({ page }) => {
     let downloaded = false;
     page.on("download", () => (downloaded = true));
+    const posts: string[] = [];
+    page.on("request", (r) => r.method() === "POST" && posts.push(r.url()));
+    await page.getByRole("button", { name: /Mobile Application/ }).click();
+    await expect(page.getByText(/Preview only\. Mobile Application templates aren't built yet/)).toBeVisible();
     await page.getByRole("button", { name: /GENERATE PROJECT/ }).click();
     await expect(page.getByText(/CONFIGURED ·/)).toBeVisible();
-    await expect(page.getByText("Generator integration coming next.")).toBeVisible();
     await expect(page.getByText(/Nothing has been generated or downloaded/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "ZIP · SOON" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "ZIP · PREVIEW ONLY" })).toBeDisabled();
     await expect(page.getByText("GEMINI_API_KEY", { exact: true })).toBeVisible();
     expect(downloaded).toBe(false);
+    expect(posts).toEqual([]);
     await page.getByRole("button", { name: "EDIT" }).click();
     await expect(page.getByRole("button", { name: /GENERATE PROJECT/ })).toBeVisible();
   });

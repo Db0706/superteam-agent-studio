@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored scaffold templates are linted in their own repository.
+    "vendor/**",
   ]),
 ]);
 
