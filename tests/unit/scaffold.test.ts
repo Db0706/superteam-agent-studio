@@ -6,7 +6,9 @@ import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { canDownload, GeneratorUnavailableError, getGenerator, ScaffoldRequestError, scaffoldGenerator } from "@/lib/project-builder/generator";
 import { SCAFFOLD, ZIP_MODULES, zipAvailability } from "@/lib/scaffold/catalog";
+import catalogJson from "../../vendor/agent-studio-scaffolds/catalog.json";
 import { composeScaffold, isForbiddenPath, VENDOR_DIR, type StudioManifest } from "@/lib/scaffold/compose";
+import { FRAMEWORK_DIRS } from "@/lib/scaffold/frameworks";
 import { createScaffoldHandler, MAX_BODY_BYTES } from "@/lib/scaffold/handler";
 import { createRateLimiter } from "@/lib/scaffold/rate-limit";
 import { crc32, createZip } from "@/lib/scaffold/zip";
@@ -14,7 +16,9 @@ import { listZipEntries } from "@/lib/scaffold/zip-entries";
 
 const ROOT = join(process.cwd(), VENDOR_DIR);
 const MODULES = ["gemini", "payments", "spending", "paidapi"];
+const FRAMEWORKS = ["next", "node"] as const;
 const FULL = { name: "My Paid Agent", framework: "next", integrations: ["gemini", "payments", "spending", "paidapi"] };
+const FULL_NODE = { ...FULL, name: "My Paid Service", framework: "node" };
 
 type ComposeMjs = {
   compose(opts: { framework: string; modules: string[]; out: string; name?: string }): StudioManifest;
@@ -62,40 +66,57 @@ describe("vendored scaffold repository", () => {
     expect(JSON.parse(readFileSync(join(ROOT, "catalog.json"), "utf8"))).toEqual(catalog());
   });
 
-  it("only Next.js has templates, with the four verified modules", () => {
-    expect(Object.keys(ZIP_MODULES)).toEqual(["next"]);
-    expect(ZIP_MODULES.next).toEqual(expect.arrayContaining(MODULES));
+  it("Next.js and Node.js have templates, each with the four verified modules", () => {
+    expect(Object.keys(ZIP_MODULES)).toEqual([...FRAMEWORKS]);
+    for (const fw of FRAMEWORKS) expect(ZIP_MODULES[fw]).toEqual(expect.arrayContaining(MODULES));
+  });
+
+  it("the composer port knows every framework compose.mjs knows", () => {
+    const upstreamDirs = readFileSync(join(ROOT, "scripts/compose.mjs"), "utf8").match(/const FRAMEWORK_DIRS = (\{[^}]*\});/)![1];
+    expect(Object.fromEntries([...upstreamDirs.matchAll(/(\w+): "([^"]+)"/g)].map((m) => [m[1], m[2]]))).toEqual(FRAMEWORK_DIRS);
   });
 
   it("contains no env file other than .env.example", () => {
     const files = walk(ROOT);
-    expect(files.filter((f) => /(^|\/)\.env/.test(f))).toEqual(["templates/nextjs/base/.env.example"]);
-    for (const line of readFileSync(join(ROOT, "templates/nextjs/base/.env.example"), "utf8").split("\n")) {
-      expect(line.startsWith("#") || !/=./.test(line), line).toBe(true);
+    const envFiles = ["templates/nextjs/base/.env.example", "templates/node/base/.env.example"];
+    expect(files.filter((f) => /(^|\/)\.env/.test(f))).toEqual(envFiles);
+    for (const file of envFiles) {
+      for (const line of readFileSync(join(ROOT, file), "utf8").split("\n")) {
+        // Base env files hold no values, except the Node.js service's non-secret PORT.
+        expect(line.startsWith("#") || !/=./.test(line) || /^PORT=\d+$/.test(line), line).toBe(true);
+      }
     }
   });
 });
 
 describe("composeScaffold", () => {
-  it.each(subsets(MODULES).map((s) => [s.join("+") || "base", s] as const))("is byte-identical to compose.mjs for %s", async (_label, modules) => {
+  it.each(FRAMEWORKS.flatMap((fw) => subsets(MODULES).map((s) => [`${fw}:${s.join("+") || "base"}`, fw, s] as const)))("is byte-identical to compose.mjs for %s", async (_label, framework, modules) => {
     const { compose } = await upstream();
     const out = join(tempDir(), "app");
-    const expected = compose({ framework: "next", modules, out, name: "parity-app" });
-    const actual = composeScaffold(ROOT, { framework: "next", modules, name: "parity-app" });
+    const expected = compose({ framework, modules, out, name: "parity-app" });
+    const actual = composeScaffold(ROOT, { framework, modules, name: "parity-app" });
     expect(actual.manifest).toEqual(expected);
     expect(actual.files.map((f) => f.path)).toEqual(walk(out));
     for (const f of actual.files) expect(f.data.equals(readFileSync(join(out, f.path))), f.path).toBe(true);
     expect(actual.files.map((f) => f.path).sort()).toEqual(expected.files);
   });
 
-  it("adds required modules", () => {
-    const { manifest } = composeScaffold(ROOT, { framework: "next", modules: ["paidapi"] });
+  it.each(FRAMEWORKS)("adds required modules (%s)", (framework) => {
+    const { manifest } = composeScaffold(ROOT, { framework, modules: ["paidapi"] });
     expect(manifest.modules).toEqual(["payments", "spending", "paidapi"]);
     expect(manifest.autoAddedModules).toEqual(["payments", "spending"]);
   });
 
-  it("keeps payments on Solana devnet and secrets empty", () => {
-    const { files } = composeScaffold(ROOT, { framework: "next", modules: MODULES });
+  it("writes the Node.js module list to src/modules.ts", () => {
+    const { files } = composeScaffold(ROOT, { framework: "node", modules: ["gemini"] });
+    const paths = files.map((f) => f.path);
+    expect(paths).toContain("src/modules.ts");
+    expect(paths).not.toContain("lib/modules.ts");
+    expect(files.find((f) => f.path === "src/modules.ts")!.data.toString("utf8")).toMatch(/"id": "gemini"/);
+  });
+
+  it.each(FRAMEWORKS)("keeps payments on Solana devnet and secrets empty (%s)", (framework) => {
+    const { files } = composeScaffold(ROOT, { framework, modules: MODULES });
     const env = files.find((f) => f.path === ".env.example")!.data.toString("utf8");
     expect(env).toMatch(/^X402_NETWORK=solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1$/m);
     expect(env).toMatch(/^AGENT_PRIVATE_KEY=$/m);
@@ -146,15 +167,38 @@ describe("zip", () => {
 });
 
 describe("zipAvailability", () => {
-  it("allows verified Next.js selections", () => {
-    expect(zipAvailability("next", [])).toEqual({ ok: true, modules: [] });
-    expect(zipAvailability("next", MODULES)).toEqual({ ok: true, modules: MODULES });
+  it.each(FRAMEWORKS)("allows verified %s selections", (fw) => {
+    expect(zipAvailability(fw, [])).toEqual({ ok: true, modules: [] });
+    expect(zipAvailability(fw, MODULES)).toEqual({ ok: true, modules: MODULES });
   });
   it("explains why other frameworks stay previews", () => {
-    for (const fw of ["expo", "python", "node"] as const) {
+    for (const fw of ["expo", "python"] as const) {
       const r = zipAvailability(fw, []);
       expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.reason).toMatch(/templates aren't built yet.*Only Next\.js/);
+      if (!r.ok) expect(r.reason).toMatch(/templates aren't built yet.*Only Next\.js and Node\.js download today/);
+    }
+  });
+  it("keeps a catalog framework the composer can't build as a preview, not a 500", async () => {
+    vi.resetModules();
+    vi.doMock("../../vendor/agent-studio-scaffolds/catalog.json", () => ({
+      default: [...catalogJson, { framework: "expo", modules: MODULES.map((id) => ({ id })) }],
+    }));
+    try {
+      const { ZIP_MODULES: zm, zipAvailability: za } = await import("@/lib/scaffold/catalog");
+      const { createScaffoldHandler: create } = await import("@/lib/scaffold/handler");
+      expect(Object.keys(zm)).toEqual([...FRAMEWORKS]);
+      expect(za("expo", ["gemini"]).ok).toBe(false);
+      const res = await create()(
+        new Request("http://localhost/api/scaffold", {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9" },
+          body: JSON.stringify({ ...FULL, framework: "expo", integrations: ["gemini"] }),
+        }),
+      );
+      expect(res.status).toBe(422);
+    } finally {
+      vi.doUnmock("../../vendor/agent-studio-scaffolds/catalog.json");
+      vi.resetModules();
     }
   });
   it("explains capabilities without a template", () => {
@@ -186,6 +230,18 @@ describe("POST /api/scaffold handler", () => {
     expect(files).toEqual(manifest.files);
     expect(files).not.toContain(".env.local");
     expect(files).toContain(".env.example");
+  });
+
+  it("returns a Node.js ZIP whose files match studio.manifest.json", async () => {
+    const res = await createScaffoldHandler()(post(FULL_NODE));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-disposition")).toBe('attachment; filename="my-paid-service.zip"');
+    const files = listZipEntries(new Uint8Array(await res.arrayBuffer())).map((e) => e.path.slice("my-paid-service/".length));
+    const { manifest } = composeScaffold(ROOT, { framework: "node", modules: MODULES, name: "my-paid-service" });
+    expect(manifest.framework).toBe("node");
+    expect(files).toEqual(manifest.files);
+    expect(files).toContain("src/server.ts");
+    expect(files.some((f) => /(^|\/)\.env(?!\.example$)/.test(f))).toBe(false);
   });
 
   it("is deterministic", async () => {
@@ -237,15 +293,18 @@ describe("rate limiter", () => {
 });
 
 describe("scaffoldGenerator", () => {
-  it("is the active generator and reports Next.js as verified", async () => {
+  it("is the active generator and reports Next.js and Node.js as verified", async () => {
     expect(getGenerator()).toBe(scaffoldGenerator);
     const templates = await scaffoldGenerator.listTemplates();
-    expect(templates.find((t) => t.framework === "next")).toMatchObject({ status: "verified", supportedIntegrations: expect.arrayContaining(MODULES) });
-    expect(templates.filter((t) => t.framework !== "next").every((t) => t.status === "provisional")).toBe(true);
+    for (const fw of FRAMEWORKS) {
+      expect(templates.find((t) => t.framework === fw)).toMatchObject({ status: "verified", supportedIntegrations: expect.arrayContaining(MODULES) });
+    }
+    expect(templates.filter((t) => !(FRAMEWORKS as readonly string[]).includes(t.framework)).every((t) => t.status === "provisional")).toBe(true);
   });
 
-  it("can download Next.js selections only", () => {
+  it("can download Next.js and Node.js selections only", () => {
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["gemini"] })).toBe(true);
+    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "node", integrations: ["paidapi"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: [] })).toBe(false);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["wallet"] })).toBe(false);
   });

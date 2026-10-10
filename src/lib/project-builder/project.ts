@@ -230,7 +230,7 @@ export function deriveProject({ id, framework, integrations }: { id: string; fra
           ...(needsCompanion ? [{ cmd: "(cd companion-server && npm install && npm run dev)", note: "second terminal" }] : []),
           {
             cmd: framework === "expo" ? "npx expo run:android" : "npm run dev",
-            note: framework === "next" ? "localhost:3000" : framework === "node" ? "localhost:8787" : "emulator or device",
+            note: framework === "next" ? "localhost:3000" : framework === "node" ? "localhost:3000" : "emulator or device",
           },
         ];
 

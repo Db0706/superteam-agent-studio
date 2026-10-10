@@ -1,0 +1,38 @@
+{
+  "id": "base",
+  "kind": "base",
+  "framework": "node",
+  "name": "Node.js backend service",
+  "description": "Express + TypeScript HTTP service. Every module is layered on top of this.",
+  "requires": [],
+  "files": [
+    "src/server.ts",
+    "src/modules.ts",
+    "tsconfig.json",
+    "tsconfig.build.json",
+    "package.json",
+    ".gitignore",
+    ".env.example",
+    "README.md"
+  ],
+  "modulesFile": "src/modules.ts",
+  "generatedFiles": ["src/modules.ts", "package.json", ".env.example", "README.md", "studio.manifest.json"],
+  "dependencies": {
+    "express": "5.2.1"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "tsx": "4.23.15",
+    "@types/node": "22.20.5",
+    "@types/express": "5.0.6"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "env": [],
+  "prerequisites": ["Node.js 20.12 or newer (22 LTS recommended)"],
+  "readme": "README.fragment.md"
+}

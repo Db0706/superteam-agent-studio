@@ -17,6 +17,7 @@
     ".env.example",
     "README.md"
   ],
+  "modulesFile": "lib/modules.ts",
   "generatedFiles": ["lib/modules.ts", "package.json", ".env.example", "README.md", "studio.manifest.json"],
   "dependencies": {
     "next": "16.3.8",

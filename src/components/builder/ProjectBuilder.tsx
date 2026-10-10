@@ -331,7 +331,7 @@ function Output({ b, ref }: { b: Builder; ref: React.Ref<HTMLElement> }) {
             <div className="border-t border-inv-div px-3.5 py-3 text-[12.5px] leading-[1.45] text-[#E9C77A]">
               {zip.ok ? (
                 <>
-                  <b>Ready to download.</b> The ZIP is built from agent-studio-scaffolds v{SCAFFOLD.version}, verified with Next.js on Solana devnet. It has an{" "}
+                  <b>Ready to download.</b> The ZIP is built from agent-studio-scaffolds v{SCAFFOLD.version}, verified with {FRAMEWORKS[b.cfg.framework].tech} on Solana devnet. It has an{" "}
                   <code>.env.example</code> with empty placeholders only: add your keys to <code>.env.local</code> yourself.
                 </>
               ) : (

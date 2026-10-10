@@ -3,12 +3,12 @@ import type { FrameworkId } from "./schema";
 /**
  * Compatibility and template catalog.
  *
- * The Next.js entries for gemini, payments, spending and paidapi match the
- * agent-studio-scaffolds repository (scaffold v0.1.0, verified 2026-10-10:
- * install, typecheck, build and offline tests pass; see its VERIFICATION.md).
- * Those are listed in `verifiedOn`. Everything else is still provisional:
- * other frameworks, Wallet and Pay.sh have no real template yet. See
- * README → "Integration catalog".
+ * The Next.js and Node.js entries for gemini, payments, spending and paidapi
+ * match the agent-studio-scaffolds repository (scaffold v0.2.0, verified
+ * 2026-10-10: install, typecheck, build and offline tests pass, plus an HTTP
+ * smoke test of the built Node service; see its VERIFICATION.md). Those are
+ * listed in `verifiedOn`. Everything else is still provisional: Expo, Python,
+ * Wallet and Pay.sh have no real template yet. See README → "Integration catalog".
  */
 
 export type CompatStatus = "ok" | "server" | "unverified" | "na";
@@ -118,15 +118,17 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
     tech: "Node.js + TypeScript",
     blurb: "For paid APIs, marketplaces and backend systems.",
     useCase: "Track 04 · paid APIs, matching engines and services other agents buy from.",
-    envFile: ".env",
+    envFile: ".env.local",
     manager: "npm",
     manifest: "package.json",
-    baseFiles: ["src/server.ts", "src/config.ts", "src/routes/health.ts", "tsconfig.json", "package.json", ".env.example", "README.md"],
+    // src/server.ts loads .env.local (process.loadEnvFile, Node >= 20.12) and every file in src/routes.
+    baseFiles: ["src/server.ts", "src/modules.ts", "tsconfig.json", "tsconfig.build.json", "package.json", ".gitignore", ".env.example", "README.md", "studio.manifest.json"],
     packages: {
-      base: [["express", "^4.21.0"], ["dotenv", "^16.4.0"], ["zod", "^3.23.0"]],
-      dev: [["tsx", "^4.19.0"], ["typescript", "^5.6.0"]],
+      // express 5.x satisfies @x402/express 2.28's peer range (^4 || ^5).
+      base: [["express", "5.2.1"]],
+      dev: [["typescript", "5.9.3"], ["tsx", "4.23.15"], ["@types/node", "22.20.5"], ["@types/express", "5.0.6"]],
     },
-    scripts: [["dev", "tsx watch src/server.ts"], ["build", "tsc"]],
+    scripts: [["dev", "tsx watch src/server.ts"], ["build", "tsc -p tsconfig.build.json"], ["start", "node dist/server.js"], ["typecheck", "tsc --noEmit"]],
   },
 };
 
@@ -161,15 +163,15 @@ export const INTEGRATIONS: IntegrationDef[] = [
     requires: [],
     prerequisites: ["Google account", "Gemini API key (free tier), added to .env yourself, never typed into this site"],
     implementationStatus: "provisional",
-    verifiedOn: ["next"],
+    verifiedOn: ["next", "node"],
     files: {
       next: ["lib/ai/gemini.ts", "app/api/chat/route.ts", "app/chat/page.tsx"],
       expo: ["lib/ai/client.ts", "companion-server/src/routes/ai.ts"],
       python: ["agent/integrations/gemini.py"],
-      node: ["src/integrations/gemini.ts", "src/routes/ai.ts"],
+      node: ["src/lib/ai/gemini.ts", "src/routes/chat.ts"],
     },
     packages: { next: [["@google/genai", "2.28.0"]], node: [["@google/genai", "2.28.0"]], python: [["google-genai", "2.29"]] },
-    env: { next: [GEMINI_KEY, GEMINI_MODEL], expo: [GEMINI_KEY], python: [GEMINI_KEY], node: [GEMINI_KEY] },
+    env: { next: [GEMINI_KEY, GEMINI_MODEL], expo: [GEMINI_KEY], python: [GEMINI_KEY], node: [GEMINI_KEY, GEMINI_MODEL] },
   },
   {
     id: "payments",
@@ -187,24 +189,24 @@ export const INTEGRATIONS: IntegrationDef[] = [
       "Devnet test USDC from faucet.circle.com, no real money. No SOL needed: the facilitator pays fees",
     ],
     implementationStatus: "provisional",
-    verifiedOn: ["next"],
+    verifiedOn: ["next", "node"],
     files: {
       next: ["lib/payments/config.ts", "lib/payments/server.ts", "lib/payments/client.ts", "scripts/keygen.ts", "scripts/wallets.ts"],
       expo: ["lib/payments/client.ts", "companion-server/src/routes/pay.ts"],
       python: ["agent/integrations/payments.py"],
-      node: ["src/integrations/payments.ts", "src/middleware/paywall.ts"],
+      node: ["src/lib/payments/config.ts", "src/lib/payments/server.ts", "src/lib/payments/client.ts", "scripts/keygen.ts", "scripts/wallets.ts"],
     },
     packages: {
       // @solana/kit must stay on 5.x: @x402/svm's @solana-program/* deps peer-require kit ^5.
       next: [["@x402/core", "2.28.0"], ["@x402/next", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"]],
       expo: [["@x402/fetch", "2.28.0"]],
-      node: [["@x402/core", "2.28.0"], ["@x402/express", "2.28.0"], ["@x402/svm", "2.28.0"]],
+      node: [["@x402/core", "2.28.0"], ["@x402/express", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"]],
       python: [["x402[svm]", "2.25"]],
     },
     env: {
       next: [FACILITATOR, NETWORK, PAY_TO, AGENT_KEY, RPC],
       expo: [FACILITATOR, NETWORK, PAY_TO],
-      node: [FACILITATOR, NETWORK, PAY_TO],
+      node: [FACILITATOR, NETWORK, PAY_TO, AGENT_KEY, RPC],
       python: [FACILITATOR, NETWORK, { key: "AGENT_SIGNER_KEY", example: "", note: "Devnet only. Never commit." }],
     },
   },
@@ -280,14 +282,14 @@ export const INTEGRATIONS: IntegrationDef[] = [
     requires: ["payments", "spending"],
     prerequisites: [],
     implementationStatus: "provisional",
-    verifiedOn: ["next"],
+    verifiedOn: ["next", "node"],
     files: {
       next: ["app/api/premium/route.ts", "app/api/buy/route.ts", "app/premium/page.tsx", "lib/paidapi/buyer.ts", "scripts/pay.ts"],
       expo: ["app/premium.tsx", "companion-server/src/routes/premium-data.ts"],
       python: ["examples/paid_service.py", "agent/tasks/buy_data.py"],
-      node: ["src/routes/premium-data.ts", "examples/client.ts"],
+      node: ["src/routes/premium-data.ts", "src/routes/buy.ts", "src/lib/paidapi/buyer.ts", "examples/client.ts"],
     },
-    packages: { node: [["@x402/fetch", "^2.0.0"]], python: [["fastapi", "0.115"], ["uvicorn", "0.32"]] },
+    packages: { python: [["fastapi", "0.115"], ["uvicorn", "0.32"]] },
     env: { next: [PRICE], expo: [PRICE], python: [PRICE], node: [PRICE] },
   },
   {
@@ -303,12 +305,12 @@ export const INTEGRATIONS: IntegrationDef[] = [
     requires: ["payments"],
     prerequisites: [],
     implementationStatus: "provisional",
-    verifiedOn: ["next"],
+    verifiedOn: ["next", "node"],
     files: {
       next: ["lib/spending/policy.ts", "lib/spending/tracker.ts", "lib/spending/attach.ts", "scripts/test-spending.ts", "scripts/test-spending-x402.ts"],
       expo: ["lib/payments/limits.ts"],
       python: ["agent/spending.py", "agent/policy.yaml"],
-      node: ["src/integrations/limits.ts"],
+      node: ["src/lib/spending/policy.ts", "src/lib/spending/tracker.ts", "src/lib/spending/attach.ts", "scripts/test-spending.ts", "scripts/test-spending-x402.ts"],
     },
     packages: { python: [["pyyaml", "6.0"]] },
     env: { next: LIMITS, expo: LIMITS, python: LIMITS, node: LIMITS },
