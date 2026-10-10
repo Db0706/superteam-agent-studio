@@ -1,0 +1,24 @@
+{
+  "id": "paidapi",
+  "kind": "module",
+  "framework": "python",
+  "name": "Paid API Example",
+  "summary": "GET /premium-data costs devnet USDC per request; `python -m agent buy` and POST /api/buy pay for it within the spending limits.",
+  "nav": { "label": "Paid endpoint (GET /premium-data)", "href": "/premium-data" },
+  "requires": ["payments", "spending"],
+  "files": [
+    "agent/paidapi/__init__.py",
+    "agent/paidapi/buyer.py",
+    "agent/routes/premium_data.py",
+    "agent/routes/buy.py",
+    "agent/commands/buy.py"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": { "buy": "python -m agent buy" },
+  "env": [
+    { "key": "PAID_API_PRICE_USD", "example": "0.01", "required": false, "secret": false, "note": "Price per request in (devnet) USDC. Default 0.01." }
+  ],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

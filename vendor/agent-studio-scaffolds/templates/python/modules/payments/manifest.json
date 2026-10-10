@@ -1,0 +1,70 @@
+{
+  "id": "payments",
+  "kind": "module",
+  "framework": "python",
+  "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+  "summary": "Charge for API endpoints with x402 V2 and pay for them with a devnet wallet. Test money only.",
+  "requires": [],
+  "files": [
+    "agent/payments/__init__.py",
+    "agent/payments/config.py",
+    "agent/payments/server.py",
+    "agent/payments/client.py",
+    "agent/commands/keygen.py",
+    "agent/commands/wallets.py"
+  ],
+  "dependencies": {
+    "x402[httpx,svm]": "2.25.0",
+    "solana": "0.38.0",
+    "solders": "0.27.1",
+    "httpx": "0.28.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "keygen": "python -m agent keygen",
+    "wallets": "python -m agent wallets"
+  },
+  "env": [
+    {
+      "key": "PAY_TO_ADDRESS",
+      "example": "",
+      "required": true,
+      "secret": false,
+      "note": "Your Solana devnet wallet address. Payments to your paid endpoints arrive here."
+    },
+    {
+      "key": "X402_NETWORK",
+      "example": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+      "required": false,
+      "secret": false,
+      "note": "CAIP-2 id. Only Solana devnet is allowed by this template."
+    },
+    {
+      "key": "X402_FACILITATOR_URL",
+      "example": "https://x402.org/facilitator",
+      "required": false,
+      "secret": false,
+      "note": "Free public test facilitator: verifies + settles devnet payments and pays the SOL fees."
+    },
+    {
+      "key": "AGENT_PRIVATE_KEY",
+      "example": "",
+      "required": false,
+      "secret": true,
+      "note": "DEVNET-ONLY throwaway key for the paying side (buyer). Base58 or solana-keygen JSON array. Never commit."
+    },
+    {
+      "key": "SOLANA_RPC_URL",
+      "example": "https://api.devnet.solana.com",
+      "required": false,
+      "secret": false,
+      "note": "Optional devnet RPC used when building payments."
+    }
+  ],
+  "prerequisites": [
+    "A Solana devnet address to receive test payments (PAY_TO_ADDRESS); `python -m agent keygen --pay-to` makes one",
+    "To pay: a throwaway devnet keypair (`python -m agent keygen`) funded with devnet USDC from https://faucet.circle.com (no real money)",
+    "The receiving address also needs a devnet USDC token account: send it faucet USDC once"
+  ],
+  "readme": "README.fragment.md"
+}

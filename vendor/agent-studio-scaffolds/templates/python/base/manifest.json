@@ -1,0 +1,50 @@
+{
+  "id": "base",
+  "kind": "base",
+  "framework": "python",
+  "name": "Python autonomous agent",
+  "description": "Python 3.10+ agent: a command line (python -m agent) plus a FastAPI HTTP service. Every module is layered on top of this.",
+  "requires": [],
+  "files": [
+    "agent/__init__.py",
+    "agent/__main__.py",
+    "agent/config.py",
+    "agent/plugins.py",
+    "agent/modules.py",
+    "agent/server.py",
+    "agent/commands/__init__.py",
+    "agent/routes/__init__.py",
+    "tests/test_agent.py",
+    "pyproject.toml",
+    "requirements.txt",
+    "requirements-dev.txt",
+    ".gitignore",
+    ".env.example",
+    "README.md"
+  ],
+  "modulesFile": "agent/modules.py",
+  "modulesPlaceholder": "modules: list[StudioModule] = []",
+  "dependencyFiles": {
+    "dependencies": "requirements.txt",
+    "devDependencies": "requirements-dev.txt"
+  },
+  "generatedFiles": ["agent/modules.py", "requirements.txt", "requirements-dev.txt", ".env.example", "README.md", "studio.manifest.json"],
+  "dependencies": {
+    "fastapi": "0.143.0",
+    "uvicorn": "0.54.0",
+    "python-dotenv": "1.2.4"
+  },
+  "devDependencies": {
+    "pyright[nodejs]": "1.1.414"
+  },
+  "scripts": {
+    "agent": "python -m agent",
+    "dev": "python -m agent serve --reload",
+    "start": "python -m agent serve",
+    "test": "python -m unittest discover -s tests -v",
+    "typecheck": "pyright"
+  },
+  "env": [],
+  "prerequisites": ["Python 3.10 or newer (3.12 recommended)"],
+  "readme": "README.fragment.md"
+}

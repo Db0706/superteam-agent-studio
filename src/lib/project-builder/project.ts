@@ -218,10 +218,11 @@ export function deriveProject({ id, framework, integrations }: { id: string; fra
     framework === "python"
       ? [
           { cmd: `cd ${id}`, note: "" },
-          { cmd: "python -m venv .venv && source .venv/bin/activate", note: "" },
+          { cmd: "python3 -m venv .venv && source .venv/bin/activate", note: "" },
           { cmd: "pip install -r requirements.txt", note: "" },
           { cmd: "cp .env.example .env", note: "add your keys" },
-          { cmd: "python -m agent", note: "runs the agent" },
+          { cmd: "python -m agent", note: "lists commands" },
+          { cmd: "python -m agent serve --reload", note: "localhost:3000" },
         ]
       : [
           { cmd: `cd ${id}`, note: "" },

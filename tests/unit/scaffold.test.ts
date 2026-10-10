@@ -16,7 +16,7 @@ import { listZipEntries } from "@/lib/scaffold/zip-entries";
 
 const ROOT = join(process.cwd(), VENDOR_DIR);
 const MODULES = ["gemini", "payments", "spending", "paidapi"];
-const FRAMEWORKS = ["next", "node"] as const;
+const FRAMEWORKS = ["next", "node", "python"] as const;
 const FULL = { name: "My Paid Agent", framework: "next", integrations: ["gemini", "payments", "spending", "paidapi"] };
 const FULL_NODE = { ...FULL, name: "My Paid Service", framework: "node" };
 
@@ -66,7 +66,7 @@ describe("vendored scaffold repository", () => {
     expect(JSON.parse(readFileSync(join(ROOT, "catalog.json"), "utf8"))).toEqual(catalog());
   });
 
-  it("Next.js and Node.js have templates, each with the four verified modules", () => {
+  it("Next.js, Node.js and Python have templates, each with the four verified modules", () => {
     expect(Object.keys(ZIP_MODULES)).toEqual([...FRAMEWORKS]);
     for (const fw of FRAMEWORKS) expect(ZIP_MODULES[fw]).toEqual(expect.arrayContaining(MODULES));
   });
@@ -78,11 +78,11 @@ describe("vendored scaffold repository", () => {
 
   it("contains no env file other than .env.example", () => {
     const files = walk(ROOT);
-    const envFiles = ["templates/nextjs/base/.env.example", "templates/node/base/.env.example"];
+    const envFiles = ["templates/nextjs/base/.env.example", "templates/node/base/.env.example", "templates/python/base/.env.example"];
     expect(files.filter((f) => /(^|\/)\.env/.test(f))).toEqual(envFiles);
     for (const file of envFiles) {
       for (const line of readFileSync(join(ROOT, file), "utf8").split("\n")) {
-        // Base env files hold no values, except the Node.js service's non-secret PORT.
+        // Base env files hold no values, except the services' non-secret PORT.
         expect(line.startsWith("#") || !/=./.test(line) || /^PORT=\d+$/.test(line), line).toBe(true);
       }
     }
@@ -113,6 +113,19 @@ describe("composeScaffold", () => {
     expect(paths).toContain("src/modules.ts");
     expect(paths).not.toContain("lib/modules.ts");
     expect(files.find((f) => f.path === "src/modules.ts")!.data.toString("utf8")).toMatch(/"id": "gemini"/);
+  });
+
+  it("writes pip requirements, not package.json, for Python", () => {
+    const { files, manifest } = composeScaffold(ROOT, { framework: "python", modules: MODULES });
+    const paths = files.map((f) => f.path);
+    expect(paths).toEqual(expect.arrayContaining(["requirements.txt", "requirements-dev.txt", "agent/modules.py"]));
+    expect(paths).not.toContain("package.json");
+    const req = files.find((f) => f.path === "requirements.txt")!.data.toString("utf8");
+    expect(req).toMatch(/^x402\[httpx,svm\]==2\.25\.0$/m);
+    expect(req).toMatch(/^google-genai==2\.29\.0$/m);
+    expect(files.find((f) => f.path === "requirements-dev.txt")!.data.toString("utf8")).toMatch(/^-r requirements\.txt$/m);
+    expect(files.find((f) => f.path === "agent/modules.py")!.data.toString("utf8")).toMatch(/"id": "paidapi"/);
+    expect(manifest.files).toContain("requirements.txt");
   });
 
   it.each(FRAMEWORKS)("keeps payments on Solana devnet and secrets empty (%s)", (framework) => {
@@ -172,11 +185,9 @@ describe("zipAvailability", () => {
     expect(zipAvailability(fw, MODULES)).toEqual({ ok: true, modules: MODULES });
   });
   it("explains why other frameworks stay previews", () => {
-    for (const fw of ["expo", "python"] as const) {
-      const r = zipAvailability(fw, []);
-      expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.reason).toMatch(/templates aren't built yet.*Only Next\.js and Node\.js download today/);
-    }
+    const r = zipAvailability("expo", []);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toMatch(/templates aren't built yet.*Only Next\.js, Node\.js and Python download today/);
   });
   it("keeps a catalog framework the composer can't build as a preview, not a 500", async () => {
     vi.resetModules();
@@ -293,7 +304,7 @@ describe("rate limiter", () => {
 });
 
 describe("scaffoldGenerator", () => {
-  it("is the active generator and reports Next.js and Node.js as verified", async () => {
+  it("is the active generator and reports Next.js, Node.js and Python as verified", async () => {
     expect(getGenerator()).toBe(scaffoldGenerator);
     const templates = await scaffoldGenerator.listTemplates();
     for (const fw of FRAMEWORKS) {
@@ -302,9 +313,10 @@ describe("scaffoldGenerator", () => {
     expect(templates.filter((t) => !(FRAMEWORKS as readonly string[]).includes(t.framework)).every((t) => t.status === "provisional")).toBe(true);
   });
 
-  it("can download Next.js and Node.js selections only", () => {
+  it("can download Next.js, Node.js and Python selections only", () => {
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["gemini"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "node", integrations: ["paidapi"] })).toBe(true);
+    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "python", integrations: ["gemini", "spending"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: [] })).toBe(false);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["wallet"] })).toBe(false);
   });
@@ -324,7 +336,7 @@ describe("scaffoldGenerator", () => {
   it("refuses selections without templates before calling the server", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    await expect(scaffoldGenerator.generateProject({ name: "a-b-c", framework: "python", integrations: [] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
+    await expect(scaffoldGenerator.generateProject({ name: "a-b-c", framework: "expo", integrations: [] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

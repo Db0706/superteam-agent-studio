@@ -91,7 +91,7 @@ The four tracks (Web / Next.js, Consumer Mobile / Expo, Autonomous Agents / Pyth
 
 ## Integration catalog (`src/config/integrations.ts`)
 
-The **Next.js** and **Node.js** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.2.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8, Express 5.2.1 with `@x402/express` 2.28.0; see that repo's `VERIFICATION.md`). Expo, Python, Wallet and Pay.sh are still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
+The **Next.js**, **Node.js** and **Python** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.3.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8, Express 5.2.1 with `@x402/express` 2.28.0; Python 3.10+ with `x402[httpx,svm]` 2.25.0, `google-genai` 2.29.0 and FastAPI 0.143.0; see that repo's `VERIFICATION.md`). Expo, Wallet and Pay.sh are still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
 
 `id`, `name`, `description`, `tech`, `external` service, `compatibility[framework]` (`ok` RDY · `server` +SRV · `unverified` UNV · `na` N/A), a `reasons` string for each framework, `worksWith` (advisory), `requires` (hard dependencies; the builder warns if they are off), `prerequisites`, `implementationStatus`, `verifiedOn` (frameworks with a verified template), and `files`, `packages` and `env` for each framework.
 
@@ -154,7 +154,7 @@ interface ScaffoldGenerator {
 - All event details, prizes, dates, the venue and the host role are placeholders (PROPOSED / SAMPLE / TBC). The "AGENT STUDIO by Superteam" wordmark and the "ST" tile are placeholder brand marks; replace them with approved assets.
 - The GitHub links point to `https://github.com/` until the repository exists (`src/config/site.ts`).
 - The compatibility matrix and package versions are illustrative.
-- No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist only for Next.js and Node.js selections the scaffold repository has templates for.
+- No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist only for Next.js, Node.js and Python selections the scaffold repository has templates for.
 
 ## Changes from the prototype (deliberate, minimal)
 
