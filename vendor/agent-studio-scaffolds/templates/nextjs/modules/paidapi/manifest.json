@@ -1,0 +1,24 @@
+{
+  "id": "paidapi",
+  "kind": "module",
+  "framework": "next",
+  "name": "Paid API Example",
+  "summary": "A pay-per-request API route plus a buyer (page + CLI script) that pays for it within its spending limits.",
+  "nav": { "label": "Paid API", "href": "/premium" },
+  "requires": ["payments", "spending"],
+  "files": [
+    "app/api/premium/route.ts",
+    "app/api/buy/route.ts",
+    "app/premium/page.tsx",
+    "lib/paidapi/buyer.ts",
+    "scripts/pay.ts"
+  ],
+  "dependencies": {},
+  "devDependencies": { "tsx": "4.23.15" },
+  "scripts": { "pay": "tsx --conditions=react-server scripts/pay.ts" },
+  "env": [
+    { "key": "PAID_API_PRICE_USD", "example": "0.01", "required": false, "secret": false, "note": "Price per request in (devnet) USDC. Default 0.01." }
+  ],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

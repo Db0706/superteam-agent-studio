@@ -1,16 +1,18 @@
 import { FRAMEWORKS, FW_ORDER, INTEGRATIONS, INTEGRATION_MAP, statusOf, type IntegrationId } from "@/config/integrations";
 import type { FrameworkId } from "@/config/schema";
+import { SCAFFOLD, ZIP_MODULES, zipAvailability, type ZipAvailability } from "@/lib/scaffold/catalog";
+import { listZipEntries } from "@/lib/scaffold/zip-entries";
 import { deriveProject, validateName } from "./project";
 
 /**
  * Scaffold generator adapter: the boundary between this website and the
- * future open-source scaffold repository (Phase 2).
+ * scaffold repository (Db0706/agent-studio-scaffolds).
  *
- * The UI only talks to a `ScaffoldGenerator`. Today the only implementation is
- * `previewGenerator`, which validates and describes a configuration but
- * deliberately cannot produce a ZIP. Phase 2 adds an implementation backed by
- * the scaffold repository (e.g. `POST /api/scaffold`) and swaps it in through
- * `getGenerator()`, with no component changes needed.
+ * The UI only talks to a `ScaffoldGenerator`. `scaffoldGenerator` builds real
+ * ZIPs through `POST /api/scaffold`, which composes a pinned, vendored copy of
+ * the scaffold repository. Selections it has no templates for (every framework
+ * except Next.js, and capabilities without a template) stay previews:
+ * `zipAvailability` says why. `previewGenerator` is the no-ZIP fallback.
  */
 
 export interface ProjectConfiguration {
@@ -63,13 +65,27 @@ export interface ScaffoldGenerator {
   readonly capabilities: readonly GeneratorCapability[];
   listTemplates(): Promise<TemplateSummary[]>;
   validateSelection(config: ProjectConfiguration): Promise<ValidationResult>;
+  /** Whether `generateProject` can build this selection, and why not when it can't. */
+  zipAvailability(config: ProjectConfiguration): ZipAvailability;
   generateProject(config: ProjectConfiguration): Promise<GenerateResult>;
 }
 
 export class GeneratorUnavailableError extends Error {
-  constructor() {
-    super("The scaffold generator is not connected yet. This build shows a configuration preview only.");
+  constructor(message = "The scaffold generator is not connected yet. This build shows a configuration preview only.") {
+    super(message);
     this.name = "GeneratorUnavailableError";
+  }
+}
+
+/** The scaffold service refused or failed. `retryable` errors are worth a retry button. */
+export class ScaffoldRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly retryable: boolean,
+  ) {
+    super(message);
+    this.name = "ScaffoldRequestError";
   }
 }
 
@@ -140,8 +156,63 @@ export const previewGenerator: ScaffoldGenerator = {
   async validateSelection(config) {
     return validateConfiguration(config);
   },
+  zipAvailability() {
+    return { ok: false, reason: "The scaffold generator is not connected in this build, so this stays a preview." };
+  },
   async generateProject() {
     throw new GeneratorUnavailableError();
+  },
+};
+
+export const SCAFFOLD_ENDPOINT = "/api/scaffold";
+
+/** Real ZIPs from the vendored scaffold repository, via `POST /api/scaffold`. */
+export const scaffoldGenerator: ScaffoldGenerator = {
+  id: "agent-studio-scaffolds",
+  capabilities: ["preview", "zip"],
+  async listTemplates() {
+    return FW_ORDER.map((fw) => {
+      const verified = ZIP_MODULES[fw];
+      return {
+        framework: fw,
+        name: FRAMEWORKS[fw].name,
+        tech: FRAMEWORKS[fw].tech,
+        supportedIntegrations: verified ?? INTEGRATIONS.filter((i) => statusOf(i.id, fw) !== "na").map((i) => i.id),
+        status: verified ? ("verified" as const) : ("provisional" as const),
+      };
+    });
+  },
+  async validateSelection(config) {
+    return validateConfiguration(config);
+  },
+  zipAvailability(config) {
+    return zipAvailability(config.framework, config.integrations);
+  },
+  async generateProject(config) {
+    const zip = zipAvailability(config.framework, config.integrations);
+    if (!zip.ok) throw new GeneratorUnavailableError(zip.reason);
+    let res: Response;
+    try {
+      res = await fetch(SCAFFOLD_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: config.name, framework: config.framework, integrations: config.integrations }),
+      });
+    } catch {
+      throw new ScaffoldRequestError("Couldn't reach the generator. Check your connection and try again.", 0, true);
+    }
+    if (!res.ok) {
+      const body = (await res.json().catch(() => null)) as { error?: string; retryable?: boolean } | null;
+      throw new ScaffoldRequestError(body?.error ?? `The generator failed (HTTP ${res.status}).`, res.status, body?.retryable ?? res.status >= 500);
+    }
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const filename = /filename="([^"]+)"/.exec(res.headers.get("content-disposition") ?? "")?.[1] ?? `${validateName(config.name).id}.zip`;
+    return {
+      archive: new Blob([bytes], { type: "application/zip" }),
+      filename,
+      manifest: listZipEntries(bytes).map((e) => ({ path: e.path.replace(/^[^/]+\//, ""), bytes: e.bytes })),
+      generatorVersion: res.headers.get("x-scaffold-version") ?? SCAFFOLD.version,
+    };
   },
 };
 
@@ -154,11 +225,10 @@ export function previewManifest(config: ProjectConfiguration): GeneratedFile[] {
 }
 
 export function getGenerator(): ScaffoldGenerator {
-  // Phase 2: return an HTTP-backed adapter when the scaffold service is configured, e.g.
-  //   if (process.env.NEXT_PUBLIC_SCAFFOLD_API_URL) return createHttpGenerator(process.env.NEXT_PUBLIC_SCAFFOLD_API_URL)
-  return previewGenerator;
+  return scaffoldGenerator;
 }
 
-export function canDownload(gen: ScaffoldGenerator): boolean {
-  return gen.capabilities.includes("zip");
+/** True when `gen` produces ZIPs at all, and, given a selection, can build that one. */
+export function canDownload(gen: ScaffoldGenerator, config?: ProjectConfiguration): boolean {
+  return gen.capabilities.includes("zip") && (!config || gen.zipAvailability(config).ok);
 }

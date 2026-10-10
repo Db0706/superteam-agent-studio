@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FRAMEWORKS, INTEGRATION_MAP, dependentsOf, normalizeIntegrations, statusOf, type IntegrationId } from "@/config/integrations";
 import type { FrameworkId } from "@/config/schema";
 import type { CodeTab } from "@/lib/project-builder/code";
-import { getGenerator, validateConfiguration } from "@/lib/project-builder/generator";
+import { getGenerator, ScaffoldRequestError, validateConfiguration } from "@/lib/project-builder/generator";
 import { deriveProject, validateName } from "@/lib/project-builder/project";
 import { DEFAULT_BUILDER, hasBuilderParams, parseBuilderParams, serializeBuilderParams, type BuilderConfig } from "@/lib/project-builder/url-state";
 
@@ -14,6 +14,8 @@ const GEN_TICK_MS = 120;
 export const GEN_CELLS = 12;
 
 export type GenState = "idle" | "working" | "done" | "error";
+/** The real ZIP download, which runs after the preview is shown. */
+export type DownloadState = "idle" | "working" | "done" | "error";
 
 function readStored(): BuilderConfig | null {
   try {
@@ -38,6 +40,10 @@ export function useBuilder() {
   const [gen, setGen] = useState<GenState>("idle");
   const [genStep, setGenStep] = useState(0);
   const [genError, setGenError] = useState<string | null>(null);
+  const [dl, setDl] = useState<DownloadState>("idle");
+  const [dlError, setDlError] = useState<{ message: string; retryable: boolean } | null>(null);
+  const [saved, setSaved] = useState<{ filename: string; files: number; version: string } | null>(null);
+  const dlRequest = useRef(0);
   const lastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Restore: URL beats storage beats default. `/build?fw=expo` (from a track card)
@@ -85,13 +91,25 @@ export function useBuilder() {
   const project = useMemo(() => deriveProject({ id, framework: cfg.framework, integrations: cfg.integrations }), [id, cfg.framework, cfg.integrations]);
   const validation = useMemo(() => validateConfiguration({ name: cfg.name, framework: cfg.framework, integrations: cfg.integrations }), [cfg]);
   const generator = getGenerator();
+  const zip = useMemo(() => generator.zipAvailability({ name: cfg.name, framework: cfg.framework, integrations: cfg.integrations }), [generator, cfg]);
+
+  const resetDownload = useCallback(() => {
+    dlRequest.current += 1; // ignore any download still in flight
+    setDl("idle");
+    setDlError(null);
+    setSaved(null);
+  }, []);
 
   /** Any configuration change returns the output module to idle. */
-  const update = useCallback((patch: Partial<BuilderConfig>) => {
-    setCfg((c) => ({ ...c, ...patch }));
-    setGen("idle");
-    setGenError(null);
-  }, []);
+  const update = useCallback(
+    (patch: Partial<BuilderConfig>) => {
+      setCfg((c) => ({ ...c, ...patch }));
+      setGen("idle");
+      setGenError(null);
+      resetDownload();
+    },
+    [resetDownload],
+  );
 
   const setName = (v: string) => update({ name: v });
 
@@ -136,7 +154,37 @@ export function useBuilder() {
     setGen("working");
   };
 
+  /** Builds the real project and saves it as `<name>.zip`. */
+  const download = async () => {
+    if (!zip.ok || dl === "working" || name.error) return;
+    const req = ++dlRequest.current;
+    setDl("working");
+    setDlError(null);
+    try {
+      const result = await generator.generateProject({ name: cfg.name, framework: cfg.framework, integrations: cfg.integrations });
+      if (req !== dlRequest.current) return;
+      const url = URL.createObjectURL(result.archive);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      setSaved({ filename: result.filename, files: result.manifest.length, version: result.generatorVersion });
+      setDl("done");
+    } catch (err) {
+      if (req !== dlRequest.current) return;
+      setDl("error");
+      setDlError({
+        message: err instanceof Error ? err.message : "The download failed.",
+        retryable: err instanceof ScaffoldRequestError ? err.retryable : false,
+      });
+    }
+  };
+
   const reset = () => {
+    resetDownload();
     setCfg(DEFAULT_BUILDER);
     setTab("tree");
     setLast(null);
@@ -161,11 +209,19 @@ export function useBuilder() {
     gen,
     genStep,
     genError,
+    zip,
+    dl,
+    dlError,
+    saved,
+    download,
     setName,
     pickFramework,
     toggle,
     generate,
-    backToEdit: () => setGen("idle"),
+    backToEdit: () => {
+      setGen("idle");
+      resetDownload();
+    },
     reset,
   };
 }

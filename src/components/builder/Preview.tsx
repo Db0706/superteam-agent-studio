@@ -223,7 +223,9 @@ function CodePanel({ b }: { b: Builder }) {
         })}
       </div>
       <p className="m-0 border-t border-inv-div px-3.5 py-2 font-mono text-[10px] text-code-com">
-        Representative preview · package versions illustrative until the scaffold repository is published
+        {b.zip.ok
+          ? "Representative preview · the ZIP's studio.manifest.json lists the exact files and versions"
+          : "Representative preview · package versions illustrative until this template is built"}
       </p>
     </section>
   );

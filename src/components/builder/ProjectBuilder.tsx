@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { COLORS, Led, Module, StatusCode, STATUS_TEXT } from "@/components/system";
 import { FRAMEWORKS, FW_ORDER, INTEGRATIONS, statusOf } from "@/config/integrations";
-import { canDownload } from "@/lib/project-builder/generator";
+import { SCAFFOLD } from "@/lib/scaffold/catalog";
 import { Preview } from "./Preview";
 import { GEN_CELLS, useBuilder, type Builder } from "./useBuilder";
 
@@ -235,7 +235,7 @@ function Output({ b, ref }: { b: Builder; ref: React.Ref<HTMLElement> }) {
   const statsLine = `${p.stats.files} FILES · ${p.stats.packages} PKGS · ${p.stats.env} ENV`;
   const names = INTEGRATIONS.filter((i) => p.valid.includes(i.id)).map((i) => i.name);
   const warnings = b.validation.issues.filter((i) => i.severity === "warning");
-  const zip = canDownload(b.generator);
+  const zip = b.zip;
 
   const copy = async () => {
     try {
@@ -266,9 +266,11 @@ function Output({ b, ref }: { b: Builder; ref: React.Ref<HTMLElement> }) {
             <span className="text-[12.5px] leading-[1.45]" style={{ color: ok && b.gen !== "error" ? COLORS.muted : COLORS.fault }}>
               {b.gen === "error"
                 ? b.genError
-                : ok
-                  ? "Design preview: shows the intended result. The ZIP connects to the scaffold repository later."
-                  : "Fix the project name in A to generate."}
+                : !ok
+                  ? "Fix the project name in A to generate."
+                  : zip.ok
+                    ? `Builds a real project from agent-studio-scaffolds v${SCAFFOLD.version}, downloaded as a ZIP.`
+                    : `Preview only. ${zip.reason}`}
             </span>
             {warnings.length > 0 && (
               <ul className="notice-amber m-0 flex list-none flex-col gap-1">
@@ -327,30 +329,66 @@ function Output({ b, ref }: { b: Builder; ref: React.Ref<HTMLElement> }) {
               )}
             </div>
             <div className="border-t border-inv-div px-3.5 py-3 text-[12.5px] leading-[1.45] text-[#E9C77A]">
-              <b>Generator integration coming next.</b> This is a design preview. The ZIP will be assembled from the open-source scaffold repository once the generator is connected. Nothing
-              has been generated or downloaded.
+              {zip.ok ? (
+                <>
+                  <b>Ready to download.</b> The ZIP is built from agent-studio-scaffolds v{SCAFFOLD.version}, verified with Next.js on Solana devnet. It has an{" "}
+                  <code>.env.example</code> with empty placeholders only: add your keys to <code>.env.local</code> yourself.
+                </>
+              ) : (
+                <>
+                  <b>Preview only.</b> {zip.reason} Nothing has been generated or downloaded.
+                </>
+              )}
             </div>
+            {(b.dl === "error" || b.dl === "done") && (
+              <div
+                role={b.dl === "error" ? "alert" : "status"}
+                className="border-t border-inv-div px-3.5 py-2.5 font-mono text-[11px] leading-normal"
+                style={{ color: b.dl === "error" ? "#FF8A73" : undefined }}
+              >
+                {b.dl === "error"
+                  ? `ZIP FAILED · ${b.dlError?.message ?? "Try again."}`
+                  : b.saved && (
+                      <span className="text-code-add">
+                        SAVED {b.saved.filename} · {b.saved.files} FILES · SCAFFOLD v{b.saved.version}
+                      </span>
+                    )}
+              </div>
+            )}
             <div className="flex flex-wrap gap-1.5 border-t border-inv-div px-3.5 pb-3.5 pt-3">
               <button type="button" onClick={copy} className="h-10 rounded-[3px] border-0 bg-[#EDEDE8] px-3 font-mono text-[10.5px] font-semibold text-ink">
                 {copied ? "COPIED ✓" : "COPY SETUP"}
               </button>
-              <span className="group relative">
+              {zip.ok ? (
                 <button
                   type="button"
-                  disabled={!zip}
-                  aria-describedby="zip-tip"
-                  className="h-10 rounded-[3px] border border-dashed border-[#5A5A55] bg-transparent px-3 font-mono text-[10.5px] font-semibold text-dim-2 disabled:cursor-not-allowed"
+                  onClick={b.download}
+                  disabled={b.dl === "working"}
+                  aria-busy={b.dl === "working"}
+                  className="h-10 rounded-[3px] border-0 px-3 font-mono text-[10.5px] font-semibold text-white disabled:cursor-wait"
+                  style={{ background: COLORS.signal }}
                 >
-                  ZIP · SOON
+                  {b.dl === "working" ? "BUILDING ZIP…" : b.dl === "error" ? "RETRY ZIP" : "DOWNLOAD ZIP ↓"}
                 </button>
-                <span
-                  id="zip-tip"
-                  role="tooltip"
-                  className="pointer-events-none absolute bottom-[calc(100%+6px)] left-0 z-10 w-max max-w-[240px] rounded-[3px] bg-[#EDEDE8] px-2 py-1.5 text-[12px] text-ink opacity-0 transition-opacity delay-300 group-focus-within:opacity-100 group-hover:opacity-100"
-                >
-                  Available once the scaffold generator is connected
+              ) : (
+                <span className="group relative">
+                  <button
+                    type="button"
+                    disabled
+                    aria-describedby="zip-tip"
+                    className="h-10 rounded-[3px] border border-dashed border-[#5A5A55] bg-transparent px-3 font-mono text-[10.5px] font-semibold text-dim-2 disabled:cursor-not-allowed"
+                  >
+                    ZIP · PREVIEW ONLY
+                  </button>
+                  <span
+                    id="zip-tip"
+                    role="tooltip"
+                    className="pointer-events-none absolute bottom-[calc(100%+6px)] left-0 z-10 w-max max-w-[240px] rounded-[3px] bg-[#EDEDE8] px-2 py-1.5 text-[12px] text-ink opacity-0 transition-opacity delay-300 group-focus-within:opacity-100 group-hover:opacity-100"
+                  >
+                    {zip.reason}
+                  </span>
                 </span>
-              </span>
+              )}
               <button type="button" onClick={b.backToEdit} className="h-10 rounded-[3px] border border-[#5A5A55] bg-transparent px-3 font-mono text-[10.5px] font-semibold text-[#EDEDE8]">
                 EDIT
               </button>

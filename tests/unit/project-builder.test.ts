@@ -125,8 +125,8 @@ describe("generator adapter", () => {
     expect(complete.issues.some((i) => i.message.includes("needs"))).toBe(false);
   });
 
-  it("the Phase 1 adapter cannot produce a ZIP", async () => {
-    expect(getGenerator()).toBe(previewGenerator);
+  it("the preview adapter cannot produce a ZIP", async () => {
+    expect(getGenerator()).not.toBe(previewGenerator);
     expect(canDownload(previewGenerator)).toBe(false);
     await expect(previewGenerator.generateProject({ name: "a-b-c", framework: "next", integrations: [] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
     const templates = await previewGenerator.listTemplates();

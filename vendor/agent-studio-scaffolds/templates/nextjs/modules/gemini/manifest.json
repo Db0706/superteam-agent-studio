@@ -1,0 +1,19 @@
+{
+  "id": "gemini",
+  "kind": "module",
+  "framework": "next",
+  "name": "Gemini AI",
+  "summary": "Ask Google Gemini a question from a server route. Your key never reaches the browser.",
+  "nav": { "label": "Gemini chat", "href": "/chat" },
+  "requires": [],
+  "files": ["lib/ai/gemini.ts", "app/api/chat/route.ts", "app/chat/page.tsx"],
+  "dependencies": { "@google/genai": "2.28.0" },
+  "devDependencies": {},
+  "scripts": {},
+  "env": [
+    { "key": "GEMINI_API_KEY", "example": "", "required": true, "secret": true, "note": "From https://aistudio.google.com/apikey. Server-only." },
+    { "key": "GEMINI_MODEL", "example": "gemini-flash-latest", "required": false, "secret": false, "note": "Optional model override." }
+  ],
+  "prerequisites": ["Google account", "Gemini API key from Google AI Studio (free tier is enough)"],
+  "readme": "README.fragment.md"
+}

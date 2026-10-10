@@ -1,0 +1,13 @@
+{
+  "name": "agent-studio-scaffolds",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Composable starter templates for Superteam Agent Studio.",
+  "type": "module",
+  "engines": { "node": ">=20.9.0" },
+  "scripts": {
+    "catalog": "node scripts/compose.mjs --list > catalog.json",
+    "compose": "node scripts/compose.mjs",
+    "verify": "node scripts/verify.mjs"
+  }
+}

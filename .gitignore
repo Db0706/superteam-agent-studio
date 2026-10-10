@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# scaffold templates ship placeholder-only env examples
+!/vendor/agent-studio-scaffolds/**/.env.example
 
 # vercel
 .vercel
