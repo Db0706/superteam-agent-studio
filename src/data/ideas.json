@@ -1,0 +1,3752 @@
+[
+ {
+  "id": 1,
+  "title": "Pay-per-page newspaper archive",
+  "industry": "Media",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Local papers sit on decades of archives nobody can reach without a full subscription.",
+  "challenge": "Pricing a single 1987 article so it is worth selling, and worth buying.",
+  "direction": "A paid API serving archive pages per request, with an agent that buys only the pages a researcher needs.",
+  "angles": [
+   "What if the buyer is a historian’s agent working overnight?",
+   "Could many tiny purchases earn more than a few subscriptions?"
+  ]
+ },
+ {
+  "id": 2,
+  "title": "A second opinion for clinic triage",
+  "industry": "Healthcare",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Rural clinics wait days for specialist input on routine cases.",
+  "challenge": "The agent must decide when a paid specialist model is worth the money, and when it is not.",
+  "direction": "A Python agent that triages cases and pays per call for specialist analysis, inside a daily clinic budget.",
+  "angles": [
+   "How do you show a clinician why money was spent?",
+   "What happens when the budget runs out mid-shift?"
+  ]
+ },
+ {
+  "id": 3,
+  "title": "Overnight lab instrument market",
+  "industry": "Science",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Expensive lab equipment sits idle overnight while other labs queue for weeks.",
+  "challenge": "Matching availability, calibration needs and price without a human in the loop.",
+  "direction": "A service where instruments publish slots and booking agents place small paid holds.",
+  "angles": [
+   "Could unused slots be priced like airline seats?",
+   "What if the instrument itself were the seller?"
+  ]
+ },
+ {
+  "id": 4,
+  "title": "Revision tutor that pays per question",
+  "industry": "Education",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Students hunt across dozens of sites for the right practice questions.",
+  "challenge": "Paying authors fairly per question used, not per bundle.",
+  "direction": "An Android tutor that fetches individual paid questions, with a weekly allowance the student sets.",
+  "angles": [
+   "What if teachers earned every time their question helped?",
+   "Could the app spend more on topics you keep getting wrong?"
+  ]
+ },
+ {
+  "id": 5,
+  "title": "Menu reader for low-vision diners",
+  "industry": "Accessibility",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Blind and low-vision diners rely on staff to read menus aloud.",
+  "challenge": "It has to be fast, private and cost pennies per visit.",
+  "direction": "Photograph a menu; Gemini describes it, and a paid allergen lookup runs per dish.",
+  "angles": [
+   "What would a restaurant pay to be readable by default?",
+   "Could it work for medicine labels too?"
+  ]
+ },
+ {
+  "id": 6,
+  "title": "Freight quotes without the email chains",
+  "industry": "Logistics",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small exporters spend hours emailing carriers for quotes.",
+  "challenge": "Comparing paid quote services without overspending on the lookups themselves.",
+  "direction": "An agent that queries several carriers’ paid quote endpoints within a strict lookup budget.",
+  "angles": [
+   "When should the agent stop searching and book?",
+   "What if carriers bid against each other in real time?"
+  ]
+ },
+ {
+  "id": 7,
+  "title": "Micro-licences for game mods",
+  "industry": "Gaming",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Mod creators rarely get paid; players will not subscribe for one asset.",
+  "challenge": "Making a 20p payment feel like a single tap.",
+  "direction": "A web marketplace with per-download payments and a creator dashboard.",
+  "angles": [
+   "Could a mod earn every time someone streams with it?",
+   "What if players could tip mid-game?"
+  ]
+ },
+ {
+  "id": 8,
+  "title": "A tip jar for open datasets",
+  "industry": "Science",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Open datasets cost money to host but rarely receive support.",
+  "challenge": "Asking for payment without ever blocking open access.",
+  "direction": "An API that is free under a rate limit and politely asks for payment above it.",
+  "angles": [
+   "Could heavy users fund light users automatically?",
+   "What if citations triggered a thank-you payment?"
+  ]
+ },
+ {
+  "id": 9,
+  "title": "Train disruption concierge",
+  "industry": "Travel",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "When a train is cancelled, travellers juggle five apps to rebook.",
+  "challenge": "Acting fast while respecting a hard spending cap the traveller set in advance.",
+  "direction": "An agent that watches disruption feeds, pays for live availability and proposes options.",
+  "angles": [
+   "Should the agent book without asking if it is cheaper?",
+   "What would a student version with a £20 cap look like?"
+  ]
+ },
+ {
+  "id": 10,
+  "title": "Pay-as-you-listen lectures",
+  "industry": "Education",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Public lecture recordings are often locked behind full course enrolment.",
+  "challenge": "Charging per chapter without making listeners feel watched by a meter.",
+  "direction": "A web player that unlocks chapters with tiny payments and refunds unwatched time.",
+  "angles": [
+   "What if the lecturer set the price live?",
+   "Could alumni sponsor chapters for current students?"
+  ]
+ },
+ {
+  "id": 11,
+  "title": "Price tags agents can read",
+  "industry": "Commerce",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Shopping agents scrape pages built for humans, and badly.",
+  "challenge": "Designing a product feed agents will happily pay to query.",
+  "direction": "An API for independent shops that sells structured, live stock and price data per query.",
+  "angles": [
+   "Should agents pay more for fresher data?",
+   "What if shops paid agents to be considered?"
+  ]
+ },
+ {
+  "id": 12,
+  "title": "Fact-check fund for breaking news",
+  "industry": "Media",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Newsrooms cannot afford to verify every claim in a fast-moving story.",
+  "challenge": "The agent must choose which claims justify paid verification.",
+  "direction": "An agent that scores claims, buys verification for the riskiest, and logs every spend.",
+  "angles": [
+   "How do readers see what was checked?",
+   "Could readers fund checks on stories they care about?"
+  ]
+ },
+ {
+  "id": 13,
+  "title": "Split the studio before you leave",
+  "industry": "Entertainment",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Bands splitting rehearsal-room costs chase each other for money afterwards.",
+  "challenge": "Settling instantly and fairly, even when someone leaves early.",
+  "direction": "An Android app that splits the booking at the moment it is paid.",
+  "angles": [
+   "What if the room charged by the minute?",
+   "Could it handle a band that never pays on time?"
+  ]
+ },
+ {
+  "id": 14,
+  "title": "Translation on demand for clinics",
+  "industry": "Healthcare",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Clinics need short translations of discharge notes at odd hours.",
+  "challenge": "Paying per request while guaranteeing quality and privacy.",
+  "direction": "A paid API that routes requests to the right translator (human or AI) with a quality guarantee.",
+  "angles": [
+   "What if urgency set the price?",
+   "Could patients choose a human translator for a small extra fee?"
+  ]
+ },
+ {
+  "id": 15,
+  "title": "GPU time for student researchers",
+  "industry": "Science",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Students run out of compute credits halfway through experiments.",
+  "challenge": "Supervisors set limits; students pay per job without paperwork.",
+  "direction": "A dashboard that funds training jobs from a shared budget with spending controls.",
+  "angles": [
+   "Should failed jobs be refunded automatically?",
+   "Could labs lend spare credits to each other?"
+  ]
+ },
+ {
+  "id": 16,
+  "title": "Courier hand-off marketplace",
+  "industry": "Marketplaces",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Last-mile parcels pass between couriers with no instant settlement.",
+  "challenge": "Matching, proof of hand-off and payment in one step.",
+  "direction": "A service that matches couriers to legs and releases payment when the hand-off is confirmed.",
+  "angles": [
+   "What if the parcel paid its own way?",
+   "Could bikes and vans compete for the same leg?"
+  ]
+ },
+ {
+  "id": 17,
+  "title": "Sign-language clip library",
+  "industry": "Accessibility",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Developers lack affordable, properly licensed sign-language video.",
+  "challenge": "Licensing per clip while paying the signers fairly.",
+  "direction": "An API selling clips per request, with signers paid on every use.",
+  "angles": [
+   "Could regional dialects be first-class?",
+   "What if apps paid only when a clip was actually watched?"
+  ]
+ },
+ {
+  "id": 18,
+  "title": "Teen allowance agent",
+  "industry": "Finance",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Teenagers have no safe way to learn how autonomous spending works.",
+  "challenge": "Parent-set rules the agent can never break.",
+  "direction": "An Android app with spending controls visible to both parent and teen.",
+  "angles": [
+   "What if the teen could propose rule changes?",
+   "Could it teach budgeting by showing what the agent declined?"
+  ]
+ },
+ {
+  "id": 19,
+  "title": "Weather-triggered event cover",
+  "industry": "Finance",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Event organisers forget weather cover until it is too late.",
+  "challenge": "Deciding when forecast data is worth buying, and when to quote.",
+  "direction": "An agent that buys forecasts as the date nears and prepares a quote at the right moment.",
+  "angles": [
+   "Should the price change hour by hour?",
+   "Could a village fête and a festival use the same model?"
+  ]
+ },
+ {
+  "id": 20,
+  "title": "Speedrun bounty board",
+  "industry": "Gaming",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Communities pool small prizes for challenges but settle them by hand.",
+  "challenge": "Verifying the winner fairly and paying out instantly.",
+  "direction": "A web board where anyone can add to a bounty and the winner is paid on verification.",
+  "angles": [
+   "What if viewers could raise the bounty live?",
+   "How would you handle a tie?"
+  ]
+ },
+ {
+  "id": 21,
+  "title": "Citation hunter",
+  "industry": "Education",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Students lose hours tracing the original source behind a statistic.",
+  "challenge": "Paying for access to specific papers only when they are truly needed.",
+  "direction": "An agent that follows a claim back to its source and buys single-paper access within a budget.",
+  "angles": [
+   "Should it stop at the first credible source?",
+   "What if it built a shared library for a whole class?"
+  ]
+ },
+ {
+  "id": 22,
+  "title": "Live bus data that pays for itself",
+  "industry": "Travel",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Bus data in smaller towns is unreliable because nobody funds it.",
+  "challenge": "Letting operators earn from accurate, live data.",
+  "direction": "An API selling live vehicle positions per query, with revenue shared back to operators.",
+  "angles": [
+   "Should late buses earn less?",
+   "Could passengers contribute data and get paid?"
+  ]
+ },
+ {
+  "id": 23,
+  "title": "Thirty-second human judgement",
+  "industry": "Marketplaces",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "AI agents sometimes need a human for a tiny decision.",
+  "challenge": "Matching, quality control and instant payment for very small tasks.",
+  "direction": "A service where agents post paid micro-tasks and people earn per answer.",
+  "angles": [
+   "How do you price a decision that takes 30 seconds?",
+   "What if the agent paid more for faster answers?"
+  ]
+ },
+ {
+  "id": 24,
+  "title": "Unlock one page of the repair manual",
+  "industry": "Commerce",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Fixing a device often needs one page of a manual sold as a £30 bundle.",
+  "challenge": "Selling a single procedure, with diagrams, straight to a phone.",
+  "direction": "An Android app that buys only the repair steps you need, when you need them.",
+  "angles": [
+   "What if repair cafés got a cut?",
+   "Could the app refund you if the fix did not work?"
+  ]
+ },
+ {
+  "id": 25,
+  "title": "Medicine shortage scout",
+  "industry": "Healthcare",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Patients ring pharmacy after pharmacy when a common prescription is out of stock locally.",
+  "challenge": "Deciding how many paid stock checks are worth it before simply waiting a day.",
+  "direction": "A Python agent that pays per stock query to nearby pharmacy services, stopping once it finds the medicine or hits a small cap.",
+  "angles": [
+   "What if pharmacies earned more for answering quickly?",
+   "Could the agent buy a forecast of tomorrow's stock instead of today's?"
+  ]
+ },
+ {
+  "id": 26,
+  "title": "Physio form check per rep",
+  "industry": "Healthcare",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "People doing home physiotherapy exercises rarely know whether their form is right between appointments.",
+  "challenge": "Giving useful feedback on a phone video without pretending to be a physiotherapist.",
+  "direction": "An Android app that films a set and pays a few cents per AI form check, with a weekly limit the patient chooses.",
+  "angles": [
+   "What if the physio could top up the allowance remotely?",
+   "Could you only pay when the AI spots something worth fixing?"
+  ]
+ },
+ {
+  "id": 27,
+  "title": "Trial-matching agent for patient groups",
+  "industry": "Healthcare",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Patient charities struggle to tell members which research studies they might be eligible to join.",
+  "challenge": "Querying several paid registries without ever sending more personal detail than each one needs.",
+  "direction": "A Python agent that buys eligibility checks per query from registry services, on the charity's monthly budget, and reports plain-language matches.",
+  "angles": [
+   "How would a member see exactly what was shared and why?",
+   "What if the studies paid for the matching instead?"
+  ]
+ },
+ {
+  "id": 28,
+  "title": "Discharge letter decoder",
+  "industry": "Healthcare",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Patients leave hospital with letters full of abbreviations they are too tired to look up.",
+  "challenge": "Explaining clearly while always pointing back to the clinical team for decisions.",
+  "direction": "A Next.js web app where a hospital charity sponsors each plain-English explanation, paid per letter decoded.",
+  "angles": [
+   "What if relatives could ask follow-up questions on the same letter?",
+   "Could the charity see which phrases confuse people most?"
+  ]
+ },
+ {
+  "id": 29,
+  "title": "Shared care costs for siblings",
+  "industry": "Healthcare",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Siblings caring for an ageing parent argue over who paid for which visit, prescription or taxi.",
+  "challenge": "Making splits feel fair when siblings contribute time as well as money.",
+  "direction": "An Android app that splits each small care cost instantly between siblings, with an AI summary of the month.",
+  "angles": [
+   "What if hours of care counted as contributions too?",
+   "Could the parent see a gentle, guilt-free version?"
+  ]
+ },
+ {
+  "id": 30,
+  "title": "Symptom diaries that pay patients back",
+  "industry": "Healthcare",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Researchers want real-world symptom diaries, but patients rarely see any benefit from sharing them.",
+  "challenge": "Paying per anonymised entry used while keeping consent revocable at any time.",
+  "direction": "A paid API that releases consented, anonymised diary entries to approved studies and pays the patient a micro-fee per entry used.",
+  "angles": [
+   "What happens to past payments if someone withdraws consent?",
+   "Could patients choose to donate their earnings to a charity instead?"
+  ]
+ },
+ {
+  "id": 31,
+  "title": "Locum shift-cover bounties",
+  "industry": "Healthcare",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Small practices scramble by phone to fill last-minute gaps in their rota.",
+  "challenge": "Raising the bounty fairly as the shift gets closer without encouraging gaming.",
+  "direction": "A Next.js web board where practices post a cover bounty that grows over time and releases on confirmation the shift was worked.",
+  "angles": [
+   "What if neighbouring practices could chip in to a shared gap?",
+   "Could an AI predict which gaps will need a bigger bounty?"
+  ]
+ },
+ {
+  "id": 32,
+  "title": "Scrub faces from clinical photos",
+  "industry": "Healthcare",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Clinicians want to share wound or skin photos for teaching but must remove identifying features first.",
+  "challenge": "Proving an image is properly de-identified before anyone pays for it.",
+  "direction": "A paid API that charges per image to blur faces, tattoos and backgrounds, refunding automatically if a reviewer flags a miss.",
+  "angles": [
+   "What if teaching libraries paid the contributing clinician per view?",
+   "Could the service charge more for harder images?"
+  ]
+ },
+ {
+  "id": 33,
+  "title": "Evidence digest for ward protocols",
+  "industry": "Healthcare",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Ward teams rarely have time to check whether new research changes their local protocols.",
+  "challenge": "Choosing which papers are worth buying full text for from abstracts alone.",
+  "direction": "A Python agent that pays per summary and per full-text access overnight, producing a short weekly digest within a fixed budget.",
+  "angles": [
+   "How does the team challenge a summary they disagree with?",
+   "What if several wards pooled one budget and shared the digest?"
+  ]
+ },
+ {
+  "id": 34,
+  "title": "Peer review paid by the paragraph",
+  "industry": "Science",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Peer reviewers work unpaid and journals wait months for reviews to arrive.",
+  "challenge": "Paying for useful comments rather than for volume of words.",
+  "direction": "A Next.js web app where editors release small payments per reviewed section, weighted by whether authors found the comment useful.",
+  "angles": [
+   "What if authors could tip a reviewer whose comment saved the paper?",
+   "Could an AI spot reviews that were clearly rushed?"
+  ]
+ },
+ {
+  "id": 35,
+  "title": "Reproduce-this-result bounties",
+  "industry": "Science",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Many published findings are never independently repeated because nobody funds the effort.",
+  "challenge": "Agreeing in advance what counts as a successful (or failed) replication.",
+  "direction": "A Next.js web app where funders pool a bounty that is held and released only when an agreed replication report is accepted.",
+  "angles": [
+   "Should a careful failed replication earn the same as a success?",
+   "What if the original authors could add to the pot?"
+  ]
+ },
+ {
+  "id": 36,
+  "title": "Amateur telescope time by the minute",
+  "industry": "Science",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Remote observatories sit idle on clear nights while amateur astronomers cannot afford full sessions.",
+  "challenge": "Streaming payment that stops the moment clouds roll in.",
+  "direction": "An Android app that controls a shared remote telescope and pays per minute of usable sky, pausing automatically when conditions drop.",
+  "angles": [
+   "What if schools got the cloudy minutes for free?",
+   "Could unused clear minutes be auctioned at the last second?"
+  ]
+ },
+ {
+  "id": 37,
+  "title": "Budgeted molecule screening agent",
+  "industry": "Science",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small labs cannot afford to run every candidate molecule through expensive prediction models.",
+  "challenge": "Spending more on promising candidates and quitting early on dead ends.",
+  "direction": "A Python agent that buys structure predictions per molecule from paid model services, reallocating its budget as results arrive.",
+  "angles": [
+   "How would you show a supervisor where each pound went?",
+   "What if two cheap models agreeing meant skipping the expensive one?"
+  ]
+ },
+ {
+  "id": 38,
+  "title": "Beetle photos, paid per verified ID",
+  "industry": "Science",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Biodiversity surveys need far more labelled insect photos than researchers can gather themselves.",
+  "challenge": "Paying only for identifications experts or AI can confidently confirm.",
+  "direction": "An Android app where walkers snap insects and earn a micro-payment from a research fund for each verified identification.",
+  "angles": [
+   "What if rare species paid more, would that tempt cheating?",
+   "Could users spend their earnings on extra species guides?"
+  ]
+ },
+ {
+  "id": 39,
+  "title": "Lab protocol steps licensed per use",
+  "industry": "Science",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Researchers who refine lab techniques get little credit when others copy their protocols.",
+  "challenge": "Pricing a single tweak to a method so people still use it.",
+  "direction": "A paid API serving individual protocol steps per request, with each author earning a tiny fee whenever their step is fetched.",
+  "angles": [
+   "What if a step's price fell as more labs confirmed it works?",
+   "Could students access everything free through a department sponsor?"
+  ]
+ },
+ {
+  "id": 40,
+  "title": "Seismometer data priced per second",
+  "industry": "Science",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Hobbyist seismometers record useful data that researchers never see.",
+  "challenge": "Pricing a stream that is dull for weeks then suddenly valuable.",
+  "direction": "A paid API that streams readings from volunteer stations and charges per second of data, paying station owners automatically.",
+  "angles": [
+   "Should a reading during an earthquake cost more or less?",
+   "What if a researcher's agent subscribed only when activity spikes?"
+  ]
+ },
+ {
+  "id": 41,
+  "title": "Overnight preprint triage",
+  "industry": "Science",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "PhD students wake to dozens of new preprints and no time to skim them.",
+  "challenge": "Ranking by relevance to one student's thesis, not by popularity.",
+  "direction": "A Python agent that pays per AI summary for new preprints overnight and stops at a small nightly allowance.",
+  "angles": [
+   "What if the supervisor's agent shared its picks?",
+   "Could the student pay more for papers that cite their own work?"
+  ]
+ },
+ {
+  "id": 42,
+  "title": "Thank-you tips for research software",
+  "industry": "Science",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "The small tools behind many papers are maintained by volunteers who never see thanks.",
+  "challenge": "Making tipping as easy as adding a citation.",
+  "direction": "A Next.js web app where researchers tip the tools listed in their project, split automatically among maintainers.",
+  "angles": [
+   "What if a grant automatically tipped every tool a project used?",
+   "Could a tip unlock a priority bug fix?"
+  ]
+ },
+ {
+  "id": 43,
+  "title": "Essay feedback with a refund button",
+  "industry": "Education",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Students pay for essay feedback that turns out to be generic and unhelpful.",
+  "challenge": "Designing a refund rule that is fair to students and feedback givers.",
+  "direction": "A Next.js web app that charges per paragraph of AI feedback and refunds instantly if the student marks it unhelpful.",
+  "angles": [
+   "What if refunds trained the feedback to improve?",
+   "Could tutors bid to give human feedback on the hardest paragraphs?"
+  ]
+ },
+ {
+  "id": 44,
+  "title": "Conversation practice by the minute",
+  "industry": "Education",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Language learners avoid speaking practice because lessons are booked in costly hour-long blocks.",
+  "challenge": "Making per-minute payment feel relaxed rather than like a ticking clock.",
+  "direction": "An Android app that streams tiny payments per minute of AI or human conversation, stopping the second the learner hangs up.",
+  "angles": [
+   "What if the price fell the longer you stayed in the language?",
+   "Could two learners teach each other and settle the difference?"
+  ]
+ },
+ {
+  "id": 45,
+  "title": "Marking agent that shops for second markers",
+  "industry": "Education",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Departments struggle to find second markers for coursework at peak times.",
+  "challenge": "Knowing when an AI second mark is enough and when a human must look.",
+  "direction": "A Python agent that buys AI second marks per script and pays human markers only for disputed ones, within a department budget.",
+  "angles": [
+   "How should a student see that their script was double-checked?",
+   "What if markers set their own per-script rate?"
+  ]
+ },
+ {
+  "id": 46,
+  "title": "Lesson slides licensed per lesson",
+  "industry": "Education",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Teachers share great lesson materials but earn nothing when others reuse them.",
+  "challenge": "Counting a 'use' honestly without spying on classrooms.",
+  "direction": "A paid API that licenses slide decks per lesson taught, paying the original teacher each time a deck is opened in class.",
+  "angles": [
+   "What if adapted versions shared revenue with the original author?",
+   "Could schools in tight budgets be sponsored automatically?"
+  ]
+ },
+ {
+  "id": 47,
+  "title": "Sponsor-funded homework helper",
+  "industry": "Education",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Students without help at home fall behind on homework they could manage with small hints.",
+  "challenge": "Letting sponsors fund help without them seeing who uses it.",
+  "direction": "An Android app giving AI hints paid per question from a local sponsor pool, with no adverts and no tracking.",
+  "angles": [
+   "What if the hint got smaller each time to encourage independence?",
+   "Could former students top up the pool?"
+  ]
+ },
+ {
+  "id": 48,
+  "title": "Ask an alumnus, pay on answer",
+  "industry": "Education",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Applicants have specific questions about courses that only recent graduates can really answer.",
+  "challenge": "Holding the payment until a good answer arrives, and refunding if none does.",
+  "direction": "A Next.js web app where applicants post a small held payment that releases only when an alumnus answers within two days.",
+  "angles": [
+   "What if alumni could donate their earnings to bursaries?",
+   "Could the best answers become a free public FAQ?"
+  ]
+ },
+ {
+  "id": 49,
+  "title": "Degree checks priced per lookup",
+  "industry": "Education",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Employers wait weeks to confirm a candidate's qualifications with universities.",
+  "challenge": "Charging per lookup while the graduate controls who may check.",
+  "direction": "A paid API where employers pay per verification and graduates approve each request from a shareable link.",
+  "angles": [
+   "What if graduates earned a share of each lookup?",
+   "Could a recruiter's agent check a whole shortlist in one go?"
+  ]
+ },
+ {
+  "id": 50,
+  "title": "Bedtime story agent on pocket money",
+  "industry": "Education",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Parents struggle to find stories pitched at exactly their child's reading level.",
+  "challenge": "Buying stories chapter by chapter that stretch the child just enough.",
+  "direction": "A Python agent that buys short levelled stories per chapter from independent authors, within a weekly budget a parent sets.",
+  "angles": [
+   "What if the child chose how to spend the leftover budget?",
+   "Could authors write to order when the agent finds a gap?"
+  ]
+ },
+ {
+  "id": 51,
+  "title": "Pay only when you learned it",
+  "industry": "Education",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Learners pay for whole courses and abandon most of them halfway through.",
+  "challenge": "Proving learning happened with a quiz that cannot simply be guessed.",
+  "direction": "An Android app that holds payment per lesson and releases it to the creator only after the learner passes a short AI-generated quiz.",
+  "angles": [
+   "What if creators earned a bonus when learners passed weeks later?",
+   "Should the learner pay anything if the lesson was badly made?"
+  ]
+ },
+ {
+  "id": 52,
+  "title": "Captions for village hall meetings",
+  "industry": "Accessibility",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Community meetings rarely offer live captions, so deaf residents miss local decisions.",
+  "challenge": "Paying by the minute while keeping captions accurate on local names.",
+  "direction": "A Next.js web app that streams AI captions to any phone in the room, paid per minute from the parish budget.",
+  "angles": [
+   "What if attendees could tip to upgrade to a human captioner?",
+   "Could the transcript become the meeting minutes?"
+  ]
+ },
+ {
+  "id": 53,
+  "title": "Alt text per image, human on request",
+  "industry": "Accessibility",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Small websites publish hundreds of images with no descriptions for screen-reader users.",
+  "challenge": "Knowing when AI alt text is good enough and when a person should write it.",
+  "direction": "A paid API that charges per AI description and offers a pricier human-written option for images it is unsure about.",
+  "angles": [
+   "What if screen-reader users could flag poor descriptions for a refund?",
+   "Could the price depend on how complex the image is?"
+  ]
+ },
+ {
+  "id": 54,
+  "title": "Easy-read version of any letter",
+  "industry": "Accessibility",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "People with learning disabilities receive official letters they cannot understand alone.",
+  "challenge": "Simplifying without dropping a single deadline or obligation.",
+  "direction": "An Android app that photographs a letter and pays per easy-read rewrite, highlighting dates and actions in plain words.",
+  "angles": [
+   "What if a support worker could approve the rewrite remotely?",
+   "Could the sender be billed instead of the reader?"
+  ]
+ },
+ {
+  "id": 55,
+  "title": "Accessibility fix agent with a budget",
+  "industry": "Accessibility",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Charities know their websites fail accessibility checks but cannot afford a full audit.",
+  "challenge": "Ranking fixes by real impact on users, not by how easy they are.",
+  "direction": "A Python agent that scans a site, pays specialist services per fix suggestion, and spends a fixed budget on the most harmful barriers first.",
+  "angles": [
+   "How would you prove the money made the site better?",
+   "What if disabled testers were paid per issue confirmed?"
+  ]
+ },
+ {
+  "id": 56,
+  "title": "Audio description on demand",
+  "industry": "Accessibility",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Short videos online almost never include audio description for blind viewers.",
+  "challenge": "Describing what matters in a scene within tight gaps in the dialogue.",
+  "direction": "A paid API that generates an audio-described track per video clip, charging per minute of footage.",
+  "angles": [
+   "What if viewers could request description and the creator paid?",
+   "Could describers sell their voice style per clip?"
+  ]
+ },
+ {
+  "id": 57,
+  "title": "Step-free route reports, paid per check",
+  "industry": "Accessibility",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Wheelchair users find out a route has a broken lift or high kerb only on arrival.",
+  "challenge": "Keeping reports fresh when conditions change daily.",
+  "direction": "An Android app where wheelchair users post small bounties and nearby people earn them by confirming a lift or kerb with a photo.",
+  "angles": [
+   "What if local councils funded bounties for their own streets?",
+   "Could AI spot stale reports and raise the bounty?"
+  ]
+ },
+ {
+  "id": 58,
+  "title": "Publisher-funded dyslexia reading mode",
+  "industry": "Accessibility",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Readers with dyslexia struggle with dense news articles and long unbroken paragraphs.",
+  "challenge": "Reformatting content without changing its meaning or losing the publisher's voice.",
+  "direction": "A Next.js web app that reformats articles for easier reading, with publishers paying per article converted.",
+  "angles": [
+   "What if readers could choose their own layout preferences per site?",
+   "Could the same service help people reading in a second language?"
+  ]
+ },
+ {
+  "id": 59,
+  "title": "Form-filling companion with a carer view",
+  "industry": "Accessibility",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "People with cognitive impairments find long application forms overwhelming and give up.",
+  "challenge": "Explaining each question without ever answering on the person's behalf.",
+  "direction": "A Python agent that buys plain-language explanations per question, with a spending log a trusted carer can review.",
+  "angles": [
+   "What if the form's owner paid for every explanation needed?",
+   "Could repeated confusing questions be reported back to fix the form?"
+  ]
+ },
+ {
+  "id": 60,
+  "title": "Tactile maps printed per request",
+  "industry": "Accessibility",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Blind visitors rarely get tactile maps of new buildings, campuses or venues.",
+  "challenge": "Turning a messy floor plan into something readable by touch.",
+  "direction": "A paid API that converts a floor plan into a printable tactile map file, charging per map generated.",
+  "angles": [
+   "What if venues paid so every visitor could print one free?",
+   "Could the map update itself when a room moves?"
+  ]
+ },
+ {
+  "id": 61,
+  "title": "Leaf photo diagnosis with a backstop",
+  "industry": "Agriculture",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Smallholders spot sick leaves but cannot reach an agronomist quickly.",
+  "challenge": "Escalating to a paid human expert only when the AI is unsure.",
+  "direction": "An Android app that pays per AI diagnosis and offers a pricier agronomist check, refunded if the AI was already right.",
+  "angles": [
+   "What if neighbouring farms shared one diagnosis for the same outbreak?",
+   "Could agronomists earn more for answering in the field season?"
+  ]
+ },
+ {
+  "id": 62,
+  "title": "Satellite tiles bought field by field",
+  "industry": "Agriculture",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Farmers pay for whole-farm satellite subscriptions when only a few fields need watching.",
+  "challenge": "Deciding which fields deserve a fresh image this week.",
+  "direction": "A Python agent that buys single satellite tiles per field when crop signals look odd, staying inside a seasonal budget.",
+  "angles": [
+   "What if a cloudy image was automatically refunded?",
+   "Could a cooperative's agents split the cost of shared tiles?"
+  ]
+ },
+ {
+  "id": 63,
+  "title": "Soil report translator",
+  "industry": "Agriculture",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Soil test reports are full of numbers that growers find hard to act on.",
+  "challenge": "Turning lab values into advice without overpromising yields.",
+  "direction": "A Next.js web app that charges per report explained, giving plain next steps and questions to ask an adviser.",
+  "angles": [
+   "What if the lab paid so every report came explained?",
+   "Could allotment groups share one report across plots?"
+  ]
+ },
+ {
+  "id": 64,
+  "title": "Farmer advice, tipped per useful answer",
+  "industry": "Agriculture",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Experienced farmers answer newcomers' questions in forums for nothing.",
+  "challenge": "Rewarding answers that actually worked, not just the first reply.",
+  "direction": "A Next.js web forum where askers tip answers and add a bonus later if the advice worked at harvest.",
+  "angles": [
+   "What if an AI summarised the best tipped answers into a guide?",
+   "Could agricultural colleges sponsor tips for students' questions?"
+  ]
+ },
+ {
+  "id": 65,
+  "title": "Herd sensor alerts sold per alert",
+  "industry": "Agriculture",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Livestock sensors produce floods of data that farmers and vets ignore.",
+  "challenge": "Charging only for alerts that turn out to matter.",
+  "direction": "A paid API that analyses herd sensor streams and charges per alert, crediting back alerts a vet marks as false.",
+  "angles": [
+   "What if the vet's practice paid for alerts instead?",
+   "Could alerts get cheaper the more accurate they become?"
+  ]
+ },
+ {
+  "id": 66,
+  "title": "Irrigation agent buying forecasts",
+  "industry": "Agriculture",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Growers water on fixed schedules and waste water before rain arrives.",
+  "challenge": "Judging when an extra paid forecast changes the decision enough to be worth it.",
+  "direction": "A Python agent that buys hyperlocal forecasts per call and soil readings per hour, delaying irrigation when rain is likely.",
+  "angles": [
+   "How would the grower override the agent on a hunch?",
+   "What if saved water earned a small reward from the local supplier?"
+  ]
+ },
+ {
+  "id": 67,
+  "title": "Provenance stamps per crate",
+  "industry": "Agriculture",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Shoppers and buyers cannot easily check where a crate of produce really came from.",
+  "challenge": "Keeping a lookup cheap enough to scan every crate.",
+  "direction": "A paid API that charges buyers a tiny fee per provenance lookup, passing a share back to the grower.",
+  "angles": [
+   "What if consumers could scan for free and retailers paid?",
+   "Could a mismatch trigger an automatic refund to the buyer?"
+  ]
+ },
+ {
+  "id": 68,
+  "title": "Pest trap counts that pay farmers",
+  "industry": "Agriculture",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Regional pest warnings depend on trap counts that farmers rarely bother to report.",
+  "challenge": "Paying for counts without rewarding made-up numbers.",
+  "direction": "An Android app where farmers photograph trap cards, AI counts the pests, and researchers pay per verified count.",
+  "angles": [
+   "What if the warning was free only to those who contributed?",
+   "Could neighbouring farms see a live pest map in return?"
+  ]
+ },
+ {
+  "id": 69,
+  "title": "Neighbour's charger, paid per kilowatt-hour",
+  "industry": "Energy",
+  "track": "mobile",
+  "difficulty": "Advanced",
+  "type": "Mobile app",
+  "problem": "Drivers without driveways struggle to charge while neighbours' home chargers sit idle.",
+  "challenge": "Streaming payment that matches energy delivered, not time plugged in.",
+  "direction": "An Android app that streams small payments per unit charged to a neighbour's charger, stopping when the car is unplugged.",
+  "angles": [
+   "What if the price followed the neighbour's solar output?",
+   "How do you settle a dispute over a half-charged car?"
+  ]
+ },
+ {
+  "id": 70,
+  "title": "Dishwasher agent that buys price forecasts",
+  "industry": "Energy",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Households on variable tariffs forget to run appliances when power is cheapest.",
+  "challenge": "Knowing whether a paid forecast will save more than it costs.",
+  "direction": "A Python agent that buys short price forecasts per call and schedules the dishwasher or washing machine, logging savings against spend.",
+  "angles": [
+   "What if the agent stopped buying forecasts once it learned the pattern?",
+   "Could a whole street share one forecast subscription?"
+  ]
+ },
+ {
+  "id": 71,
+  "title": "Energy bill decoder",
+  "industry": "Energy",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Energy bills mix standing charges, estimates and rates that few people understand.",
+  "challenge": "Spotting likely estimate errors without claiming to be certain.",
+  "direction": "A Next.js web app that charges per bill explained, highlighting estimated readings and questions to ask the supplier.",
+  "angles": [
+   "What if a debt-advice charity sponsored every explanation?",
+   "Could the app compare this bill to last year's automatically?"
+  ]
+ },
+ {
+  "id": 72,
+  "title": "Paid to switch off at peak",
+  "industry": "Energy",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Local grids struggle at peak times while households would happily shift usage for a reward.",
+  "challenge": "Verifying that a household really used less than it would have.",
+  "direction": "A paid backend service that pays households per verified unit avoided at peak, settling each payment within minutes.",
+  "angles": [
+   "What if households could donate their earnings to a neighbour in fuel poverty?",
+   "How would you stop people inflating their normal usage?"
+  ]
+ },
+ {
+  "id": 73,
+  "title": "Community solar income splitter",
+  "industry": "Energy",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Community solar groups split income between members using spreadsheets and bank transfers.",
+  "challenge": "Splitting fairly when members joined at different times with different shares.",
+  "direction": "A Next.js web app that splits each day's solar income between members automatically, showing everyone the same ledger.",
+  "angles": [
+   "What if members could route their share to the local school's bill?",
+   "Could members trade shares inside the group?"
+  ]
+ },
+ {
+  "id": 74,
+  "title": "Insulation advice per address",
+  "industry": "Energy",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Homeowners do not know which insulation upgrade would help their particular home most.",
+  "challenge": "Giving useful advice from a few photos and an address.",
+  "direction": "A paid API that returns ranked upgrade suggestions per address, charging a small fee per report.",
+  "angles": [
+   "What if installers paid for the report in exchange for a quote request?",
+   "Could tenants use it to make the case to landlords?"
+  ]
+ },
+ {
+  "id": 75,
+  "title": "Office energy walkthrough agent",
+  "industry": "Energy",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Small offices waste energy on lights and devices nobody notices left on.",
+  "challenge": "Turning a quick phone video into a short, prioritised fix list.",
+  "direction": "A Python agent that pays per photo analysed from an office walkthrough, stopping when its small budget or the building is covered.",
+  "angles": [
+   "What if the agent repeated the check monthly and reported progress?",
+   "Could staff earn a share of the savings they spot?"
+  ]
+ },
+ {
+  "id": 76,
+  "title": "Solar charging kiosk by the minute",
+  "industry": "Energy",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Festival-goers queue for phone charging and pay a flat fee even for a quick top-up.",
+  "challenge": "Making per-minute charging simple for someone with a nearly dead phone.",
+  "direction": "An Android app that unlocks a solar kiosk socket and streams payment per minute, with a free first few minutes.",
+  "angles": [
+   "What if sunnier hours were cheaper?",
+   "Could a sponsor cover charging for people with emergencies?"
+  ]
+ },
+ {
+  "id": 77,
+  "title": "River-level readings paid per reading",
+  "industry": "Climate",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Flood warnings miss small streams that no official gauge monitors.",
+  "challenge": "Trusting readings from cheap volunteer sensors.",
+  "direction": "A paid API where councils and researchers pay per reading from volunteer river sensors, with owners paid automatically.",
+  "angles": [
+   "Should readings during a flood cost more or be free?",
+   "What if an agent bought readings only when rain was forecast?"
+  ]
+ },
+ {
+  "id": 78,
+  "title": "Supplier emissions agent",
+  "industry": "Climate",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small firms are asked for their supply-chain emissions but cannot find the data.",
+  "challenge": "Buying just enough supplier data to give an honest estimate.",
+  "direction": "A Python agent that pays per supplier lookup to emissions data services, filling gaps until its budget or confidence target is reached.",
+  "angles": [
+   "How would you show which numbers are estimates?",
+   "What if suppliers earned something for each lookup of their data?"
+  ]
+ },
+ {
+  "id": 79,
+  "title": "Sapling photos paid by sponsors",
+  "industry": "Climate",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Tree-planting sponsors rarely know whether saplings survived their first year.",
+  "challenge": "Confirming the same tree is still alive a year later.",
+  "direction": "A Next.js web app where sponsors pay a small reward per verified photo of a living sapling, checked by AI each season.",
+  "angles": [
+   "What if rewards grew the longer a tree survived?",
+   "Could schools adopt trees and earn for their trips?"
+  ]
+ },
+ {
+  "id": 80,
+  "title": "Repair-not-replace advisor",
+  "industry": "Climate",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "People throw away broken appliances that a simple fix could save.",
+  "challenge": "Giving a confident repair suggestion from one photo and a description.",
+  "direction": "An Android app that pays per AI repair diagnosis, sponsored by a council waste team keen to cut landfill.",
+  "angles": [
+   "What if local repairers paid to receive the hard cases?",
+   "Could the app tip users for reporting a successful fix?"
+  ]
+ },
+ {
+  "id": 81,
+  "title": "Greenwashing checker for reports",
+  "industry": "Climate",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Journalists and students cannot easily verify bold claims in sustainability reports.",
+  "challenge": "Separating vague claims from checkable ones before spending money.",
+  "direction": "A Python agent that pays per data lookup to check each measurable claim in a report, within a budget, and lists what it could not verify.",
+  "angles": [
+   "What if companies could pay to have their own reports checked first?",
+   "How would you show uncertainty without sounding like an accusation?"
+  ]
+ },
+ {
+  "id": 82,
+  "title": "Smoke forecasts for school playgrounds",
+  "industry": "Climate",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Schools have little warning when wildfire smoke makes outdoor play unsafe.",
+  "challenge": "Producing a trustworthy neighbourhood forecast quickly and cheaply.",
+  "direction": "A paid API that sells smoke forecasts per neighbourhood per query, with sponsors covering schools' requests.",
+  "angles": [
+   "What if parents' phones could ask the same API for free?",
+   "Could the price fall when many schools ask about the same area?"
+  ]
+ },
+ {
+  "id": 83,
+  "title": "Low-carbon commute rewards",
+  "industry": "Climate",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Employers want to encourage cycling and walking but rewards schemes are clunky.",
+  "challenge": "Verifying a trip without tracking where people actually go.",
+  "direction": "A Next.js web app where employers pay a micro-reward per verified low-carbon trip, using private, self-reported checks.",
+  "angles": [
+   "What if rewards were pooled for a team charity instead?",
+   "Could rainy days earn a bonus?"
+  ]
+ },
+ {
+  "id": 84,
+  "title": "Overheating check, one room at a time",
+  "industry": "Climate",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Many homes overheat in heatwaves and occupants do not know which rooms are risky.",
+  "challenge": "Judging heat risk from photos of windows, orientation and layout.",
+  "direction": "An Android app that pays per room assessed by AI and suggests cheap cooling fixes for the riskiest spaces.",
+  "angles": [
+   "What if landlords paid for the assessment?",
+   "Could neighbours share results for identical flats?"
+  ]
+ },
+ {
+  "id": 85,
+  "title": "Pay by the paragraph for long reads",
+  "industry": "Media",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Readers abandon long features behind paywalls, so writers earn nothing from the people who only wanted half.",
+  "challenge": "Charging fairly for exactly what was read without making scrolling feel like a meter running.",
+  "direction": "A web app where each paragraph unlocks for a fraction of a penny as you scroll, capped at the full-article price.",
+  "angles": [
+   "What if finishing the piece refunded the last few paragraphs?",
+   "Could the writer see which paragraph people stopped paying at?"
+  ]
+ },
+ {
+  "id": 86,
+  "title": "Press photo buyer for student papers",
+  "industry": "Media",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Student newspapers run stories without pictures because licensing a single photo feels too costly and slow.",
+  "challenge": "Choosing the image that fits the story best when every preview and licence costs money.",
+  "direction": "A Python agent that reads a draft, shortlists photos from paid libraries and licenses one per story within an issue budget.",
+  "angles": [
+   "What if the agent had to justify each purchase to the editor in one line?",
+   "Could it commission a local student photographer instead when that is cheaper?"
+  ]
+ },
+ {
+  "id": 87,
+  "title": "Searchable podcast quotes by the snippet",
+  "industry": "Media",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Hours of great podcast conversation are unsearchable, so researchers and journalists can't cite what was actually said.",
+  "challenge": "Selling a ten-second quote so the podcaster earns and the buyer gets proof of context.",
+  "direction": "A paid API that returns timestamped transcript snippets per request, with each payment flowing back to the show.",
+  "angles": [
+   "What if a snippet came with the sentence before and after for free?",
+   "Could small shows earn more from quotes than from adverts?"
+  ]
+ },
+ {
+  "id": 88,
+  "title": "Reader-funded questions for local reporters",
+  "industry": "Media",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Local readers have questions nobody is paid to investigate, and newsrooms can't guess which ones matter most.",
+  "challenge": "Holding pledges until a question is properly answered, and returning them if it never is.",
+  "direction": "An Android app where neighbours chip in small amounts behind a question, released to the reporter when the story publishes.",
+  "angles": [
+   "What if the reporter could split the pot with a source who helped?",
+   "Should a question expire if nobody picks it up within a month?"
+  ]
+ },
+ {
+  "id": 89,
+  "title": "Explainers that refund when they're wrong",
+  "industry": "Media",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Quick AI news explainers spread errors, and readers have no recourse when a summary misleads them.",
+  "challenge": "Deciding automatically and fairly when a correction is serious enough to trigger refunds.",
+  "direction": "A paid explainer API that charges per answer and automatically refunds every buyer if a later correction is logged.",
+  "angles": [
+   "What if the refund came with the corrected explainer attached?",
+   "Could the refund rate become a public trust score for the service?"
+  ]
+ },
+ {
+  "id": 90,
+  "title": "Newsletter sponsors who pay per real read",
+  "industry": "Media",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Small newsletter writers struggle to prove value to sponsors, who pay flat fees for opens that may be bots.",
+  "challenge": "Telling a genuine human read from an automated open without tracking readers invasively.",
+  "direction": "A web dashboard where a sponsor's budget streams to the writer per verified read, with privacy-friendly checks.",
+  "angles": [
+   "What if readers could choose which sponsor funds their issue?",
+   "Could the writer stop the sponsorship stream if a sponsor's values change?"
+  ]
+ },
+ {
+  "id": 91,
+  "title": "Corrections watcher for cited sources",
+  "industry": "Media",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Bloggers and students cite articles that are later corrected, and their own work quietly goes out of date.",
+  "challenge": "Paying only to check sources that actually matter, not every link in an archive.",
+  "direction": "A Python agent that monitors your cited articles, pays per correction lookup within a monthly budget, and flags what needs updating.",
+  "angles": [
+   "What if it prioritised sources by how many readers saw your piece?",
+   "Could publishers earn from selling corrections as a feed?"
+  ]
+ },
+ {
+  "id": 92,
+  "title": "A news briefing as long as your commute",
+  "industry": "Media",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Commuters skim headlines without depth, while full podcasts never fit the journey they actually have.",
+  "challenge": "Generating a briefing that ends exactly when the journey does, and charging by the minute.",
+  "direction": "An Android app that builds an AI audio briefing to your commute length and charges per minute actually listened.",
+  "angles": [
+   "What if a delayed train extended the briefing for free?",
+   "Could the publishers whose stories were used share each minute's payment?"
+  ]
+ },
+ {
+  "id": 93,
+  "title": "Local news translated for diaspora readers",
+  "industry": "Media",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Families abroad can't follow hometown news because local outlets publish in one language only.",
+  "challenge": "Splitting each payment between the outlet, the AI translation and a human checker who spots errors.",
+  "direction": "A web app that sells single translated local articles, splitting each micro-payment three ways at the moment of purchase.",
+  "angles": [
+   "What if readers could pay extra for a human-checked version?",
+   "Could the outlet discover a new audience it never knew it had?"
+  ]
+ },
+ {
+  "id": 94,
+  "title": "Hints that get pricier the more you ask",
+  "industry": "Gaming",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Puzzle players either stay stuck and quit, or look up full solutions that spoil the game.",
+  "challenge": "Giving an AI hint that nudges without solving, and pricing it to protect the fun.",
+  "direction": "An Android companion that sells escalating AI hints for a puzzle, refunding any hint the player rates useless.",
+  "angles": [
+   "What if the puzzle's designer earned from every hint bought?",
+   "Could the first hint be free but the third cost real thought?"
+  ]
+ },
+ {
+  "id": 95,
+  "title": "Playtesters paid by the minute",
+  "industry": "Gaming",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Indie developers can't afford big playtest rounds, yet need fresh eyes after every build.",
+  "challenge": "Knowing when a playtester's session is still producing insight versus just running up the bill.",
+  "direction": "A Python agent that recruits testers, streams per-minute pay during sessions and stops when feedback stops being new.",
+  "angles": [
+   "What if testers earned a bonus for finding a crash?",
+   "Could the agent mix AI play-throughs with human ones to stretch the budget?"
+  ]
+ },
+ {
+  "id": 96,
+  "title": "NPC lines priced per sentence",
+  "industry": "Gaming",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Small studios want characters that respond naturally, but can't afford a writer for every branching line.",
+  "challenge": "Keeping generated dialogue in character and consistent while billing per line spoken.",
+  "direction": "A paid API that returns in-character NPC lines per request, priced by length and whether the line is new or cached.",
+  "angles": [
+   "What if a human writer could sell a hand-polished version of a popular line?",
+   "Could players hear cheaper lines in side quests and richer ones in the finale?"
+  ]
+ },
+ {
+  "id": 97,
+  "title": "Sponsor-funded school esports league",
+  "industry": "Gaming",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "School esports clubs can't cover tournament costs, and local sponsors don't know where their money goes.",
+  "challenge": "Showing sponsors exactly what each pound paid for, from server time to prizes.",
+  "direction": "A web hub where sponsors top up a league pot and every spend, such as a match server, is visible as it happens.",
+  "angles": [
+   "What if each match showed which sponsor paid for it?",
+   "Could unspent sponsorship roll over to next term automatically?"
+  ]
+ },
+ {
+  "id": 98,
+  "title": "Level makers paid per completed run",
+  "industry": "Gaming",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Community level designers pour hours into creations that get played millions of times but earn nothing.",
+  "challenge": "Proving a run was genuinely completed so payments can't be farmed by bots.",
+  "direction": "A marketplace backend where games pay a tiny fee to the creator each time a player verifiably finishes their level.",
+  "angles": [
+   "What if harder levels paid more per completion?",
+   "Could players tip the creator directly at the finish line?"
+  ]
+ },
+ {
+  "id": 99,
+  "title": "Replay reviews from a pocket coach",
+  "industry": "Gaming",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Competitive players know they're losing but can't afford a coach to watch their replays.",
+  "challenge": "Deciding which moments are worth paying a human to review after an AI pass.",
+  "direction": "An Android app that gets an AI review of each replay per upload, with an optional paid human review of key moments.",
+  "angles": [
+   "What if coaches bid to review the replays they find most interesting?",
+   "Could the player set a weekly coaching allowance?"
+  ]
+ },
+ {
+  "id": 100,
+  "title": "A strategy bot that buys its analysis",
+  "industry": "Gaming",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Hobbyist game AIs are either too weak or too expensive to run deep analysis on every move.",
+  "challenge": "Valuing a single move's analysis against the budget left for the rest of the game.",
+  "direction": "A Python agent that plays turn-based games and pays per call for deeper engine analysis only on critical turns.",
+  "angles": [
+   "What if two agents with equal budgets played each other?",
+   "Would a poorer agent learn to play more cautiously?"
+  ]
+ },
+ {
+  "id": 101,
+  "title": "Single-sprite shop for game jams",
+  "industry": "Gaming",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Game jam teams need one or two assets fast, but artists only sell large packs.",
+  "challenge": "Making one sprite worth selling and simple enough to buy in seconds.",
+  "direction": "A web shop where jam teams buy individual sprites per item, with artists paid the moment a download happens.",
+  "angles": [
+   "What if the price dropped once the jam ended?",
+   "Could artists see which jam games used their work?"
+  ]
+ },
+ {
+  "id": 102,
+  "title": "Surtitles in your language, by the minute",
+  "industry": "Entertainment",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Visitors skip local theatre because they can't follow a play performed in another language.",
+  "challenge": "Keeping AI surtitles in sync with live actors who improvise and skip lines.",
+  "direction": "An Android app that streams translated surtitles during a performance and charges per minute of use.",
+  "angles": [
+   "What if the theatre sponsored the first act for free?",
+   "Could the playwright earn from every translated minute?"
+  ]
+ },
+ {
+  "id": 103,
+  "title": "Watch the scene, not the whole film",
+  "industry": "Entertainment",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Film students need to study one scene but must rent or buy the entire film to do it.",
+  "challenge": "Pricing a three-minute clip so rights holders feel it is worth unlocking.",
+  "direction": "A web app that sells access to individual scenes per view, with AI notes on framing and editing alongside.",
+  "angles": [
+   "What if a lecturer could buy a scene once for a whole seminar?",
+   "Could scene sales show which moments in cinema are studied most?"
+  ]
+ },
+ {
+  "id": 104,
+  "title": "Laugh-timing feedback for open mics",
+  "industry": "Entertainment",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "New comedians record their sets but can't tell objectively where the laughs landed or died.",
+  "challenge": "Separating real laughter from crowd noise in a cheap phone recording.",
+  "direction": "An Android app that analyses a set recording per upload and maps laughs against the script.",
+  "angles": [
+   "What if comedians could compare the same joke across nights?",
+   "Could a paid human comic add notes to the toughest bits?"
+  ]
+ },
+ {
+  "id": 105,
+  "title": "Pub quiz question exchange",
+  "industry": "Entertainment",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Quiz hosts spend hours writing questions, while good question writers never get paid for them.",
+  "challenge": "Stopping the same question being recycled at nearby pubs on the same night.",
+  "direction": "A paid API where hosts buy fresh questions per item and writers earn every time theirs is used.",
+  "angles": [
+   "What if a question's price rose the more obscure it was?",
+   "Could an AI check answers are still true before each sale?"
+  ]
+ },
+ {
+  "id": 106,
+  "title": "Escape-room clues on demand",
+  "industry": "Entertainment",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Escape-room teams get stuck and the host has to guess what kind of clue will help.",
+  "challenge": "Generating a clue tailored to how far the team has got without giving it all away.",
+  "direction": "A paid backend that rooms call per clue, generating hints from the room's puzzle map and the team's progress.",
+  "angles": [
+   "What if teams spent clue credits from a shared pot?",
+   "Could a room sell its best puzzles to other rooms per use?"
+  ]
+ },
+ {
+  "id": 107,
+  "title": "Friday night planner with a fixed budget",
+  "industry": "Entertainment",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Planning a night out means checking dozens of listings, prices and availability by hand.",
+  "challenge": "Spending on availability checks and ticket holds without blowing the evening's budget.",
+  "direction": "A Python agent that pays per query to event listing services and assembles a plan inside the group's limit.",
+  "angles": [
+   "What if the agent could hold tickets for ten minutes while friends vote?",
+   "Should the cost of planning come out of the night's budget?"
+  ]
+ },
+ {
+  "id": 108,
+  "title": "Fans unlock the director's commentary",
+  "industry": "Entertainment",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Independent filmmakers would record commentary tracks but can't be sure anyone will pay for them.",
+  "challenge": "Holding pledges safely and refunding everyone if the target isn't met in time.",
+  "direction": "A web page where fans pledge small amounts, held until a target triggers the commentary's recording and release.",
+  "angles": [
+   "What if late fans paid less once it was already unlocked?",
+   "Could fans vote on which scenes get discussed first?"
+  ]
+ },
+ {
+  "id": 109,
+  "title": "Talent scout for small venues",
+  "industry": "Entertainment",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small venues struggle to find fresh acts among thousands of online clips each week.",
+  "challenge": "Deciding which clips are worth paying to analyse when most will be a poor fit.",
+  "direction": "A Python agent that pays per clip analysis to rank emerging performers against a venue's style and budget.",
+  "angles": [
+   "What if performers could pay to be looked at first?",
+   "Could the venue share its scouting results with other venues for a fee?"
+  ]
+ },
+ {
+  "id": 110,
+  "title": "Licence a single stem",
+  "industry": "Music",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Producers want just a drum loop or vocal from a track, but licensing is all-or-nothing.",
+  "challenge": "Pricing an isolated stem fairly against the whole song it came from.",
+  "direction": "A paid API that sells individual stems per download, paying the artist instantly and logging the licence.",
+  "angles": [
+   "What if the price changed with how the stem would be used?",
+   "Could an artist release stems before the full song?"
+  ]
+ },
+ {
+  "id": 111,
+  "title": "Busker tips that reach the songwriter",
+  "industry": "Music",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Buskers often play covers, and the songwriters behind those songs never see a penny from street tips.",
+  "challenge": "Recognising the song being played live and splitting the tip without slowing the giver down.",
+  "direction": "An Android tip jar that identifies the song with AI and splits each tip between busker and songwriter.",
+  "angles": [
+   "What if the busker could choose a bigger share for the songwriter?",
+   "Could passers-by tip extra to request the next song?"
+  ]
+ },
+ {
+  "id": 112,
+  "title": "Backing band by the minute",
+  "industry": "Music",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Musicians practising alone lack a band to play along with, and live session players are expensive.",
+  "challenge": "Making an AI accompaniment respond to the player's tempo in real time.",
+  "direction": "A web app that streams an AI backing band while you practise, charging per minute it plays.",
+  "angles": [
+   "What if the band stopped charging when you stopped playing?",
+   "Could real musicians license their style to the backing band?"
+  ]
+ },
+ {
+  "id": 113,
+  "title": "Sample clearance agent for mixtapes",
+  "industry": "Music",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Bedroom producers use samples they can't clear, so their mixtapes can never be released properly.",
+  "challenge": "Paying for clearance per second of sample across rights holders with different prices.",
+  "direction": "A Python agent that finds who owns each sample, compares offers and pays for clearances within a release budget.",
+  "angles": [
+   "What if it suggested a cheaper, similar sample when one was too pricey?",
+   "Could rights holders set automatic prices for small uses?"
+  ]
+ },
+ {
+  "id": 114,
+  "title": "Learn your choir part, one song at a time",
+  "industry": "Music",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Amateur choir members struggle to learn their harmony line from a full recording.",
+  "challenge": "Isolating a single voice part clearly enough to sing along to.",
+  "direction": "An Android app that sells AI-generated part tracks per song and voice, with the choir able to share one purchase.",
+  "angles": [
+   "What if the conductor bought parts for the whole choir at once?",
+   "Could singers pay a little more for a slowed-down practice version?"
+  ]
+ },
+ {
+  "id": 115,
+  "title": "A listening allowance for indie artists",
+  "industry": "Music",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Listeners want to support the small artists they love, but streaming pays them very little.",
+  "challenge": "Dividing a fixed monthly allowance fairly across what you actually listened to.",
+  "direction": "A Python agent that tracks your listening and pays artists directly per play, never exceeding your monthly allowance.",
+  "angles": [
+   "What if a song you replayed ten times earned a bonus?",
+   "Could the agent find new artists and spend a little on discovery?"
+  ]
+ },
+ {
+  "id": 116,
+  "title": "Chord charts from your own recordings",
+  "industry": "Music",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Songwriters record voice memos full of ideas but never write down the chords.",
+  "challenge": "Turning a rough phone recording into an accurate, readable chord chart.",
+  "direction": "A paid API that returns a chord chart per uploaded recording, charging by the minute of audio.",
+  "angles": [
+   "What if a human musician could correct the chart for a small fee?",
+   "Could the service suggest alternative chords as a paid extra?"
+  ]
+ },
+ {
+  "id": 117,
+  "title": "Session players paid for the take you keep",
+  "industry": "Music",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Songwriters need a guitar or violin part but can't afford to book a session player upfront.",
+  "challenge": "Rewarding the chosen take fairly while not wasting everyone else's time.",
+  "direction": "A matching service where musicians submit takes to a posted bounty and the songwriter's payment releases to the chosen one.",
+  "angles": [
+   "What if runners-up received a small thank-you payment?",
+   "Could AI pre-screen takes for timing before the songwriter listens?"
+  ]
+ },
+ {
+  "id": 118,
+  "title": "Marked practice, one exercise at a time",
+  "industry": "Music",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Music students practise alone all week and only get feedback in their weekly lesson.",
+  "challenge": "Combining an AI first pass with human marking so teachers only spend time where it counts.",
+  "direction": "A web app where students submit recordings, AI pre-marks them, and teachers are paid per exercise they review.",
+  "angles": [
+   "What if the student chose which exercises deserved a human ear?",
+   "Could teachers earn from reusable feedback on common mistakes?"
+  ]
+ },
+ {
+  "id": 119,
+  "title": "Sunday league highlights by the goal",
+  "industry": "Sports",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Amateur players film whole matches but never edit out the moments worth sharing.",
+  "challenge": "Spotting goals and saves reliably from a shaky sideline video.",
+  "direction": "An Android app that uses AI to cut highlights from match footage and charges per clip exported.",
+  "angles": [
+   "What if teammates could each buy their own moments?",
+   "Could the club earn a share when players buy clips?"
+  ]
+ },
+ {
+  "id": 120,
+  "title": "Live stats from amateur leagues",
+  "industry": "Sports",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Amateur leagues track scores and stats, but have no way to earn from apps that want the data.",
+  "challenge": "Keeping stats reliable when volunteers enter them on the touchline.",
+  "direction": "A paid API where leagues sell live match stats per request, with income going back to the clubs.",
+  "angles": [
+   "What if data that was later corrected came with a refund?",
+   "Could fans pay a little to see stats in real time instead of after?"
+  ]
+ },
+ {
+  "id": 121,
+  "title": "Running plan agent with a coaching budget",
+  "industry": "Sports",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Amateur runners follow generic plans that ignore missed sessions, tiredness and progress.",
+  "challenge": "Deciding when a plan change is worth paying an expert model for and when it is not.",
+  "direction": "A Python agent that reads your training log and pays for expert plan adjustments only when progress stalls, inside a monthly budget.",
+  "angles": [
+   "What if the agent saved budget for the weeks before a race?",
+   "How would you show the runner what each pound changed?"
+  ]
+ },
+ {
+  "id": 122,
+  "title": "Pitch deposits refunded on arrival",
+  "industry": "Sports",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Community pitches are booked and left empty, so other teams miss out on scarce slots.",
+  "challenge": "Confirming a team actually showed up without needing staff at the gate.",
+  "direction": "A web booking system that holds a small deposit and refunds it automatically when the team checks in on site.",
+  "angles": [
+   "What if no-show deposits funded free slots for youth teams?",
+   "Could a team pass its booking on to another team for its deposit?"
+  ]
+ },
+ {
+  "id": 123,
+  "title": "Form check from a phone video",
+  "industry": "Sports",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Gym-goers learning new lifts can't tell whether their technique is drifting without a coach watching.",
+  "challenge": "Giving useful, cautious feedback from one camera angle without overclaiming.",
+  "direction": "An Android app that analyses a filmed set and charges per review, with an optional paid human coach follow-up.",
+  "angles": [
+   "What if the app refused to review when the angle was too poor to judge?",
+   "Could coaches sell their own review style through the app?"
+  ]
+ },
+ {
+  "id": 124,
+  "title": "Sponsor a goal for your local club",
+  "industry": "Sports",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Grassroots clubs rely on raffles for funds, while local businesses want visible ways to support them.",
+  "challenge": "Paying out fairly and instantly when a match result is entered by a volunteer.",
+  "direction": "A web page where businesses pledge a small amount per goal scored, released after each match result is confirmed.",
+  "angles": [
+   "What if fans could top up a pledge mid-season?",
+   "Could clean sheets earn the defenders' fund something too?"
+  ]
+ },
+ {
+  "id": 125,
+  "title": "Scouting agent for grassroots talent",
+  "industry": "Sports",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Talented amateur players go unnoticed because scouts can't watch every league.",
+  "challenge": "Buying player data from many sources while staying within budget and avoiding biased picks.",
+  "direction": "A Python agent that pays per player profile from stats services, ranks candidates and explains every purchase.",
+  "angles": [
+   "What if players could see and correct the data being bought about them?",
+   "Could the agent decide a cheap source was good enough?"
+  ]
+ },
+ {
+  "id": 126,
+  "title": "Tactics simulator priced per scenario",
+  "industry": "Sports",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Volunteer coaches want to test formations but have no way to see how ideas might play out.",
+  "challenge": "Simulating a match believably enough to be useful, cheaply enough to sell per run.",
+  "direction": "A paid API that runs a tactical scenario per request and returns an AI-written summary of what happened.",
+  "angles": [
+   "What if coaches could buy a deeper simulation only for the big match?",
+   "Could teams sell their own playing styles as scenario packs?"
+  ]
+ },
+ {
+  "id": 127,
+  "title": "Fonts licensed per document",
+  "industry": "Art & Design",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Small type designers sell expensive font licences that students and hobbyists simply never buy.",
+  "challenge": "Counting use fairly without spying on what people are writing.",
+  "direction": "A paid font service that charges per rendered document and pays the type designer each time.",
+  "angles": [
+   "What if a font got cheaper the more it was used?",
+   "Could designers set a free tier for students?"
+  ]
+ },
+ {
+  "id": 128,
+  "title": "Commission payments released per sketch",
+  "industry": "Art & Design",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Illustrators get ghosted after delivering sketches, while clients fear paying upfront for nothing.",
+  "challenge": "Agreeing when a stage is truly done so funds can be released without disputes.",
+  "direction": "A web app that holds a commission's payment and releases it stage by stage as the client approves each sketch.",
+  "angles": [
+   "What if a neutral artist could settle disagreements for a small fee?",
+   "Could clients add a tip at the final stage?"
+  ]
+ },
+ {
+  "id": 129,
+  "title": "Gallery guide by the artwork",
+  "industry": "Art & Design",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Small galleries can't afford audio guides, and visitors only care about a few works anyway.",
+  "challenge": "Recognising an artwork from a phone photo in a dimly lit room.",
+  "direction": "An Android app that identifies a piece and plays an AI-written guide, charging per artwork explored.",
+  "angles": [
+   "What if the artist could record their own guide and earn from it?",
+   "Could the gallery pay for children's guides?"
+  ]
+ },
+ {
+  "id": 130,
+  "title": "Critique agent that hires human eyes",
+  "industry": "Art & Design",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Design students get vague feedback from friends and cannot afford regular professional critique.",
+  "challenge": "Knowing when AI critique is enough and when a paid human reviewer would add value.",
+  "direction": "A Python agent that gathers AI critique first, then pays a human designer per review only for the hardest questions.",
+  "angles": [
+   "What if the student set a per-project critique budget?",
+   "Could reviewers rate how useful the AI's first pass was?"
+  ]
+ },
+ {
+  "id": 131,
+  "title": "Accessible colour palettes per request",
+  "industry": "Art & Design",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Designers pick colours that look great but fail contrast checks for people with low vision.",
+  "challenge": "Generating palettes that are both beautiful and genuinely readable.",
+  "direction": "A paid API that returns an AI-generated palette per request, each colour pair already checked for contrast.",
+  "angles": [
+   "What if the API charged more for palettes tested against colour blindness?",
+   "Could illustrators sell their signature palettes through it?"
+  ]
+ },
+ {
+  "id": 132,
+  "title": "Life drawing streamed by the minute",
+  "industry": "Art & Design",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Artists outside cities rarely find life drawing sessions, and models are poorly paid for remote work.",
+  "challenge": "Streaming fairly to both the model and the host while people drop in and out.",
+  "direction": "A web app that streams life drawing sessions and splits per-minute payments between model and host.",
+  "angles": [
+   "What if attendees could tip for a longer pose?",
+   "Could the session end early but still pay the model in full?"
+  ]
+ },
+ {
+  "id": 133,
+  "title": "Tracing where an old print came from",
+  "industry": "Art & Design",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Second-hand print buyers can't tell whether a piece is genuine or where it has been.",
+  "challenge": "Paying for archive lookups that may come back empty while building a confident answer.",
+  "direction": "A Python agent that pays per search across paid archives and records, building a provenance trail within a set budget.",
+  "angles": [
+   "What if the agent stopped once its confidence passed a threshold?",
+   "Could archives earn more by answering faster?"
+  ]
+ },
+ {
+  "id": 134,
+  "title": "Tip the artist behind the mural",
+  "industry": "Art & Design",
+  "track": "mobile",
+  "difficulty": "Advanced",
+  "type": "Mobile app",
+  "problem": "Street artists brighten cities but rarely know who enjoys their work or get any reward.",
+  "challenge": "Identifying an unsigned mural and making sure the tip reaches the right artist.",
+  "direction": "An Android app that recognises a mural with AI and sends a tip to the artist's wallet, held until they claim it.",
+  "angles": [
+   "What if unclaimed tips funded new murals nearby?",
+   "Could councils match tips for public art they want to keep?"
+  ]
+ },
+ {
+  "id": 135,
+  "title": "Recipes bought one at a time",
+  "industry": "Food",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Home cooks want one good recipe, not a subscription to a whole food site.",
+  "challenge": "Making a single recipe worth buying when free ones are everywhere.",
+  "direction": "A web app that sells recipes from small food writers per dish, with AI scaling servings and suggesting swaps.",
+  "angles": [
+   "What if the writer earned again every time the dish was cooked?",
+   "Could a refund follow a recipe that genuinely didn't work?"
+  ]
+ },
+ {
+  "id": 136,
+  "title": "Leftovers agent with pocket money",
+  "industry": "Food",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Students throw away food because they don't know what to cook with what's left.",
+  "challenge": "Spending tiny amounts on recipe lookups only when they will actually save food.",
+  "direction": "A Python agent that reads your fridge list and pays per recipe lookup from a weekly allowance.",
+  "angles": [
+   "What if it reported how much food your allowance saved?",
+   "Could flatmates pool their fridges and budgets?"
+  ]
+ },
+ {
+  "id": 137,
+  "title": "Allergen flags for small menus",
+  "industry": "Food",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Small cafés struggle to keep allergen information accurate when recipes change weekly.",
+  "challenge": "Flagging likely allergens clearly while being honest that a human must confirm.",
+  "direction": "A paid API that cafés call per dish to flag possible allergens in a recipe for staff to confirm.",
+  "angles": [
+   "What if suppliers could sell ingredient data to the API?",
+   "How should the service show what it isn't sure about?"
+  ]
+ },
+ {
+  "id": 138,
+  "title": "End-of-day bakery holds",
+  "industry": "Food",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Bakeries bin unsold bread each evening while nearby people would happily buy it cheaply.",
+  "challenge": "Holding items for buyers who might not turn up, without leaving the baker short.",
+  "direction": "An Android app where buyers pay a small hold on surplus items, refunded automatically if the baker sells out.",
+  "angles": [
+   "What if unclaimed holds were donated to a food bank?",
+   "Could prices fall every half hour until closing?"
+  ]
+ },
+ {
+  "id": 139,
+  "title": "Dish photo coach for small cafés",
+  "industry": "Food",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Independent cafés post dark, unappealing food photos that undersell their cooking.",
+  "challenge": "Giving feedback a busy owner can act on in the next photo they take.",
+  "direction": "A paid API that critiques and gently enhances each dish photo per request, with tips for the next shot.",
+  "angles": [
+   "What if a local photographer could take on the worst cases for a fee?",
+   "Could the service learn each café's style over time?"
+  ]
+ },
+ {
+  "id": 140,
+  "title": "Morning market buyer for restaurants",
+  "industry": "Food",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small restaurants miss the best local produce because comparing farm prices each morning takes hours.",
+  "challenge": "Buying quotes and placing orders within budget while balancing price, freshness and distance.",
+  "direction": "A Python agent that pays per price quote from local farms, then orders within the kitchen's daily budget.",
+  "angles": [
+   "What if the agent rewrote the specials around the best deals?",
+   "Could farms pay to be quoted first when they have a glut?"
+  ]
+ },
+ {
+  "id": 141,
+  "title": "Supper club costs split as you cook",
+  "industry": "Food",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Supper club hosts front the cost of ingredients and then chase guests for money.",
+  "challenge": "Splitting fairly when some guests are vegetarian, some drink and some arrive late.",
+  "direction": "An Android app that logs each ingredient bought and splits it across guests by what they will actually eat.",
+  "angles": [
+   "What if guests prepaid into a shared pot before shopping?",
+   "Could the host earn a small fee for the cooking?"
+  ]
+ },
+ {
+  "id": 142,
+  "title": "Royalties for remixed recipes",
+  "industry": "Food",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "AI remixes recipes endlessly, but the cooks who created the originals get no credit or reward.",
+  "challenge": "Tracing how much of a remixed recipe came from each original source.",
+  "direction": "A web app that tracks a recipe's lineage and splits each micro-payment between all the cooks who shaped it.",
+  "angles": [
+   "What if a grandmother's recipe earned more than its twentieth remix?",
+   "Could writers opt out of being remixed at all?"
+  ]
+ },
+ {
+  "id": 143,
+  "title": "Snap the receipt, split the shop",
+  "industry": "Finance",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Flatmates argue over shared shopping because nobody wants to type up a long receipt.",
+  "challenge": "Reading a crumpled receipt well enough that everyone trusts their share.",
+  "direction": "An Android app that reads a receipt photo with AI and sends each flatmate a tiny payment request for their items.",
+  "angles": [
+   "What if the app learned who always buys the oat milk?",
+   "Could the payer be reimbursed before they leave the till?"
+  ]
+ },
+ {
+  "id": 144,
+  "title": "One clause of the annual report",
+  "industry": "Finance",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Small investors and students give up on company filings because they are long and full of jargon.",
+  "challenge": "Explaining a single clause plainly without drifting into advice.",
+  "direction": "A paid API that explains one highlighted passage of a filing per request, priced by length and difficulty.",
+  "angles": [
+   "What if agents researching companies were the main customers?",
+   "Could the explanation get cheaper the more people ask about the same clause?"
+  ]
+ },
+ {
+  "id": 145,
+  "title": "Grant hunter for tiny charities",
+  "industry": "Finance",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Volunteer-run charities miss funding because searching grant listings takes hours they do not have.",
+  "challenge": "Deciding which paid listings are worth opening before the monthly budget is gone.",
+  "direction": "A Python agent that searches paid grant sources per query and pays only to unlock listings that match the charity’s mission.",
+  "angles": [
+   "What if three charities pooled one agent and shared its findings?",
+   "Should the agent stop spending once it finds one strong match?"
+  ]
+ },
+ {
+  "id": 146,
+  "title": "Invoices that settle themselves",
+  "industry": "Finance",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Freelancers wait weeks for small invoices that cost more to chase than they are worth.",
+  "challenge": "Making paying an invoice as easy as clicking a link, for someone with no wallet.",
+  "direction": "A web app where each invoice is a link that settles instantly in a stablecoin, with a gentle AI-written reminder if it sits unpaid.",
+  "angles": [
+   "What if a client could pay an invoice in instalments by the hour?",
+   "Could the reminder tone change depending on how late it is?"
+  ]
+ },
+ {
+  "id": 147,
+  "title": "Pocket money for company agents",
+  "industry": "Finance",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Teams want to let AI agents buy services, but finance has no way to see or cap that spending.",
+  "challenge": "Designing limits that are strict enough to trust but loose enough to be useful.",
+  "direction": "A web dashboard for issuing each agent its own allowance, rules and spending history, with a one-click freeze.",
+  "angles": [
+   "What if an agent could ask a human for a temporary raise?",
+   "Should unused allowance roll over, or vanish at month end?"
+  ]
+ },
+ {
+  "id": 148,
+  "title": "Wages that stream by the minute",
+  "industry": "Finance",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Shift workers wait weeks for pay, even though their work is logged minute by minute.",
+  "challenge": "Streaming pay safely while handling breaks, overtime and disputed minutes.",
+  "direction": "A payment service that streams earnings per minute of a logged shift, pausing automatically when the shift does.",
+  "angles": [
+   "What if the worker could choose to hold some back as savings?",
+   "How would you correct a minute paid by mistake?"
+  ]
+ },
+ {
+  "id": 149,
+  "title": "Tax questions at a penny a time",
+  "industry": "Finance",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Students with part-time jobs freeze at tax forms but would never pay for a full accountant.",
+  "challenge": "Knowing when an AI answer is enough and when a human must step in.",
+  "direction": "An Android app that answers single tax-form questions for a tiny fee, offering a paid human check when the AI is unsure.",
+  "angles": [
+   "What if the human reviewer earned only when they changed the answer?",
+   "Could a university sponsor the first ten questions?"
+  ]
+ },
+ {
+  "id": 150,
+  "title": "Subscription audit agent",
+  "industry": "Finance",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "People keep paying for forgotten subscriptions because checking each one is tedious.",
+  "challenge": "Spending a little on price checks to save a lot, and proving it did.",
+  "direction": "A Python agent that reviews a list of subscriptions, pays per lookup for current prices and cheaper tiers, and reports what it found.",
+  "angles": [
+   "What if the agent only earned a fee from money it actually saved?",
+   "Could it warn you a month before a free trial converts?"
+  ]
+ },
+ {
+  "id": 151,
+  "title": "Try it on for a few pence",
+  "industry": "Commerce",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Online clothes shoppers order three sizes and return two, which costs everyone.",
+  "challenge": "Making a virtual try-on convincing enough that it changes what people order.",
+  "direction": "An Android app that charges a tiny fee per AI try-on, credited back if you keep the item.",
+  "angles": [
+   "What if shops paid for the try-on instead of the shopper?",
+   "Could the app tell you when not to buy at all?"
+  ]
+ },
+ {
+  "id": 152,
+  "title": "Gift finder on a fiver",
+  "industry": "Commerce",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Picking a thoughtful gift means trawling endless lists of generic suggestions.",
+  "challenge": "Turning a few facts about a person into paid searches that actually surprise them.",
+  "direction": "A Python agent that buys recommendations from several paid sources within a five-pound research budget and presents a shortlist.",
+  "angles": [
+   "What if the recipient could quietly veto ideas in advance?",
+   "Should the agent spend more for a milestone birthday?"
+  ]
+ },
+ {
+  "id": 153,
+  "title": "Product photos priced per edit",
+  "industry": "Commerce",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Small online sellers lose sales because their product photos look cluttered and inconsistent.",
+  "challenge": "Charging fairly when some photos need one tweak and others need ten.",
+  "direction": "A paid API that cleans up one product photo per request, priced by the edits applied.",
+  "angles": [
+   "What if sellers only paid for photos that went on to sell?",
+   "Could a whole market stall’s stock be shot and listed in an afternoon?"
+  ]
+ },
+ {
+  "id": 154,
+  "title": "Returns desk with instant refunds",
+  "industry": "Commerce",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Shoppers wait days for refunds while returned items sit in a queue for inspection.",
+  "challenge": "Judging condition from photos well enough to refund before the parcel arrives.",
+  "direction": "A web app where an AI assesses return photos and releases part of the refund at once, the rest on arrival.",
+  "angles": [
+   "What if honest returners earned faster refunds over time?",
+   "How would you handle a photo that hides the damage?"
+  ]
+ },
+ {
+  "id": 155,
+  "title": "Corner shop stock check",
+  "industry": "Commerce",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "People walk to three shops looking for one item that none of them have.",
+  "challenge": "Keeping stock answers fresh enough to be worth paying for.",
+  "direction": "A paid API where independent shops sell live yes-or-no stock answers per query to apps and agents.",
+  "angles": [
+   "What if the shop earned more for rare items?",
+   "Could a shopping agent plan a route around the answers?"
+  ]
+ },
+ {
+  "id": 156,
+  "title": "Buy the recipe, get the basket",
+  "industry": "Commerce",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Recipe sites bury the method under ads, and turning it into a shopping list is still manual.",
+  "challenge": "Making one recipe worth paying for on its own.",
+  "direction": "A web app that sells single recipes for a few pence and turns each into a ready shopping list sized to your household.",
+  "angles": [
+   "What if the cook earned a share whenever their basket was bought?",
+   "Could leftovers from one recipe shape the next suggestion?"
+  ]
+ },
+ {
+  "id": 157,
+  "title": "Warranty claim assembler",
+  "industry": "Commerce",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "People give up on warranty claims because gathering proof and diagnoses is a chore.",
+  "challenge": "Paying for just enough evidence to make a claim succeed.",
+  "direction": "A Python agent that pays per call for fault diagnoses and proof-of-purchase lookups, then drafts the claim within a set budget.",
+  "angles": [
+   "What if the agent took a small cut only when a claim succeeded?",
+   "When should it advise repairing rather than claiming?"
+  ]
+ },
+ {
+  "id": 158,
+  "title": "Cashback that lands in seconds",
+  "industry": "Commerce",
+  "track": "mobile",
+  "difficulty": "Advanced",
+  "type": "Mobile app",
+  "problem": "Loyalty schemes at independent shops are clunky cards that customers forget to bring.",
+  "challenge": "Sharing cashback across many small shops without any of them running a scheme.",
+  "direction": "An Android app that streams tiny cashback the moment you pay at a participating local shop, spendable at any of the others.",
+  "angles": [
+   "What if shops on the same street funded a joint reward?",
+   "Could the cashback grow on rainy days when footfall drops?"
+  ]
+ },
+ {
+  "id": 159,
+  "title": "Prompts that earn per run",
+  "industry": "Marketplaces",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "People who write excellent AI prompts sell them once and never see value from heavy reuse.",
+  "challenge": "Charging per use without revealing the prompt itself.",
+  "direction": "A marketplace service that runs a seller’s hidden prompt on the buyer’s input and pays the author per run.",
+  "angles": [
+   "What if buyers could tip for a run that went brilliantly?",
+   "How would you stop someone reverse-engineering the prompt from outputs?"
+  ]
+ },
+ {
+  "id": 160,
+  "title": "Agents hiring agents",
+  "industry": "Marketplaces",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Specialist AI agents exist but cannot easily find or pay one another for sub-tasks.",
+  "challenge": "Holding payment until the work is checked, with no human in the loop.",
+  "direction": "A matching engine where agents post small tasks, other agents bid, and payment is held until the result passes a check.",
+  "angles": [
+   "What if reputation mattered more than price?",
+   "Who decides a result failed when both sides are machines?"
+  ]
+ },
+ {
+  "id": 161,
+  "title": "Lecture notes by the page",
+  "industry": "Marketplaces",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Students who take great notes get nothing for them, and others pay for whole bundles they barely read.",
+  "challenge": "Pricing a single page so writers and readers both feel it is fair.",
+  "direction": "A web marketplace where students sell notes page by page, with AI previews that show what each page covers.",
+  "angles": [
+   "What if the price fell as more people bought the same page?",
+   "Could a lecturer endorse the best notes for a bonus?"
+  ]
+ },
+ {
+  "id": 162,
+  "title": "Borrow a drill by the hour",
+  "industry": "Marketplaces",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Neighbours buy tools they use once a year because lending feels awkward and risky.",
+  "challenge": "Holding a fair deposit and releasing it without arguments.",
+  "direction": "An Android app where borrowers pay per hour of use, with a deposit held and returned when the tool comes back.",
+  "angles": [
+   "What if the AI checked photos of the tool before and after?",
+   "Could lenders donate earnings to a street fund?"
+  ]
+ },
+ {
+  "id": 163,
+  "title": "Voice lines on request",
+  "industry": "Marketplaces",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Indie creators need a handful of human voice lines but hiring for a full session is overkill.",
+  "challenge": "Paying per accepted line while keeping rejections fair to the performer.",
+  "direction": "A web marketplace where creators post individual lines and voice performers are paid per line accepted.",
+  "angles": [
+   "What if a rejected take still earned a small fee?",
+   "Could listeners vote which take wins?"
+  ]
+ },
+ {
+  "id": 164,
+  "title": "Hackathon credit shopper",
+  "industry": "Marketplaces",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Hackathon teams waste the first hour comparing paid APIs and signing up for each one.",
+  "challenge": "Spreading a small team budget across services nobody has tried yet.",
+  "direction": "A Python agent that browses a marketplace of paid APIs, buys small trial calls and recommends where the team’s budget should go.",
+  "angles": [
+   "What if teams could resell unused credits at the end?",
+   "Should the agent favour cheap breadth or one deep tool?"
+  ]
+ },
+ {
+  "id": 165,
+  "title": "Reverse auction for AI jobs",
+  "industry": "Marketplaces",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Anyone with a batch AI job pays list price, even when spare capacity sits idle elsewhere.",
+  "challenge": "Running a fair auction fast enough that waiting does not cost more than it saves.",
+  "direction": "A Python agent that posts a job, collects bids from providers and pays the winner per completed result.",
+  "angles": [
+   "What if the job could be split across several winners?",
+   "How should the agent react when the cheapest bidder is unreliable?"
+  ]
+ },
+ {
+  "id": 166,
+  "title": "Textbook price check",
+  "industry": "Marketplaces",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Students selling used textbooks guess the price and either undersell or never sell.",
+  "challenge": "Combining a few paid price sources into one number people trust.",
+  "direction": "An Android app that scans a barcode and pays a penny per paid valuation to suggest a fair resale price.",
+  "angles": [
+   "What if the app found a buyer in the same college?",
+   "Could the price drop automatically as term approaches?"
+  ]
+ },
+ {
+  "id": 167,
+  "title": "Parcel lockers rented by the hour",
+  "industry": "Logistics",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Couriers waste trips when nobody is home, while shop back rooms sit half empty.",
+  "challenge": "Pricing a locker slot that is worth more at six in the evening than at noon.",
+  "direction": "A paid service where shops rent spare locker slots to couriers per hour, priced by demand.",
+  "angles": [
+   "What if the recipient paid extra for a closer locker?",
+   "Could slots be booked automatically by a courier’s route planner?"
+  ]
+ },
+ {
+  "id": 168,
+  "title": "Proof-of-delivery photo checker",
+  "industry": "Logistics",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Delivery photos are often blurry or show the wrong door, and disputes drag on.",
+  "challenge": "Judging whether a photo genuinely proves delivery.",
+  "direction": "A paid API that rates each delivery photo per request and flags ones a customer is likely to dispute.",
+  "angles": [
+   "What if drivers got instant feedback before leaving the doorstep?",
+   "Could a good photo history lower a courier’s insurance?"
+  ]
+ },
+ {
+  "id": 169,
+  "title": "Route agent that buys only doubt",
+  "industry": "Logistics",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Small delivery firms cannot afford constant premium traffic data for every van.",
+  "challenge": "Knowing when uncertainty is high enough to justify paying for an update.",
+  "direction": "A Python agent that plans routes on free data and pays per query for live closures only when the route looks risky.",
+  "angles": [
+   "What if vans shared what they paid for with each other?",
+   "Should the agent spend more on deliveries with tight time slots?"
+  ]
+ },
+ {
+  "id": 170,
+  "title": "Cold-chain alarm for food vans",
+  "industry": "Logistics",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Small food traders lose whole loads when a fridge fails quietly on the road.",
+  "challenge": "Alerting fast enough to save stock without crying wolf.",
+  "direction": "An Android app that pays per reading from a cheap fridge sensor service and alerts the driver when temperatures drift.",
+  "angles": [
+   "What if the nearest cold store could bid to take the load?",
+   "Could the readings double as proof for a food inspector?"
+  ]
+ },
+ {
+  "id": 171,
+  "title": "Customs forms with a refund promise",
+  "industry": "Logistics",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Small exporters dread customs paperwork, and one wrong code can hold a shipment for days.",
+  "challenge": "Standing behind an AI-drafted form with a refund if it is rejected.",
+  "direction": "A web app that drafts customs declarations per form for a small fee, refunding automatically if the form is rejected.",
+  "angles": [
+   "What if experienced brokers reviewed tricky forms for a share of the fee?",
+   "Could the app learn from every rejection?"
+  ]
+ },
+ {
+  "id": 172,
+  "title": "Empty space in the van",
+  "industry": "Logistics",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Vans drive between towns half empty while people pay full price to move one sofa.",
+  "challenge": "Matching odd-shaped items to spare space along a route already planned.",
+  "direction": "A web board where drivers list spare space per trip and senders pay per cubic metre to book it.",
+  "angles": [
+   "What if the price dropped the closer the van got to leaving?",
+   "Could an AI estimate an item’s size from a photo?"
+  ]
+ },
+ {
+  "id": 173,
+  "title": "Voice pick-list on a shift pass",
+  "industry": "Logistics",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Temporary warehouse staff slow down while juggling paper pick-lists and scanners.",
+  "challenge": "Charging for help only when it is actually being used.",
+  "direction": "An Android app that reads pick-lists aloud and answers questions, paid per active minute of a shift.",
+  "angles": [
+   "What if the app spoke the picker’s own language?",
+   "Could the warehouse pay only for minutes that sped picks up?"
+  ]
+ },
+ {
+  "id": 174,
+  "title": "Late-parcel refund collector",
+  "industry": "Logistics",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Online sellers are owed small refunds for late carrier deliveries but rarely claim them.",
+  "challenge": "Proving lateness for each parcel cheaply enough that the claim is still worth it.",
+  "direction": "A Python agent that pays per tracking lookup, spots late parcels and files claims, keeping a running tally of money recovered.",
+  "angles": [
+   "What if the agent were paid only from refunds it won?",
+   "Should it ever decide a claim is not worth the cost?"
+  ]
+ },
+ {
+  "id": 175,
+  "title": "Defect spotter per part",
+  "industry": "Manufacturing",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Small workshops cannot afford inspection systems, so faulty parts slip out to customers.",
+  "challenge": "Being reliable on parts the model has never seen before.",
+  "direction": "A paid API that checks one photo of a part per request and returns a pass, fail or human-check verdict.",
+  "angles": [
+   "What if a human inspector earned per disputed verdict?",
+   "Could the price fall as the model learns a workshop’s parts?"
+  ]
+ },
+ {
+  "id": 176,
+  "title": "Idle machines by the minute",
+  "industry": "Manufacturing",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Makerspaces and workshops have laser cutters sitting idle while makers nearby have nowhere to cut.",
+  "challenge": "Billing machine time fairly when jobs overrun or fail.",
+  "direction": "A web app where workshops list idle machines and makers pay per minute of run time, streamed while the job runs.",
+  "angles": [
+   "What if failed jobs were partly refunded automatically?",
+   "Could a student society book machines in bulk?"
+  ]
+ },
+ {
+  "id": 177,
+  "title": "Maintenance agent with a diagnosis budget",
+  "industry": "Manufacturing",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small factories fix machines only after they break because expert diagnosis is costly.",
+  "challenge": "Deciding which odd sensor reading deserves a paid expert look.",
+  "direction": "A Python agent that watches machine readings and pays per call for specialist diagnoses, within a weekly maintenance budget.",
+  "angles": [
+   "What if two factories with the same machine shared diagnoses?",
+   "How should it explain a spend that turned out unnecessary?"
+  ]
+ },
+ {
+  "id": 178,
+  "title": "Spare parts licensed per print",
+  "industry": "Manufacturing",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "A broken plastic clip can write off an appliance because the part is no longer sold.",
+  "challenge": "Letting designers earn per print without locking files down unpleasantly.",
+  "direction": "A paid service that releases a replacement-part design for a single print, paying the designer each time.",
+  "angles": [
+   "What if repair cafés printed parts on behalf of visitors?",
+   "Could the original maker sponsor free prints of discontinued parts?"
+  ]
+ },
+ {
+  "id": 179,
+  "title": "Safety briefings in every language",
+  "industry": "Manufacturing",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "On multilingual shop floors, safety briefings are understood by some workers and nodded through by others.",
+  "challenge": "Translating technical safety language accurately enough to rely on.",
+  "direction": "An Android app that translates a spoken briefing into each worker’s language, paid per briefing.",
+  "angles": [
+   "What if each worker confirmed understanding with a quick question?",
+   "Could the app flag phrases that translate badly?"
+  ]
+ },
+ {
+  "id": 180,
+  "title": "Instant quotes from a drawing",
+  "industry": "Manufacturing",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Engineers wait days for quotes on simple custom parts, and most requests never become orders.",
+  "challenge": "Estimating machining cost from a drawing well enough to be useful.",
+  "direction": "A web app that gives an AI-estimated quote for a small fee, credited back if the customer places the order.",
+  "angles": [
+   "What if several workshops could beat the AI’s quote?",
+   "Should the fee rise for drawings that take longer to read?"
+  ]
+ },
+ {
+  "id": 181,
+  "title": "Material certificate checker",
+  "industry": "Manufacturing",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Goods-in staff accept metal deliveries on paper certificates that are rarely checked properly.",
+  "challenge": "Reading messy certificates and confirming them against paid records quickly.",
+  "direction": "An Android app that scans a certificate at the loading bay and pays per verification against a supplier records service.",
+  "angles": [
+   "What if suppliers paid for checks to prove they are trustworthy?",
+   "How should the app handle a certificate it cannot read?"
+  ]
+ },
+ {
+  "id": 182,
+  "title": "Run the oven when power is cheap",
+  "industry": "Manufacturing",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small manufacturers pay peak electricity prices because rescheduling jobs by hand is too fiddly.",
+  "challenge": "Balancing energy savings against missed delivery deadlines.",
+  "direction": "A Python agent that buys hourly price forecasts per request and reshuffles flexible jobs, within a small forecast budget.",
+  "angles": [
+   "What if the agent also weighed the carbon of each hour?",
+   "When is the forecast not worth buying at all?"
+  ]
+ },
+ {
+  "id": 183,
+  "title": "Code review by the diff",
+  "industry": "Developer Tools",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Solo developers and students rarely get a second pair of eyes on their changes.",
+  "challenge": "Giving useful feedback on a small diff without the rest of the codebase.",
+  "direction": "A paid API that reviews one diff per request, priced by size, with a cheaper quick-scan option.",
+  "angles": [
+   "What if a human reviewer could top up an AI review for a tip?",
+   "Could the price drop for diffs that pass first time?"
+  ]
+ },
+ {
+  "id": 184,
+  "title": "Flaky test detective",
+  "industry": "Developer Tools",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Flaky tests waste hours because rerunning them enough times to be sure is expensive.",
+  "challenge": "Choosing which reruns to buy to isolate the culprit cheapest.",
+  "direction": "A Python agent that buys test runner minutes per run within a budget and narrows down which tests are genuinely flaky.",
+  "angles": [
+   "What if the agent could bet on a cause before running?",
+   "Should teams share findings for the same open-source library?"
+  ]
+ },
+ {
+  "id": 185,
+  "title": "Docs free for humans, paid for bots",
+  "industry": "Developer Tools",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Documentation sites pay heavy hosting costs for automated crawlers that give nothing back.",
+  "challenge": "Telling a person from an agent without annoying either.",
+  "direction": "A docs service that stays free for people but rate-limits agents, then charges per page beyond a free allowance.",
+  "angles": [
+   "What if agents got a discount for linking back to the source?",
+   "Could the earnings fund the docs writers directly?"
+  ]
+ },
+ {
+  "id": 186,
+  "title": "Sponsor-funded API sandbox",
+  "industry": "Developer Tools",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Students abandon promising APIs because they hit a paywall before building anything.",
+  "challenge": "Letting sponsors fund calls without them feeling wasted.",
+  "direction": "A web app where sponsors fund a pool of API calls and each student sees exactly how much of their free share remains.",
+  "angles": [
+   "What if the student’s project page thanked the sponsor automatically?",
+   "Could unused calls be passed to another team?"
+  ]
+ },
+ {
+  "id": 187,
+  "title": "Dependency thank-you jar",
+  "industry": "Developer Tools",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Projects rely on dozens of free libraries whose maintainers see none of the value.",
+  "challenge": "Splitting a small monthly tip fairly across libraries of very different importance.",
+  "direction": "A web app that reads a project’s dependencies and splits a monthly tip among maintainers, weighted however the user chooses.",
+  "angles": [
+   "What if the split favoured libraries with fewer funders?",
+   "Could a company match every student’s tip?"
+  ]
+ },
+ {
+  "id": 188,
+  "title": "Stack trace explained on the bus",
+  "industry": "Developer Tools",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "On-call developers get alerts away from their desks and cannot dig into logs on a phone.",
+  "challenge": "Explaining a cryptic error usefully from a few lines of context.",
+  "direction": "An Android app that explains a pasted stack trace for a tiny fee, with a paid expert option if the AI is stuck.",
+  "angles": [
+   "What if the explanation came with a suggested first command?",
+   "Could the team’s past fixes make answers cheaper?"
+  ]
+ },
+ {
+  "id": 189,
+  "title": "API taste-test agent",
+  "industry": "Developer Tools",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Choosing between several paid APIs that claim the same thing is mostly guesswork.",
+  "challenge": "Designing small paid probes that reveal real quality differences.",
+  "direction": "A Python agent that buys a few test calls from each competing API, scores the answers and recommends the best value.",
+  "angles": [
+   "What if the results were published as a shared league table?",
+   "Should the agent retest every month as prices change?"
+  ]
+ },
+ {
+  "id": 190,
+  "title": "Payment-required playground",
+  "industry": "Developer Tools",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Developers new to paid APIs cannot test payment flows without spending real money.",
+  "challenge": "Making pretend payments behave enough like real ones to catch bugs.",
+  "direction": "A web playground that simulates paid endpoints with play money, showing every step of a payment-required request.",
+  "angles": [
+   "What if it could inject failures like a declined payment?",
+   "Could it grade your client on how gracefully it pays?"
+  ]
+ },
+ {
+  "id": 191,
+  "title": "Bounties for fixing the docs",
+  "industry": "Developer Tools",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Readers spot mistakes in documentation but rarely bother to report them.",
+  "challenge": "Rewarding genuine fixes without inviting spammy ones.",
+  "direction": "An Android app for flagging documentation errors that pays a micro-bounty once a maintainer accepts the fix.",
+  "angles": [
+   "What if the bounty grew the longer a mistake went unfixed?",
+   "Could an AI pre-check reports before maintainers see them?"
+  ]
+ },
+ {
+  "id": 192,
+  "title": "Is this link safe?",
+  "industry": "Security",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "People receive suspicious links by text and either click nervously or ignore real messages.",
+  "challenge": "Giving a clear answer quickly without over-alarming people.",
+  "direction": "An Android app that checks a shared link for a fraction of a penny, explaining in plain words why it looks risky.",
+  "angles": [
+   "What if a local council sponsored checks for older residents?",
+   "Could the app teach you to spot the next one yourself?"
+  ]
+ },
+ {
+  "id": 193,
+  "title": "Leaked key early warning",
+  "industry": "Security",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Students accidentally publish API keys in public projects and only notice when the bill arrives.",
+  "challenge": "Catching real secrets while ignoring harmless look-alikes.",
+  "direction": "A paid API that scans a repository per request for exposed secrets, refunding the scan fee for any false alarm.",
+  "angles": [
+   "What if the service could rotate the key for you?",
+   "Should hackathons sponsor scans for every team?"
+  ]
+ },
+ {
+  "id": 194,
+  "title": "A firewall for agent spending",
+  "industry": "Security",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "An autonomous agent with a wallet could be tricked into paying for things it should not.",
+  "challenge": "Spotting a malicious payment request among thousands of legitimate ones.",
+  "direction": "A service that sits between an agent and paid APIs, enforcing spending rules and blocking suspicious requests before money moves.",
+  "angles": [
+   "What if the firewall asked a human only for the strangest cases?",
+   "Could firewalls share warnings about bad sellers?"
+  ]
+ },
+ {
+  "id": 195,
+  "title": "Security questionnaire autopilot",
+  "industry": "Security",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Small start-ups lose days answering identical security questionnaires from every new customer.",
+  "challenge": "Answering honestly, citing evidence, and admitting gaps rather than bluffing.",
+  "direction": "A Python agent that drafts answers from the company’s own policies, paying per lookup for standards guidance it lacks.",
+  "angles": [
+   "What if every answer showed its source document?",
+   "Could a human expert sign off risky answers for a fee?"
+  ]
+ },
+ {
+  "id": 196,
+  "title": "Bug bounties for tiny websites",
+  "industry": "Security",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Small organisations cannot run bug bounty programmes, so researchers have no safe way to report flaws.",
+  "challenge": "Holding a reward fairly until the owner confirms and fixes the issue.",
+  "direction": "A web app where site owners fund a small reward pool held until a reported vulnerability is confirmed and patched.",
+  "angles": [
+   "What if a community fund topped up bounties for charities?",
+   "How would you settle a dispute over severity?"
+  ]
+ },
+ {
+  "id": 197,
+  "title": "Scam message second opinion",
+  "industry": "Security",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Scam messages now sound convincing, and people feel embarrassed to ask anyone for help.",
+  "challenge": "Explaining a verdict kindly so the person feels supported, not foolish.",
+  "direction": "An Android app where pasting a suspicious message gets an AI verdict, with checks paid for by a community sponsor.",
+  "angles": [
+   "What if a trusted relative was notified only with permission?",
+   "Could anonymised verdicts warn others about new scams?"
+  ]
+ },
+ {
+  "id": 198,
+  "title": "Threat intel by the sip",
+  "industry": "Security",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small teams cannot afford full threat-intelligence subscriptions, so alerts go uninvestigated.",
+  "challenge": "Buying just the indicators that matter for one alert, quickly.",
+  "direction": "A Python agent that, when an alert fires, pays per lookup for threat details and summarises whether it is worth waking someone.",
+  "angles": [
+   "What if the agent had a nightly budget and a daytime one?",
+   "How should it act when the paid answer is inconclusive?"
+  ]
+ },
+ {
+  "id": 199,
+  "title": "Notarised audit logs per event",
+  "industry": "Security",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "After an incident, nobody can prove the logs were not edited.",
+  "challenge": "Making tampering evident without storing sensitive log contents anywhere public.",
+  "direction": "A paid service that seals each important log event for a tiny fee, so any later edit is detectable.",
+  "angles": [
+   "What if only the most sensitive events were worth sealing?",
+   "Could an auditor pay to verify a log without seeing it?"
+  ]
+ },
+ {
+  "id": 200,
+  "title": "One-minute security lessons",
+  "industry": "Security",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Annual security training is long, forgettable and quietly skipped.",
+  "challenge": "Making a lesson short enough to finish and memorable enough to matter.",
+  "direction": "A web app of one-minute lessons where employers pay per lesson actually completed, not per seat.",
+  "angles": [
+   "What if lessons appeared right after someone nearly made a mistake?",
+   "Could staff earn a small reward for spotting a test phish?"
+  ]
+ },
+ {
+  "id": 201,
+  "title": "Layover city guide by the minute",
+  "industry": "Travel",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Travellers with a six-hour layover don't know what they can safely see and still make the gate.",
+  "challenge": "Charging for guidance by the minute without making people anxious about the meter.",
+  "direction": "An Android app that streams a timed audio walk from the airport, paid per minute and stopping the moment you turn back.",
+  "angles": [
+   "What if the guide paid you back for minutes the delay ate?",
+   "Could locals record routes and earn every time one is walked?"
+  ]
+ },
+ {
+  "id": 202,
+  "title": "Entry rules, answered one question at a time",
+  "industry": "Travel",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Visa and entry rules change quietly, and travellers piece answers together from out-of-date forum posts.",
+  "challenge": "Proving each answer is current, and refunding when the source turns out stale.",
+  "direction": "A paid API that answers single entry-requirement questions with a cited source, charging per answer and refunding if the citation has expired.",
+  "angles": [
+   "What if travel agents' tools were the main customers, not travellers?",
+   "Could readers be paid for flagging a rule that has changed?"
+  ]
+ },
+ {
+  "id": 203,
+  "title": "Group trip kitty that settles itself",
+  "industry": "Travel",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Friends on a group trip lose track of who paid for which ticket, tour and taxi.",
+  "challenge": "Settling dozens of tiny debts fairly without anyone feeling like the accountant.",
+  "direction": "A web app where the group tops up a shared kitty, logs costs as they happen and settles small balances automatically at the end.",
+  "angles": [
+   "What if the kitty could pay for bookings directly?",
+   "Could it suggest who should pay next instead of settling after?"
+  ]
+ },
+ {
+  "id": 204,
+  "title": "Insider tips on a research budget",
+  "industry": "Travel",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Generic itineraries miss the small local knowledge that makes a trip feel personal.",
+  "challenge": "Deciding which paid tips are worth buying before you know what they say.",
+  "direction": "A Python agent that drafts an itinerary, then buys individual local tips from paid sources within a fixed budget per city.",
+  "angles": [
+   "How would the agent explain which tips it chose not to buy?",
+   "What if tip authors set their price based on how recent the tip is?"
+  ]
+ },
+ {
+  "id": 205,
+  "title": "Fare watcher that pays for itself",
+  "industry": "Travel",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Checking fares often enough to catch a drop costs time, and paid fare data costs money.",
+  "challenge": "Spending on price checks only in proportion to the saving the agent expects to find.",
+  "direction": "A Python agent that polls paid fare feeds, scaling how often it checks to the likely saving and stopping when the maths stops working.",
+  "angles": [
+   "What if the agent only charged you a cut of what it saved?",
+   "Could many travellers' agents share one check and split the cost?"
+  ]
+ },
+ {
+  "id": 206,
+  "title": "Step-free route reports, paid per lookup",
+  "industry": "Travel",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Wheelchair users can't tell from maps whether a station exit or old town street is genuinely step-free.",
+  "challenge": "Keeping first-hand reports fresh and rewarding the people who make them.",
+  "direction": "A paid API where travellers earn for verified accessibility reports and apps pay per lookup of a route or entrance.",
+  "angles": [
+   "What if a report earned more the longer it stayed accurate?",
+   "Could tourist boards sponsor lookups so they're free to travellers?"
+  ]
+ },
+ {
+  "id": 207,
+  "title": "Walking routes sold one at a time",
+  "industry": "Travel",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Great local walking routes live in people's heads or behind full guidebook purchases.",
+  "challenge": "Pricing a single route so the author earns and the walker doesn't hesitate.",
+  "direction": "A web shop where locals publish individual walking routes with notes, each unlocked for a small one-off payment.",
+  "angles": [
+   "What if you only paid if you finished the walk?",
+   "Could the route price change with the season?"
+  ]
+ },
+ {
+  "id": 208,
+  "title": "Tip the guide stop by stop",
+  "industry": "Travel",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Free walking tours rely on an awkward cash collection at the end that many guests skip.",
+  "challenge": "Making tipping feel natural mid-tour rather than a guilt trip at the finish.",
+  "direction": "An Android app where guests tap a small tip at each stop they enjoyed, with the guide seeing a running total.",
+  "angles": [
+   "What if the tour route adapted to which stops earned the most tips?",
+   "Could guests pre-set a budget and let the app tip for them?"
+  ]
+ },
+ {
+  "id": 209,
+  "title": "Receipts in any language, ready to claim",
+  "industry": "Travel",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Business travellers return with piles of foreign receipts that finance teams can't read or categorise.",
+  "challenge": "Handling smudged, handwritten receipts honestly, knowing when the model isn't sure.",
+  "direction": "A paid API that turns a photo of a foreign receipt into a translated, categorised expense line, charging per receipt and refunding low-confidence reads.",
+  "angles": [
+   "What if the price depended on how messy the receipt was?",
+   "Could a human checker be paid per receipt the model flags?"
+  ]
+ },
+ {
+  "id": 210,
+  "title": "Phrasebook that buys phrases as you need them",
+  "industry": "Travel",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Phrasebooks are full of sentences you never use and missing the one you need right now.",
+  "challenge": "Adding cultural context to a phrase quickly enough to say it in the moment.",
+  "direction": "An Android phrasebook that generates a phrase with pronunciation and etiquette notes on demand, paid per phrase and saved for offline use.",
+  "angles": [
+   "What if native speakers earned for correcting a generated phrase?",
+   "Could the app learn which phrases you'll need before you land?"
+  ]
+ },
+ {
+  "id": 211,
+  "title": "Is this mould my problem",
+  "industry": "Housing",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Tenants struggle to describe damp and mould in a way landlords take seriously.",
+  "challenge": "Giving a useful assessment from photos without pretending to be a surveyor.",
+  "direction": "An Android app that analyses a photo of damp, pays per AI assessment and drafts a clear, polite repair request.",
+  "angles": [
+   "What if landlords paid for the assessment instead?",
+   "Could repeated photos over weeks tell a stronger story than one?"
+  ]
+ },
+ {
+  "id": 212,
+  "title": "Flat viewings by someone nearby",
+  "industry": "Housing",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Students moving cities can't travel to view every flat before signing.",
+  "challenge": "Holding payment fairly until the viewer has actually done a thorough job.",
+  "direction": "A matching service that pairs renters with local viewers, holding a small fee until a live video viewing and checklist are delivered.",
+  "angles": [
+   "What if the viewer earned a bonus for spotting a deal-breaker?",
+   "Could an AI checklist decide what the viewer must film?"
+  ]
+ },
+ {
+  "id": 213,
+  "title": "Deposit dispute evidence builder",
+  "industry": "Housing",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Tenants lose deposits because check-in and check-out evidence is scattered and hard to compare.",
+  "challenge": "Matching photos of the same room taken months apart, in different light.",
+  "direction": "A web app that pairs check-in and check-out photos room by room, paying per AI comparison and producing a tidy evidence pack.",
+  "angles": [
+   "What if both landlord and tenant split the cost of one neutral report?",
+   "Could the tool settle small disputes before anyone escalates?"
+  ]
+ },
+ {
+  "id": 214,
+  "title": "House Wi-Fi paid by the gigabyte",
+  "industry": "Housing",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Housemates split the broadband bill equally even when one streams all day and another barely connects.",
+  "challenge": "Measuring usage fairly without it feeling like housemates spying on each other.",
+  "direction": "An Android app where each housemate's share is charged per gigabyte used, with everyone seeing only totals, never activity.",
+  "angles": [
+   "What if light users could gift their spare allowance?",
+   "Could the house agree a flat fee and pay per gigabyte only beyond it?"
+  ]
+ },
+ {
+  "id": 215,
+  "title": "Listing scam checker",
+  "industry": "Housing",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Fake rental listings take deposits from renters who never see the flat.",
+  "challenge": "Choosing which paid checks to run before the verdict is clear enough.",
+  "direction": "A Python agent that runs paid checks on a listing (image matches, ownership records, price sanity) within a small per-listing budget.",
+  "angles": [
+   "How would the agent explain a 'probably fine' verdict?",
+   "What if the agent stopped spending as soon as it was confident?"
+  ]
+ },
+ {
+  "id": 216,
+  "title": "Energy bill forecast before you sign",
+  "industry": "Housing",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Renters only discover a flat is cold and costly to heat after the first winter bill.",
+  "challenge": "Making a believable estimate from a listing's photos and scant details.",
+  "direction": "A web app that estimates a property's yearly energy costs from a listing, charging a small fee per forecast.",
+  "angles": [
+   "What if landlords paid to show a forecast badge on their listing?",
+   "Could tenants' real bills improve the next person's forecast?"
+  ]
+ },
+ {
+  "id": 217,
+  "title": "Repair quotes that pay the trade to reply",
+  "industry": "Housing",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small landlords chase tradespeople for quotes that rarely arrive.",
+  "challenge": "Paying for quotes without encouraging rushed or inflated ones.",
+  "direction": "A Python agent that requests repair quotes and pays a small fee for each detailed reply, within a budget per job.",
+  "angles": [
+   "What if the fee rose for quotes with photos and timelines?",
+   "Could the tenant's agent negotiate with the landlord's agent?"
+  ]
+ },
+ {
+  "id": 218,
+  "title": "Summer room-swap matcher",
+  "industry": "Housing",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Students pay rent on empty rooms all summer while interns elsewhere can't find short lets.",
+  "challenge": "Matching chains of people across cities when one dropout breaks the whole swap.",
+  "direction": "A matching engine that links students into room swaps, charging a small fee held until every link in the chain confirms.",
+  "angles": [
+   "What if a swap could involve three or four cities at once?",
+   "Who should cover the cost when one person pulls out?"
+  ]
+ },
+ {
+  "id": 219,
+  "title": "Floor plan from a phone video",
+  "industry": "Housing",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Many rental listings have no floor plan, so renters can't tell if their furniture will fit.",
+  "challenge": "Turning a shaky walk-through video into measurements people can trust.",
+  "direction": "A paid API that turns a short room-by-room video into a rough floor plan, charging per plan generated.",
+  "angles": [
+   "What if the price fell when the video was filmed well?",
+   "Could renters test furniture layouts against the plan?"
+  ]
+ },
+ {
+  "id": 220,
+  "title": "Neighbour mediation, split down the middle",
+  "industry": "Housing",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Noise and parking disputes between neighbours fester because nobody wants a formal complaint.",
+  "challenge": "Keeping an AI mediator neutral when each side tells a different story.",
+  "direction": "A web app offering short AI-guided mediation sessions, with both neighbours paying half the small session fee.",
+  "angles": [
+   "What if the side that skipped the session paid the whole fee?",
+   "Could the app hand over to a human mediator when things stall?"
+  ]
+ },
+ {
+  "id": 221,
+  "title": "Contract clauses explained one by one",
+  "industry": "Legal",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Freelancers sign client contracts without understanding clauses on ownership, liability or payment terms.",
+  "challenge": "Explaining clearly without straying into advice the tool can't give.",
+  "direction": "A web app where you paste a contract and pay per clause you want explained in plain English, with questions to ask the client.",
+  "angles": [
+   "What if the tool flagged which clauses are worth paying to read?",
+   "Could freelancers share explanations of common clauses for others?"
+  ]
+ },
+ {
+  "id": 222,
+  "title": "Parking ticket appeal helper",
+  "industry": "Legal",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Drivers pay unfair parking tickets because appealing feels confusing and slow.",
+  "challenge": "Spotting genuine grounds for appeal from a photo of the ticket and the scene.",
+  "direction": "An Android app that reads a ticket photo, highlights possible grounds and drafts an appeal, paid per draft.",
+  "angles": [
+   "What if the draft were free and you paid only if you sent it?",
+   "Could anonymised outcomes show which grounds tend to matter?"
+  ]
+ },
+ {
+  "id": 223,
+  "title": "Case-law researcher on a budget",
+  "industry": "Legal",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Small firms and law students can't afford unlimited access to paid judgment databases.",
+  "challenge": "Deciding which judgments are worth paying to read in full from headnotes alone.",
+  "direction": "A Python agent that searches, buys individual judgments per document within a budget and writes a research note citing what it read.",
+  "angles": [
+   "How do you show a supervisor what the agent chose not to buy?",
+   "What if two students' agents could share purchases legally?"
+  ]
+ },
+ {
+  "id": 224,
+  "title": "Sponsored minutes with a trainee lawyer",
+  "industry": "Legal",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "People with simple legal questions can't afford an hour with a solicitor.",
+  "challenge": "Fairly allocating sponsor-funded minutes to those who need them most.",
+  "direction": "A booking service where sponsors fund short supervised calls with trainee lawyers, metered per minute and topped up by a pool.",
+  "angles": [
+   "What if an AI pre-call summary saved everyone five minutes?",
+   "Could callers pay it forward with a tiny tip for the next person?"
+  ]
+ },
+ {
+  "id": 225,
+  "title": "Image licences checked at upload",
+  "industry": "Legal",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Small websites get hefty copyright letters for images they thought were free to use.",
+  "challenge": "Matching an image to its owner and price before the site goes live.",
+  "direction": "A web app that checks images as a site owner uploads them, then offers a per-use licence paid straight to the rights holder.",
+  "angles": [
+   "What if photographers set different prices for charities?",
+   "Could the licence expire and renew automatically like a subscription?"
+  ]
+ },
+ {
+  "id": 226,
+  "title": "One minute of a hearing transcript",
+  "industry": "Legal",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Journalists and researchers must buy whole hearing transcripts to quote a single exchange.",
+  "challenge": "Letting buyers find the right minute without giving the content away for free.",
+  "direction": "A paid service that indexes hearing transcripts and sells them by the minute, with AI search showing redacted previews.",
+  "angles": [
+   "What if the price dropped as a hearing got older?",
+   "Could researchers' agents buy only the minutes their query needs?"
+  ]
+ },
+ {
+  "id": 227,
+  "title": "Terms and conditions change watcher",
+  "industry": "Legal",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Online services change their terms quietly, and nobody rereads them.",
+  "challenge": "Summarising what actually changed in a long document without crying wolf.",
+  "direction": "A Python agent that pays per fetch and summary to check the terms of services you use, alerting you only on meaningful changes.",
+  "angles": [
+   "What if the agent could compare terms across rival services?",
+   "Could a group of users split the cost of watching the same terms?"
+  ]
+ },
+ {
+  "id": 228,
+  "title": "Milestone holds with an AI case summary",
+  "industry": "Legal",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Freelancers and clients argue over whether a milestone was met, and small disputes aren't worth a lawyer.",
+  "challenge": "Summarising both sides fairly so a human arbiter can decide fast.",
+  "direction": "A web app that holds milestone payments and, in a dispute, produces a neutral AI summary of the evidence for a paid human reviewer.",
+  "angles": [
+   "What if the losing side paid the reviewer's fee?",
+   "Could a partial release settle most disputes automatically?"
+  ]
+ },
+ {
+  "id": 229,
+  "title": "Faulty product refund claimer",
+  "industry": "Legal",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Shoppers don't know their consumer rights when a product breaks just after purchase.",
+  "challenge": "Pricing the help so it's fair whether or not the refund comes through.",
+  "direction": "An Android app that drafts a consumer rights claim for a small fee, with an optional thank-you tip if the refund arrives.",
+  "angles": [
+   "What if retailers paid to resolve claims before they were sent?",
+   "Could the app track which claims tend to get answered?"
+  ]
+ },
+ {
+  "id": 230,
+  "title": "Supplier checks in ten lookups",
+  "industry": "Legal",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Small businesses sign with suppliers without checking filings, insolvency notices or court records.",
+  "challenge": "Knowing which paid record lookups matter for this particular supplier.",
+  "direction": "A Python agent that buys company filings and public record lookups per query, capped at a small budget, and writes a short risk note.",
+  "angles": [
+   "What if the budget grew with the size of the contract?",
+   "Could the agent re-check suppliers quietly every quarter?"
+  ]
+ },
+ {
+  "id": 231,
+  "title": "Planning applications in plain English",
+  "industry": "Civic",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Residents miss planning applications that affect them because the documents are long and technical.",
+  "challenge": "Summarising drawings and reports fairly without taking a side.",
+  "direction": "A web app that turns a planning application into a short plain-English summary, with summaries paid for by a local sponsor pool.",
+  "angles": [
+   "What if residents could pay a little to ask follow-up questions?",
+   "Could developers fund summaries to build trust early?"
+  ]
+ },
+ {
+  "id": 232,
+  "title": "Pothole bounty with photo proof",
+  "industry": "Civic",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Residents report the same pothole for months with no sign anything will change.",
+  "challenge": "Verifying a repair from photos so the bounty pays out to the right people.",
+  "direction": "An Android app where neighbours add small amounts to a bounty on a fault, released when a before-and-after photo is verified.",
+  "angles": [
+   "What if the council matched every penny residents added?",
+   "Could the bounty shrink the longer a fix takes?"
+  ]
+ },
+ {
+  "id": 233,
+  "title": "Council meeting digest agent",
+  "industry": "Civic",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Community groups can't sit through hours of council meetings to find the five minutes that matter to them.",
+  "challenge": "Deciding which meetings and agenda items are worth paying to transcribe.",
+  "direction": "A Python agent that scans agendas, pays per transcript or translation for relevant items, and sends a digest within a monthly budget.",
+  "angles": [
+   "What if several groups shared one agent and split its costs?",
+   "How should the agent explain an item it skipped?"
+  ]
+ },
+ {
+  "id": 234,
+  "title": "Free for people, metered for bots",
+  "industry": "Civic",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Public data portals slow down when scrapers and bots hammer them.",
+  "challenge": "Charging automated traffic without locking out curious residents.",
+  "direction": "A paid API in front of open civic data that stays free under a rate limit and charges per request beyond it.",
+  "angles": [
+   "What if bot fees funded new datasets residents asked for?",
+   "Could a researcher apply for a sponsored allowance?"
+  ]
+ },
+ {
+  "id": 235,
+  "title": "Quadratic funding for street projects",
+  "industry": "Civic",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Small neighbourhood projects lose out to whoever shouts loudest at the council.",
+  "challenge": "Rewarding broad support over a few big donors while keeping it hard to game.",
+  "direction": "A web app where residents chip in small amounts and a matching pool favours projects with many backers, not big cheques.",
+  "angles": [
+   "What if backers could see their penny's matched value live?",
+   "How would you stop one person splitting into many?"
+  ]
+ },
+ {
+  "id": 236,
+  "title": "Records request research agent",
+  "industry": "Civic",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Records requests return hundreds of scanned pages that nobody has time to read.",
+  "challenge": "Spending OCR and analysis money only on the pages likely to matter.",
+  "direction": "A Python agent that triages released documents, pays per page to read promising ones and assembles a sourced briefing within a budget.",
+  "angles": [
+   "What if journalists pooled budgets to analyse one big release?",
+   "Could the agent stop and ask before an expensive batch?"
+  ]
+ },
+ {
+  "id": 237,
+  "title": "Library of things with refundable holds",
+  "industry": "Civic",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Community tool libraries lose drills and ladders because borrowing relies on trust alone.",
+  "challenge": "Taking a small hold that protects the library without excluding people with little money.",
+  "direction": "An Android app that places a small refundable hold when you borrow an item, released automatically when it's scanned back.",
+  "angles": [
+   "What if regular returners earned a hold-free badge?",
+   "Could neighbours sponsor holds for people who can't cover them?"
+  ]
+ },
+ {
+  "id": 238,
+  "title": "Street air quality, sold by the reading",
+  "industry": "Civic",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Official air monitors are sparse, while residents with home sensors have no reason to share data.",
+  "challenge": "Trusting readings from cheap sensors and paying owners fairly per use.",
+  "direction": "A data marketplace where sensor owners earn per reading bought, and apps query air quality by street.",
+  "angles": [
+   "What if readings near schools were sponsored free?",
+   "Could suspicious sensors be paid less until they prove reliable?"
+  ]
+ },
+ {
+  "id": 239,
+  "title": "Council notices in every community language",
+  "industry": "Civic",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Important notices about bins, roadworks and consultations reach many residents only in one language.",
+  "challenge": "Keeping translations accurate for official wording that people act on.",
+  "direction": "A Python agent that watches for new council notices and pays per translation into the languages residents have asked for, within a monthly budget.",
+  "angles": [
+   "What if residents could request a language and the council paid?",
+   "Could audio versions reach people who don't read well?"
+  ]
+ },
+ {
+  "id": 240,
+  "title": "Thank-you tips for litter pickers",
+  "industry": "Civic",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Volunteer clean-up groups do visible good work but struggle to cover bags and gloves.",
+  "challenge": "Linking a tip to a specific cleaned spot so givers feel the connection.",
+  "direction": "An Android app where passers-by scan a code at a cleaned spot to tip the volunteer group, with before-and-after photos.",
+  "angles": [
+   "What if local shops matched tips on their street?",
+   "Could tips fund the next clean-up the moment a spot gets messy?"
+  ]
+ },
+ {
+  "id": 241,
+  "title": "Fund one specific item",
+  "industry": "Nonprofit",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Donors give to big general funds and never learn what their money actually bought.",
+  "challenge": "Linking a small donation to one real purchase without heavy admin.",
+  "direction": "A web app where charities list specific items, donors fund one, and get a photo receipt once it's bought.",
+  "angles": [
+   "What if donors could split one item between strangers?",
+   "What happens to money when the item is already funded?"
+  ]
+ },
+ {
+  "id": 242,
+  "title": "Grant application second reader",
+  "industry": "Nonprofit",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Small charities write grant applications alone, with nobody to check them before submission.",
+  "challenge": "Knowing when a paid specialist review adds enough to justify the spend.",
+  "direction": "A Python agent that drafts feedback, then pays for a specialist model or human review per section within a small budget.",
+  "angles": [
+   "What if funders sponsored reviews for first-time applicants?",
+   "Could the agent learn which sections tend to need the most help?"
+  ]
+ },
+ {
+  "id": 243,
+  "title": "Round up every API call for charity",
+  "industry": "Nonprofit",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Developers want to give back, but one-off donations are easy to forget.",
+  "challenge": "Adding a tiny donation per request without slowing the service down.",
+  "direction": "A paid API service that adds an optional fraction of a cent per call, pooled and paid to a charity the developer chooses.",
+  "angles": [
+   "What if users of the API voted on where the pool goes?",
+   "Could the charity show what each million calls achieved?"
+  ]
+ },
+ {
+  "id": 244,
+  "title": "Charity shop price checker",
+  "industry": "Nonprofit",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Charity shop volunteers underprice valuable donations because they can't research every item.",
+  "challenge": "Valuing odd, unbranded items from a single photo honestly.",
+  "direction": "An Android app where volunteers photograph a donation and pay a tiny fee per AI price suggestion with a confidence level.",
+  "angles": [
+   "What if a specialist could be paid to check high-value items?",
+   "Could shops pool valuations so the same item is never priced twice?"
+  ]
+ },
+ {
+  "id": 245,
+  "title": "Surplus food matcher for food banks",
+  "industry": "Nonprofit",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Shops throw away surplus food because finding a nearby food bank with space takes too long.",
+  "challenge": "Matching perishable food to collectors within hours, not days.",
+  "direction": "A matching engine where shops pay a small listing fee per batch, refunded automatically if nobody collects.",
+  "angles": [
+   "What if the fee fell for food with longer shelf life?",
+   "Could volunteer drivers be paid per successful pickup?"
+  ]
+ },
+ {
+  "id": 246,
+  "title": "Donate by the minute while you watch",
+  "industry": "Nonprofit",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Charity livestreams get viewers, but most never reach for a donation button.",
+  "challenge": "Making a tiny per-minute stream of giving feel meaningful, not invisible.",
+  "direction": "A web app where viewers switch on a per-minute donation during a charity stream, with a cap they choose.",
+  "angles": [
+   "What if the stream unlocked moments when giving passed a target?",
+   "Could viewers send their minutes to a friend's fundraiser?"
+  ]
+ },
+ {
+  "id": 247,
+  "title": "Proof the trees were planted",
+  "industry": "Nonprofit",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Donors to tree-planting projects can't tell if saplings were planted or survived.",
+  "challenge": "Buying just enough imagery to verify planting without spending the donations.",
+  "direction": "A Python agent that buys satellite image tiles per site within a verification budget and reports growth to donors.",
+  "angles": [
+   "What if donations were released only as growth was confirmed?",
+   "How much of a donation should verification ever cost?"
+  ]
+ },
+ {
+  "id": 248,
+  "title": "Donations held until the goal is met",
+  "industry": "Nonprofit",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Donors hesitate to give to small appeals that might never reach their target.",
+  "challenge": "Holding money transparently and refunding everyone automatically if the goal is missed.",
+  "direction": "A web app where pledges are held until a fundraising target is met, then released, or refunded in full if it isn't.",
+  "angles": [
+   "What if donors chose to roll a failed pledge into another appeal?",
+   "Could a partial goal unlock part of the project?"
+  ]
+ },
+ {
+  "id": 249,
+  "title": "Easy-read versions of charity reports",
+  "industry": "Nonprofit",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Charity reports are written for funders, not for the people the charity serves.",
+  "challenge": "Simplifying text without losing meaning or sounding patronising.",
+  "direction": "A paid API that turns a report into an easy-read version with simple language and image prompts, charged per page.",
+  "angles": [
+   "What if the people served reviewed it and were paid for their time?",
+   "Could the same pages be turned into short audio?"
+  ]
+ },
+ {
+  "id": 250,
+  "title": "Bus fares back before you get home",
+  "industry": "Nonprofit",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Volunteers on low incomes stop helping because expense claims take weeks to repay.",
+  "challenge": "Checking receipts quickly enough to pay instantly without inviting mistakes.",
+  "direction": "An Android app where volunteers snap a receipt, AI checks it against simple rules and small amounts are reimbursed straight away.",
+  "angles": [
+   "What if volunteers could donate their expenses back with one tap?",
+   "Could the charity set a weekly allowance instead of claims?"
+  ]
+ }
+]
