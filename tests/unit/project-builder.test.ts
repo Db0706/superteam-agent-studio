@@ -26,9 +26,11 @@ describe("validateName", () => {
 });
 
 describe("deriveProject", () => {
-  it("Next.js + Gemini + Payments matches the design's default preview", () => {
+  it("Next.js + Gemini + Payments matches the verified scaffold template", () => {
     const p = deriveProject({ id: "my-first-ai-agent", framework: "next", integrations: ["gemini", "payments"] });
-    expect(p.stats).toEqual({ files: 13, packages: 9, env: 4 });
+    expect(p.stats).toEqual({ files: 19, packages: 14, env: 7 });
+    expect(p.deps.find((d) => d.name === "@x402/next")?.version).toBe("2.28.0");
+    expect(p.env.map((e) => e.key)).toContain("AGENT_PRIVATE_KEY");
     expect(p.manifest).toBe("package.json");
     expect(p.needsCompanion).toBe(false);
     expect(p.files.map((f) => f.path)).toContain("lib/ai/gemini.ts");
@@ -86,6 +88,11 @@ describe("compatibility catalog", () => {
       for (const fw of FW_ORDER) expect(["ok", "server", "unverified", "na"]).toContain(statusOf(i.id, fw));
     }
   });
+  it("only claims verified templates for Next.js", () => {
+    const verified = INTEGRATIONS.filter((i) => i.verifiedOn.length).map((i) => i.id);
+    expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "spending"]);
+    for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => fw === "next")).toBe(true);
+  });
   it("never claims a wallet for Python agents or Node services", () => {
     expect(statusOf("wallet", "python")).toBe("na");
     expect(statusOf("wallet", "node")).toBe("na");
@@ -100,6 +107,10 @@ describe("generator adapter", () => {
     expect(bad.issues.map((i) => i.field)).toEqual(expect.arrayContaining(["name", "integrations"]));
     const warn = validateConfiguration({ name: "pay-agent", framework: "python", integrations: ["payments"] });
     expect(warn.issues.some((i) => i.severity === "warning")).toBe(true);
+    const needs = validateConfiguration({ name: "paid-app", framework: "next", integrations: ["paidapi"] });
+    expect(needs.issues).toContainEqual(expect.objectContaining({ severity: "warning", message: expect.stringContaining("needs Internet-Native Payments and Spending Controls") }));
+    const complete = validateConfiguration({ name: "paid-app", framework: "next", integrations: ["payments", "spending", "paidapi"] });
+    expect(complete.issues.some((i) => i.message.includes("needs"))).toBe(false);
   });
 
   it("the Phase 1 adapter cannot produce a ZIP", async () => {

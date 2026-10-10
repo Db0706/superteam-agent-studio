@@ -91,9 +91,9 @@ The four tracks (Web / Next.js, Consumer Mobile / Expo, Autonomous Agents / Pyth
 
 ## Integration catalog (`src/config/integrations.ts`)
 
-This is **provisional** and has not been validated against real templates. For each framework it defines the base files, packages, scripts, env file and use case. Each integration has:
+The **Next.js** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.1.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8; see that repo's `VERIFICATION.md`). Every other framework, Wallet and Pay.sh are still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
 
-`id`, `name`, `description`, `tech`, `external` service, `compatibility[framework]` (`ok` RDY · `server` +SRV · `unverified` UNV · `na` N/A), a `reasons` string for each framework, `worksWith`, `prerequisites`, `implementationStatus`, and `files`, `packages` and `env` for each framework.
+`id`, `name`, `description`, `tech`, `external` service, `compatibility[framework]` (`ok` RDY · `server` +SRV · `unverified` UNV · `na` N/A), a `reasons` string for each framework, `worksWith` (advisory), `requires` (hard dependencies; the builder warns if they are off), `prerequisites`, `implementationStatus`, `verifiedOn` (frameworks with a verified template), and `files`, `packages` and `env` for each framework.
 
 Rules the builder enforces:
 - **Expo plus a +SRV capability** (Gemini, Payments, Paid API) adds a `companion-server/`. Secret env vars are written to `companion-server/.env.example`; only `EXPO_PUBLIC_*` values stay in the app. **Gemini and payment secrets never go in Android client code.**
@@ -138,7 +138,7 @@ interface ScaffoldGenerator {
   1. Implement an HTTP-backed `ScaffoldGenerator`, for example `POST /api/scaffold` proxying to the scaffold repository's generator, with rate limiting and abuse controls.
   2. Return it from `getGenerator()`.
   3. In `ProjectBuilder.tsx`'s Output, wire the ZIP button to `generateProject` and trigger the download. Add an error/retry state; `GenState` already includes `"error"`.
-  4. Replace the provisional catalog with the repository's template manifest, or validate the catalog against it.
+  4. Replace the catalog with the repository's template manifests (`agent-studio-scaffolds/catalog.json`), or validate the catalog against them.
 
 ## Known limitations
 

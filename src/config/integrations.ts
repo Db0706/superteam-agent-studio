@@ -1,13 +1,14 @@
 import type { FrameworkId } from "./schema";
 
 /**
- * PROVISIONAL compatibility and template catalog.
+ * Compatibility and template catalog.
  *
- * Ported from the design's `builder-data.js`. Nothing here has been validated
- * against the real scaffold repository yet. Package names and versions, the
- * Pay.sh client, and x402 header and network ids are all illustrative. Every
- * combination stays labelled UNV (or provisional) until the scaffold
- * repository's CI proves it works. See README → "Integration catalog".
+ * The Next.js entries for gemini, payments, spending and paidapi match the
+ * agent-studio-scaffolds repository (scaffold v0.1.0, verified 2026-10-10:
+ * install, typecheck, build and offline tests pass; see its VERIFICATION.md).
+ * Those are listed in `verifiedOn`. Everything else is still provisional:
+ * other frameworks, Wallet and Pay.sh have no real template yet. See
+ * README → "Integration catalog".
  */
 
 export type CompatStatus = "ok" | "server" | "unverified" | "na";
@@ -47,8 +48,12 @@ export interface IntegrationDef {
   reasons: Partial<Record<FrameworkId, string>>;
   /** Other capabilities this one is designed to work alongside. Advisory only. */
   worksWith: IntegrationId[];
+  /** Capabilities this one cannot work without. The scaffold composer adds them automatically. */
+  requires: IntegrationId[];
   prerequisites: string[];
   implementationStatus: "provisional" | "verified";
+  /** Frameworks where a real scaffold template exists and its build is verified. */
+  verifiedOn: FrameworkId[];
   files: Partial<Record<FrameworkId, string[]>>;
   packages: Partial<Record<FrameworkId, Pkg[]>>;
   env: Partial<Record<FrameworkId, EnvVarDef[]>>;
@@ -67,12 +72,13 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
     envFile: ".env.local",
     manager: "npm",
     manifest: "package.json",
-    baseFiles: ["app/layout.tsx", "app/page.tsx", "app/globals.css", "components/ui/Button.tsx", "next.config.ts", "tsconfig.json", "package.json", ".env.example", "README.md"],
+    baseFiles: ["app/layout.tsx", "app/page.tsx", "app/globals.css", "lib/modules.ts", "next.config.ts", "tsconfig.json", "package.json", ".gitignore", ".env.example", "README.md", "studio.manifest.json"],
     packages: {
-      base: [["next", "^15.1.0"], ["react", "^19.0.0"], ["react-dom", "^19.0.0"]],
-      dev: [["typescript", "^5.6.0"], ["@types/react", "^19.0.0"]],
+      // next >=16.2.6 is required by @x402/next 2.28.
+      base: [["next", "16.3.8"], ["react", "19.3.0"], ["react-dom", "19.3.0"], ["server-only", "0.0.1"]],
+      dev: [["typescript", "5.9.3"], ["@types/node", "22.20.5"], ["@types/react", "19.3.0"], ["@types/react-dom", "19.3.0"]],
     },
-    scripts: [["dev", "next dev"], ["build", "next build"]],
+    scripts: [["dev", "next dev"], ["build", "next build"], ["start", "next start"], ["typecheck", "tsc --noEmit"]],
   },
   expo: {
     id: "expo",
@@ -124,17 +130,20 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
   },
 };
 
-/** CAIP-2 id for Solana devnet. Illustrative; confirm against the x402 V2 spec before launch. */
+/** CAIP-2 id for Solana devnet, as used by x402 V2. Verified against @x402/svm 2.28 and the x402.org facilitator. */
 export const SOLANA_DEVNET = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
 
-const FACILITATOR: EnvVarDef = { key: "X402_FACILITATOR_URL", example: "https://facilitator.example", note: "Verifies + settles payments" };
-const NETWORK: EnvVarDef = { key: "SOLANA_NETWORK", example: SOLANA_DEVNET, note: "Solana devnet" };
+const FACILITATOR: EnvVarDef = { key: "X402_FACILITATOR_URL", example: "https://x402.org/facilitator", note: "Free test facilitator, verifies + settles, pays fees" };
+const NETWORK: EnvVarDef = { key: "X402_NETWORK", example: SOLANA_DEVNET, note: "Solana devnet only" };
 const PAY_TO: EnvVarDef = { key: "PAY_TO_ADDRESS", example: "", note: "Where payments arrive" };
 const GEMINI_KEY: EnvVarDef = { key: "GEMINI_API_KEY", example: "", note: "From Google AI Studio" };
+const GEMINI_MODEL: EnvVarDef = { key: "GEMINI_MODEL", example: "gemini-flash-latest", note: "Optional model override" };
+const AGENT_KEY: EnvVarDef = { key: "AGENT_PRIVATE_KEY", example: "", note: "Devnet-only buyer key. Never commit." };
+const RPC: EnvVarDef = { key: "SOLANA_RPC_URL", example: "https://api.devnet.solana.com", note: "Optional devnet RPC" };
 const PRICE: EnvVarDef = { key: "PAID_API_PRICE_USD", example: "0.01", note: "Price per request" };
 const LIMITS: EnvVarDef[] = [
   { key: "AGENT_BUDGET_USD", example: "1.00", note: "Total allowed spend" },
-  { key: "MAX_PAYMENT_USD", example: "0.25", note: "Largest single payment" },
+  { key: "MAX_PAYMENT_USD", example: "0.10", note: "Largest single payment" },
 ];
 const PAYSH_KEY: EnvVarDef = { key: "PAYSH_API_KEY", example: "", note: "Placeholder, confirm in docs" };
 
@@ -149,16 +158,18 @@ export const INTEGRATIONS: IntegrationDef[] = [
     compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
     reasons: { expo: "Adds a small server so your Gemini key never ships inside the app." },
     worksWith: [],
+    requires: [],
     prerequisites: ["Google account", "Gemini API key (free tier), added to .env yourself, never typed into this site"],
     implementationStatus: "provisional",
+    verifiedOn: ["next"],
     files: {
-      next: ["lib/ai/gemini.ts", "app/api/chat/route.ts"],
+      next: ["lib/ai/gemini.ts", "app/api/chat/route.ts", "app/chat/page.tsx"],
       expo: ["lib/ai/client.ts", "companion-server/src/routes/ai.ts"],
       python: ["agent/integrations/gemini.py"],
       node: ["src/integrations/gemini.ts", "src/routes/ai.ts"],
     },
-    packages: { next: [["@google/genai", "^1.0.0"]], node: [["@google/genai", "^1.0.0"]], python: [["google-genai", "1.0"]] },
-    env: { next: [GEMINI_KEY], expo: [GEMINI_KEY], python: [GEMINI_KEY], node: [GEMINI_KEY] },
+    packages: { next: [["@google/genai", "2.28.0"]], node: [["@google/genai", "2.28.0"]], python: [["google-genai", "2.29"]] },
+    env: { next: [GEMINI_KEY, GEMINI_MODEL], expo: [GEMINI_KEY], python: [GEMINI_KEY], node: [GEMINI_KEY] },
   },
   {
     id: "payments",
@@ -170,22 +181,28 @@ export const INTEGRATIONS: IntegrationDef[] = [
     compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
     reasons: { expo: "Adds a companion server that confirms payments for the app." },
     worksWith: ["spending"],
-    prerequisites: ["Solana devnet address for receiving test payments", "Devnet test USDC, no real money"],
+    requires: [],
+    prerequisites: [
+      "Solana devnet address for receiving test payments. It needs a devnet USDC account: send it faucet USDC once",
+      "Devnet test USDC from faucet.circle.com, no real money. No SOL needed: the facilitator pays fees",
+    ],
     implementationStatus: "provisional",
+    verifiedOn: ["next"],
     files: {
-      next: ["lib/payments/x402.ts", "middleware.ts"],
+      next: ["lib/payments/config.ts", "lib/payments/server.ts", "lib/payments/client.ts", "scripts/keygen.ts", "scripts/wallets.ts"],
       expo: ["lib/payments/client.ts", "companion-server/src/routes/pay.ts"],
       python: ["agent/integrations/payments.py"],
       node: ["src/integrations/payments.ts", "src/middleware/paywall.ts"],
     },
     packages: {
-      next: [["@x402/next", "^2.0.0"], ["@x402/fetch", "^2.0.0"], ["@x402/svm", "^2.0.0"]],
-      expo: [["@x402/fetch", "^2.0.0"]],
-      node: [["@x402/express", "^2.0.0"], ["@x402/svm", "^2.0.0"]],
-      python: [["x402", "2.0"]],
+      // @solana/kit must stay on 5.x: @x402/svm's @solana-program/* deps peer-require kit ^5.
+      next: [["@x402/core", "2.28.0"], ["@x402/next", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"]],
+      expo: [["@x402/fetch", "2.28.0"]],
+      node: [["@x402/core", "2.28.0"], ["@x402/express", "2.28.0"], ["@x402/svm", "2.28.0"]],
+      python: [["x402[svm]", "2.25"]],
     },
     env: {
-      next: [FACILITATOR, NETWORK, PAY_TO],
+      next: [FACILITATOR, NETWORK, PAY_TO, AGENT_KEY, RPC],
       expo: [FACILITATOR, NETWORK, PAY_TO],
       node: [FACILITATOR, NETWORK, PAY_TO],
       python: [FACILITATOR, NETWORK, { key: "AGENT_SIGNER_KEY", example: "", note: "Devnet only. Never commit." }],
@@ -196,7 +213,7 @@ export const INTEGRATIONS: IntegrationDef[] = [
     name: "Pay.sh",
     short: "Pay.sh",
     description: "Connect supported payment tooling and services.",
-    tech: "Pay.sh client · package name to be confirmed",
+    tech: "Pay.sh client · package name to be confirmed (no \"pay.sh\" package on npm)",
     external: { name: "Pay.sh", description: "Account and key. Setup to be confirmed." },
     compatibility: { next: "unverified", expo: "unverified", python: "unverified", node: "ok" },
     reasons: {
@@ -205,8 +222,10 @@ export const INTEGRATIONS: IntegrationDef[] = [
       python: "No verified Python client yet.",
     },
     worksWith: ["payments"],
+    requires: [],
     prerequisites: ["Pay.sh account (setup to be confirmed)"],
     implementationStatus: "provisional",
+    verifiedOn: [],
     files: {
       next: ["lib/payments/paysh.ts"],
       expo: ["lib/payments/paysh.ts"],
@@ -221,6 +240,8 @@ export const INTEGRATIONS: IntegrationDef[] = [
     name: "Wallet Connection",
     short: "Wallet",
     description: "Let people approve payments from a supported Solana wallet.",
+    // Unverified: x402's Solana stack is @solana/kit, so the web3.js 1.x / wallet-adapter
+    // packages below likely need replacing (Wallet Standard / kit-based) before this is built.
     tech: "Wallet Standard (web) · Mobile Wallet Adapter (Android)",
     external: { name: "User’s wallet app", description: "Users approve payments in a wallet app they already have." },
     compatibility: { next: "ok", expo: "ok", python: "na", node: "na" },
@@ -229,8 +250,10 @@ export const INTEGRATIONS: IntegrationDef[] = [
       node: "Services receive payments. Set a payout address instead.",
     },
     worksWith: ["payments"],
+    requires: [],
     prerequisites: ["A Solana wallet app set to devnet, for testing"],
     implementationStatus: "provisional",
+    verifiedOn: [],
     files: {
       next: ["components/wallet/WalletProvider.tsx", "components/wallet/ConnectButton.tsx"],
       expo: ["lib/wallet/mobileWallet.ts", "components/ConnectWallet.tsx"],
@@ -253,11 +276,13 @@ export const INTEGRATIONS: IntegrationDef[] = [
     external: null,
     compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
     reasons: { expo: "The example paid API runs in the companion server." },
-    worksWith: ["payments"],
+    worksWith: ["payments", "spending"],
+    requires: ["payments", "spending"],
     prerequisites: [],
     implementationStatus: "provisional",
+    verifiedOn: ["next"],
     files: {
-      next: ["app/api/premium-data/route.ts", "app/premium/page.tsx"],
+      next: ["app/api/premium/route.ts", "app/api/buy/route.ts", "app/premium/page.tsx", "lib/paidapi/buyer.ts", "scripts/pay.ts"],
       expo: ["app/premium.tsx", "companion-server/src/routes/premium-data.ts"],
       python: ["examples/paid_service.py", "agent/tasks/buy_data.py"],
       node: ["src/routes/premium-data.ts", "examples/client.ts"],
@@ -270,15 +295,17 @@ export const INTEGRATIONS: IntegrationDef[] = [
     name: "Spending Controls",
     short: "Limits",
     description: "Set budgets and per-payment limits for autonomous payments.",
-    tech: "Total budget · per-payment cap · allow-list, checked before paying",
+    tech: "Total budget · per-payment cap · devnet-USDC-only asset allow-list, checked before paying",
     external: null,
     compatibility: { next: "ok", expo: "unverified", python: "ok", node: "ok" },
     reasons: { expo: "Limits run on-device only and are not yet reviewed." },
     worksWith: ["payments"],
+    requires: ["payments"],
     prerequisites: [],
     implementationStatus: "provisional",
+    verifiedOn: ["next"],
     files: {
-      next: ["lib/payments/limits.ts"],
+      next: ["lib/spending/policy.ts", "lib/spending/tracker.ts", "lib/spending/attach.ts", "scripts/test-spending.ts", "scripts/test-spending-x402.ts"],
       expo: ["lib/payments/limits.ts"],
       python: ["agent/spending.py", "agent/policy.yaml"],
       node: ["src/integrations/limits.ts"],

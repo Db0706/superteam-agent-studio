@@ -97,8 +97,18 @@ export function validateConfiguration(config: ProjectConfiguration): ValidationR
     if (st === "server") issues.push({ severity: "info", field: "integrations", message: `${def.name} adds a companion server so secrets never ship in the app.` });
   }
   for (const id of seen) {
+    const required = INTEGRATION_MAP[id].requires.filter(
+      (r) => !seen.has(r) && statusOf(r, config.framework) !== "na",
+    );
+    if (required.length) {
+      issues.push({
+        severity: "warning",
+        field: "integrations",
+        message: `${INTEGRATION_MAP[id].name} needs ${required.map((r) => INTEGRATION_MAP[r].name).join(" and ")}. Switch ${required.length > 1 ? "them" : "it"} on too.`,
+      });
+    }
     const missing = INTEGRATION_MAP[id].worksWith.filter(
-      (w) => !seen.has(w) && statusOf(w, config.framework) !== "na",
+      (w) => !seen.has(w) && !required.includes(w) && statusOf(w, config.framework) !== "na",
     );
     if (missing.length) {
       issues.push({
