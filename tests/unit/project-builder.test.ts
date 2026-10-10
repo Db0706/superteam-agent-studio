@@ -88,10 +88,10 @@ describe("compatibility catalog", () => {
       for (const fw of FW_ORDER) expect(["ok", "server", "unverified", "na"]).toContain(statusOf(i.id, fw));
     }
   });
-  it("only claims verified templates for Next.js", () => {
+  it("only claims verified templates for Next.js and Node.js", () => {
     const verified = INTEGRATIONS.filter((i) => i.verifiedOn.length).map((i) => i.id);
     expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "spending"]);
-    for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => fw === "next")).toBe(true);
+    for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => fw === "next" || fw === "node")).toBe(true);
   });
   it("switches on required capabilities, in dependency order", () => {
     expect(normalizeIntegrations(["paidapi"], "next")).toEqual(["paidapi", "payments", "spending"]);
