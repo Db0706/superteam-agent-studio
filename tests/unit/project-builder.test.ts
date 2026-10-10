@@ -46,7 +46,7 @@ describe("deriveProject", () => {
   it("Expo + secret-bearing capability adds a companion server and keeps the key out of the app", () => {
     const p = deriveProject({ id: "mobile-app", framework: "expo", integrations: ["gemini", "wallet"] });
     expect(p.needsCompanion).toBe(true);
-    expect(p.files.map((f) => f.path)).toContain("companion-server/src/index.ts");
+    expect(p.files.map((f) => f.path)).toContain("companion-server/src/server.ts");
     const gemini = p.env.find((e) => e.key === "GEMINI_API_KEY")!;
     expect(gemini.file).toBe("companion-server/.env.example");
     const rpc = p.env.find((e) => e.key === "EXPO_PUBLIC_SOLANA_RPC_URL")!;
@@ -88,10 +88,10 @@ describe("compatibility catalog", () => {
       for (const fw of FW_ORDER) expect(["ok", "server", "unverified", "na"]).toContain(statusOf(i.id, fw));
     }
   });
-  it("only claims verified templates for Next.js, Node.js and Python", () => {
+  it("only claims verified templates for the four built frameworks", () => {
     const verified = INTEGRATIONS.filter((i) => i.verifiedOn.length).map((i) => i.id);
     expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "spending"]);
-    for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => fw === "next" || fw === "node" || fw === "python")).toBe(true);
+    for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => ["next", "node", "python", "expo"].includes(fw))).toBe(true);
   });
   it("switches on required capabilities, in dependency order", () => {
     expect(normalizeIntegrations(["paidapi"], "next")).toEqual(["paidapi", "payments", "spending"]);

@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Superteam Agent App",
+    "slug": "superteam-agent-app",
+    "version": "0.1.0",
+    "scheme": "superteamagentapp",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "platforms": ["android", "ios"],
+    "android": {
+      "package": "com.superteam.agentapp"
+    },
+    "plugins": ["expo-router"]
+  }
+}

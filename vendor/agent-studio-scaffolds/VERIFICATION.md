@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.3.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21)
+Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.4.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0)
 
 ## Verified package versions (exact pins)
 
@@ -23,6 +23,14 @@ Checked against the npm registry and PyPI on 2026-10-10. The x402 behaviour was 
 | `tsx` | 4.23.15 | runs `scripts/*.ts` (keygen, wallets, pay, tests); in node also `npm run dev` (`tsx watch`) and `examples/client.ts` |
 | `express` (node) | 5.2.1 | `@x402/express@2.28.0` peer-requires `express ^4 \|\| ^5`. 5.3.0 came out the day before testing, so the previous release is used. |
 | `@types/express` (node) | 5.0.6 | latest; `@x402/express`'s own `.d.ts` imports Express types |
+| `expo` (expo) | 57.0.25 | SDK 57 is the current SDK (`latest` dist-tag 57.0.27, published 2026-10-06). 57.0.25 (2026-09-24) is the newest patch at least two weeks old. SDK 58 is still `next`. The old catalog guess `~52.0.0` is three SDKs behind. |
+| `react-native` (expo) | 0.86.3 | exactly what `expo@57.0.25`'s `bundledNativeModules.json` lists (0.87 is out but not for SDK 57) |
+| `react` / `react-dom` (expo) | 19.2.3 | SDK 57's exact pin. `react-dom` is needed even for Android: `expo-router`'s web-only deps (`vaul`, `@radix-ui/*`) peer-require it, and without a pin npm picks `react-dom@19.3.0`, which conflicts with `react@19.2.3` (`ERESOLVE`, seen on a clean install) |
+| `expo-router` (expo) | 57.0.23 | SDK range `~57.0.23`; published 2026-09-24 |
+| `expo-constants`, `expo-linking`, `expo-status-bar` (expo) | 57.0.19, 57.0.11, 57.0.1 | expo-router peers / SDK ranges, newest patches at least two weeks old |
+| `react-native-screens`, `react-native-safe-area-context` (expo) | 4.26.2, 5.7.0 | expo-router peers, inside SDK ranges `~4.26.0` / `~5.7.0` |
+| `react-native-reanimated`, `react-native-worklets` (expo) | 4.5.1, 0.10.1 | not used by the app, but `expo-router` → `react-native-drawer-layout` peer-requires reanimated, so npm installs it anyway. Unpinned, npm chose reanimated 4.7.1 + worklets 0.13.0, which don't match SDK 57's native modules (`expo-modules-core` warns: worklets `^0.7.4 … ^0.10.0`). Pinned to the SDK's exact versions. |
+| `typescript` / `@types/react` (expo) | 6.0.3 / 19.2.18 | what Expo's own SDK 57 TypeScript template uses (`~6.0.3`, `~19.2.2`). The companion server stays on 5.9.3 like the node template; they are separate projects. |
 | `@x402/express` (node) | 2.28.0 | `paymentMiddleware(routes, x402ResourceServer)`. Depends on `@x402/core ~2.28.0` and `@x402/extensions ~2.28.0`. `@x402/paywall` is an optional peer (browser paywall UI only; not used). |
 
 ### Python (PyPI), checked 2026-10-10
@@ -117,6 +125,18 @@ Same machine and date, Python 3.12.14 unless noted. Commands ran in the composed
 | P9 | `python -m agent serve --reload`: starts, reloads on file change; unknown path 404 JSON; gemini without key 500 "GEMINI_API_KEY is not set" | pass |
 | P10 | Composer: next and node output for **all 32** module subsets is byte-identical to the v0.2.0 composer (run before the version bump; afterwards only `studio.manifest.json` `scaffoldVersion` reads 0.3.0) | pass |
 
+## What was tested: Expo app + companion server (`--framework expo`)
+
+Same machine and date.
+
+| # | Test | Result |
+| --- | --- | --- |
+| E1 | `npm run verify`: compose + `npm install` + **sdk-versions** (every pin that expo's `bundledNativeModules.json` lists is inside the SDK's range; offline, unlike `expo install --check`) + `tsc --noEmit` + `expo export --platform android` + **no-secrets** for **base**, **gemini**, **payments**, **payments+spending**, **full**. For every combination except base, the generated `companion-server/` then gets the full node treatment: install, typecheck, build, `test:spending` (when present) and the HTTP smoke test (N1). | see matrix below |
+| E2 | Companion composition: `companion-server/` is byte-identical to `compose --framework node` with the same modules (gemini → gemini; payments → payments; payments+spending → payments, spending; full → all four). A base-only expo app has no `companion-server/`, no `companion*` scripts and no `EXPO_PUBLIC_COMPANION_URL`. next/node output is byte-identical to before this change for all 32 module subsets. | pass |
+| E3 | no-secrets: the exported Android bundle (Hermes bytecode, strings readable) contains none of `GEMINI_API_KEY`, `AGENT_PRIVATE_KEY`, `@google/genai`, `createKeyPairSignerFromBytes`, `companion-server/src`. As a control, app strings such as `10.0.2.2` and `PAYMENT-REQUIRED` are found. | pass |
+| E4 | Metro `blockList`: an app screen importing `../companion-server/src/lib/ai/gemini` makes `expo export` fail with "Unable to resolve module" | pass |
+| E5 | `npx expo install --check` (online) on the full app: it reports newer patches published since (`expo ~57.0.27`, `expo-router ~57.0.25`, …), which is why verify checks against the installed SDK's own table instead. `EXPO_OFFLINE=1 npx expo install --check` passes but did not catch a deliberately wrong `react-native-screens` pin in `package.json` (it checks installed versions), so it isn't used. | informational |
+
 ## Matrix (`npm run verify`, final run)
 
 ```
@@ -135,7 +155,14 @@ PASS  python-gemini             venv → install → compile → typecheck → t
 PASS  python-payments           venv → install → compile → typecheck → test → cli → smoke
 PASS  python-payments-spending  venv → install → compile → typecheck → test → cli → smoke
 PASS  python-full               venv → install → compile → typecheck → test → cli → smoke
+PASS  expo-base                 install → sdk-versions → typecheck → build → no-secrets
+PASS  expo-gemini               install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:smoke
+PASS  expo-payments             install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:smoke
+PASS  expo-payments-spending    install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:spending → companion:smoke
+PASS  expo-full                 install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:spending → companion:smoke
 ```
+
+The expo `build` step is `expo export --platform android` (29 files: one Hermes bundle, about 2.7 MB, plus expo-router's assets). The companion's `test:spending` is the same 8/8 as N2, and its smoke test is N1 (17 checks across the four companion combinations).
 
 ## Not tested (needs things we don't have here)
 
@@ -146,7 +173,9 @@ PASS  python-full               venv → install → compile → typecheck → t
 - Windows/Linux, Node 20 (CI runs `full` on Node 20 for both frameworks), deployment to Vercel or any Node host.
 - Node: the same gaps as Next (no real Gemini call, no settled payment, no funded `npm run wallets`). The Express settle path (`PAYMENT-RESPONSE` header after a < 400 handler) was read from the `@x402/express` source, not exercised.
 - Python: the same gaps (no real Gemini call, no settled payment, no funded `wallets`). The FastAPI settle path was read from the x402 source, and exercised only offline via the client tests. Windows (`.venv\Scripts`) was not tested.
-- Expo, and the Wallet / Pay.sh capabilities.
+- Expo on a device or emulator. No Android SDK or emulator was used: the app was type-checked and bundled (`expo export`), not run. Expo Go for SDK 57 should load it; the screens' HTTP calls to the companion were not exercised from a phone. `lib/companion.ts`'s address logic (`EXPO_PUBLIC_COMPANION_URL` → Expo's `hostUri` → `10.0.2.2`) was read from the `expo-constants` types, not tested on a device.
+- Expo: an installable build (EAS Build / `expo run:android`), iOS, and web (no `react-native-web`; the template is Android-first).
+- The Wallet / Pay.sh capabilities.
 
 ## Known limitations (by design for a starter)
 
@@ -155,3 +184,5 @@ PASS  python-full               venv → install → compile → typecheck → t
 - Node `paidRoute("GET /path", …)` must be given the same method and path it is mounted on. `@x402/express` only charges requests matching that string and lets everything else through, so `paidRoute` answers 500 on a mismatch instead of serving the endpoint for free (tested by mounting it on the wrong path). Express-style `:param` segments work in both. `HEAD` requests to a paid `GET` route are not charged; Express sends headers only, no body.
 - Only devnet USDC is priced. Other tokens are refused.
 - Python: the x402 Solana client does its RPC lookups synchronously, so a purchase briefly blocks the agent's event loop (and the FastAPI service when `POST /api/buy` runs). Fine for a starter; move purchases to a worker for anything busy. The service binds to `127.0.0.1` by default because `POST /api/buy` has no authentication.
+- Expo: the app talks to the companion over plain `http://` in development (Expo Go allows it). Android release builds need `https://`, so the companion must be deployed behind TLS and `EXPO_PUBLIC_COMPANION_URL` set before building. The companion's endpoints have no authentication (see `/api/buy` above); a phone on the same Wi-Fi can reach it.
+- Expo: users can't pay from their own wallet yet. The companion's agent pays with its devnet key. A wallet connection (Mobile Wallet Adapter) is the separate Wallet capability.

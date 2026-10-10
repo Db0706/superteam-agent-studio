@@ -1,5 +1,5 @@
 import {
-  COMPANION_FILES,
+  COMPANION_DIR,
   FRAMEWORKS,
   INTEGRATIONS,
   INTEGRATION_MAP,
@@ -165,7 +165,12 @@ export function deriveProject({ id, framework, integrations }: { id: string; fra
   const needsCompanion = framework === "expo" && valid.some((i) => statusOf(i, framework) === "server");
 
   const files: ProjectFile[] = fw.baseFiles.map((path) => ({ path, tag: null }));
-  if (needsCompanion) COMPANION_FILES.forEach((path) => files.push({ path, tag: "companion" }));
+  if (needsCompanion) {
+    // The companion is the Node.js template with the same capabilities, nested in companion-server/.
+    const serverSide = valid.filter((i) => statusOf(i, framework) === "server");
+    const companionFiles = [...FRAMEWORKS.node.baseFiles, ...serverSide.flatMap((i) => INTEGRATION_MAP[i].files.node ?? [])];
+    companionFiles.forEach((path) => files.push({ path: `${COMPANION_DIR}/${path}`, tag: "companion" }));
+  }
   valid.forEach((i) =>
     (INTEGRATION_MAP[i].files[framework] ?? []).forEach((path) => {
       if (!files.some((f) => f.path === path)) files.push({ path, tag: i });
@@ -192,7 +197,7 @@ export function deriveProject({ id, framework, integrations }: { id: string; fra
       seenEnv.add(key);
       // Secrets for +SRV capabilities live in the companion server, never the Android bundle.
       const onServer = framework === "expo" && statusOf(i, framework) === "server" && !key.startsWith("EXPO_PUBLIC");
-      env.push({ key, example, note, tag: i, file: onServer ? "companion-server/.env.example" : ".env.example" });
+      env.push({ key, example, note, tag: i, file: onServer ? `${COMPANION_DIR}/.env.example` : ".env.example" });
     }),
   );
 
@@ -224,16 +229,25 @@ export function deriveProject({ id, framework, integrations }: { id: string; fra
           { cmd: "python -m agent", note: "lists commands" },
           { cmd: "python -m agent serve --reload", note: "localhost:3000" },
         ]
-      : [
-          { cmd: `cd ${id}`, note: "" },
-          { cmd: `cp .env.example ${fw.envFile}`, note: "add your keys" },
-          { cmd: "npm install", note: "" },
-          ...(needsCompanion ? [{ cmd: "(cd companion-server && npm install && npm run dev)", note: "second terminal" }] : []),
-          {
-            cmd: framework === "expo" ? "npx expo run:android" : "npm run dev",
-            note: framework === "next" ? "localhost:3000" : framework === "node" ? "localhost:3000" : "emulator or device",
-          },
-        ];
+      : framework === "expo"
+        ? [
+            { cmd: `cd ${id}`, note: "" },
+            { cmd: "npm install", note: "" },
+            ...(needsCompanion
+              ? [
+                  { cmd: "npm run companion:install", note: "once" },
+                  { cmd: `cp ${COMPANION_DIR}/.env.example ${COMPANION_DIR}/.env.local`, note: "add your keys" },
+                  { cmd: "npm run companion", note: "second terminal" },
+                ]
+              : []),
+            { cmd: "npm start", note: "scan the QR code in Expo Go" },
+          ]
+        : [
+            { cmd: `cd ${id}`, note: "" },
+            { cmd: `cp .env.example ${fw.envFile}`, note: "add your keys" },
+            { cmd: "npm install", note: "" },
+            { cmd: "npm run dev", note: "localhost:3000" },
+          ];
 
   return {
     id,

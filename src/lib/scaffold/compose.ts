@@ -23,6 +23,15 @@ interface EnvDef {
   note: string;
 }
 
+interface CompanionSettings {
+  framework: string;
+  dir: string;
+  name: string;
+  scripts?: Record<string, string>;
+  env: EnvDef[];
+  readme: string;
+}
+
 interface PartManifest {
   id: string;
   name: string;
@@ -37,6 +46,10 @@ interface PartManifest {
   modulesPlaceholder?: string;
   /** Base only: write pip requirements files instead of package.json. */
   dependencyFiles?: { dependencies: string; devDependencies: string };
+  /** Base only (expo): where and how to generate the companion server. */
+  companion?: CompanionSettings;
+  /** Module only (expo): modules of the companion framework this module needs. */
+  companionModules?: string[];
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   scripts?: Record<string, string>;
@@ -67,6 +80,8 @@ export interface StudioManifest {
   scripts: Record<string, string>;
   env: { key: string; required: boolean; secret: boolean; module: string }[];
   prerequisites: string[];
+  /** Expo: the generated companion server, composed from another framework's template. */
+  companion?: { dir: string; framework: string; modules: string[]; env: StudioManifest["env"] };
 }
 
 export interface ComposedFile {
@@ -186,7 +201,30 @@ export function composeScaffold(
 ): Composed {
   const { version, base, modules } = loadFramework(root, framework);
   const { order, autoAdded } = resolveModules(modules, requested);
-  const parts = [base, ...order.map((id) => modules[id])];
+
+  // Companion server (expo): modules whose secrets must not ship inside the app list the modules
+  // of another framework they need (`companionModules`). That framework is composed separately
+  // into `base.companion.dir`. The companion's scripts/env/README fragment are only added when it is.
+  const companionModules = [...new Set(order.flatMap((id) => modules[id].companionModules ?? []))];
+  if (companionModules.length && !base.companion) {
+    throw new ScaffoldCompositionError(`${framework} modules list companionModules but the ${framework} base has no "companion" settings`);
+  }
+  const companion: Part | null =
+    companionModules.length && base.companion
+      ? {
+          id: "companion",
+          name: base.companion.name,
+          requires: [],
+          files: [],
+          scripts: base.companion.scripts,
+          env: base.companion.env,
+          prerequisites: [],
+          readme: base.companion.readme,
+          content: new Map([["\0readme", get(base, base.companion.readme)]]),
+        }
+      : null;
+  // The companion's README section comes right after the base's, before the module sections that refer to it.
+  const parts = [base, ...(companion ? [companion] : []), ...order.map((id) => modules[id])];
   const out = new Map<string, Buffer>();
   const generated = base.generatedFiles ?? [];
   // The generated module list (drives the home page / GET /). Its path differs per framework.
@@ -201,6 +239,9 @@ export function composeScaffold(
   }
   for (const id of order) {
     for (const file of modules[id].files) {
+      if (base.companion && `${file}/`.startsWith(`${base.companion.dir}/`)) {
+        throw new ScaffoldCompositionError(`modules/${id} lists ${file}, but ${base.companion.dir}/ is generated from the ${base.companion.framework} template`);
+      }
       if (owners.has(file)) throw new ScaffoldCompositionError(`File conflict: ${file} is provided by both ${owners.get(file)} and ${id}`);
       out.set(file, get(modules[id], file));
       owners.set(file, id);
@@ -233,12 +274,13 @@ export function composeScaffold(
   const generatedDepFiles = depFiles ? [depFiles.dependencies, depFiles.devDependencies] : ["package.json"];
 
   // 3. .env.example (examples only; real values go in .env.local, which is never generated)
-  const env = order.flatMap((id) => modules[id].env.map((e) => ({ ...e, module: id })));
+  const envParts = [...order.map((id) => modules[id]), ...(companion ? [companion] : [])];
+  const env = envParts.flatMap((p) => p.env.map((e) => ({ ...e, module: p.id })));
   let envText = get(base, ".env.example").toString("utf8");
-  for (const id of order) {
-    if (!modules[id].env.length) continue;
-    envText += `\n# --- ${modules[id].name} ---\n`;
-    for (const e of modules[id].env) {
+  for (const p of envParts) {
+    if (!p.env.length) continue;
+    envText += `\n# --- ${p.name} ---\n`;
+    for (const e of p.env) {
       const tags = [e.required ? "required" : "optional", e.secret ? "SECRET, never commit or expose to the browser" : null].filter(Boolean).join(", ");
       envText += `# ${e.note} (${tags})\n${e.key}=${e.example}\n`;
     }
@@ -263,7 +305,14 @@ export function composeScaffold(
   const readme = parts.map((p) => p.content.get("\0readme")!.toString("utf8").trim()).join("\n\n---\n\n");
   out.set("README.md", Buffer.from(readme + "\n"));
 
-  // 6. studio.manifest.json
+  // 6. The companion server: a full, separate project (own package.json, README, .env.example).
+  let companionComposed: Composed | null = null;
+  if (companion && base.companion) {
+    companionComposed = composeScaffold(root, { framework: base.companion.framework, modules: companionModules, name: `${name}-companion` });
+    for (const f of companionComposed.files) out.set(`${base.companion.dir}/${f.path}`, f.data);
+  }
+
+  // 7. studio.manifest.json
   const manifest: StudioManifest = {
     scaffoldVersion: version,
     framework,
@@ -274,8 +323,17 @@ export function composeScaffold(
     devDependencies,
     scripts,
     env: env.map(({ key, required, secret, module }) => ({ key, required, secret, module })),
-    prerequisites: parts.flatMap((p) => p.prerequisites),
+    prerequisites: [
+      ...parts.flatMap((p) => p.prerequisites ?? []),
+      ...(companionComposed?.manifest.prerequisites ?? []).map((p) => `${base.companion!.dir}: ${p}`),
+    ],
   };
+  if (companionComposed && base.companion) {
+    // Every file of the companion (its own studio.manifest.json describes it in full).
+    const dir = base.companion.dir;
+    manifest.files = [...manifest.files, ...companionComposed.manifest.files.map((f) => `${dir}/${f}`)].sort();
+    manifest.companion = { dir, framework: base.companion.framework, modules: companionComposed.manifest.modules, env: companionComposed.manifest.env };
+  }
   out.set("studio.manifest.json", Buffer.from(JSON.stringify(manifest, null, 2) + "\n"));
 
   const files = [...out].map(([path, data]) => ({ path, data })).sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));

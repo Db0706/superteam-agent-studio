@@ -4,6 +4,7 @@
 //   node scripts/compose.mjs --framework next --modules gemini,payments,spending,paidapi --out out/my-app
 //   node scripts/compose.mjs --framework node --modules paidapi --out out/my-service
 //   node scripts/compose.mjs --framework python --modules paidapi --out out/my-agent
+//   node scripts/compose.mjs --framework expo --modules gemini --out out/my-mobile-app   # + companion-server/
 //   node scripts/compose.mjs --list            # print the catalog (all templates + modules) as JSON
 //
 // No dependencies: this is the piece the Agent Studio generator will call (or port).
@@ -14,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const FRAMEWORK_DIRS = { next: "templates/nextjs", node: "templates/node", python: "templates/python" };
+const FRAMEWORK_DIRS = { next: "templates/nextjs", node: "templates/node", python: "templates/python", expo: "templates/expo" };
 const SCAFFOLD_VERSION = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).version;
 
 const readJson = (p) => JSON.parse(readFileSync(p, "utf8"));
@@ -73,10 +74,22 @@ function requirementsTxt(deps, include) {
 export function compose({ framework, modules: requested, out, name = "superteam-agent-app" }) {
   const { base, modules } = loadFramework(framework);
   const { order, autoAdded } = resolveModules(modules, requested);
-  const parts = [base, ...order.map((id) => modules[id])];
   const outDir = resolve(out);
   // The generated module list (drives the home page / GET /). Its path differs per framework.
   const modulesFile = base.modulesFile ?? "lib/modules.ts";
+
+  // Companion server (expo): modules whose secrets must not ship inside the app list the modules
+  // of another framework they need (`companionModules`). That framework is composed separately
+  // into `base.companion.dir`. The companion's scripts/env/README fragment are only added when it is.
+  const companionModules = [...new Set(order.flatMap((id) => modules[id].companionModules ?? []))];
+  if (companionModules.length && !base.companion) {
+    throw new Error(`${framework} modules list companionModules but the ${framework} base has no "companion" settings`);
+  }
+  const companion = companionModules.length
+    ? { id: "companion", ...base.companion, outDir: base.companion.dir, dir: base.dir }
+    : null;
+  // The companion's README section comes right after the base's, before the module sections that refer to it.
+  const parts = [base, ...(companion ? [companion] : []), ...order.map((id) => modules[id])];
 
   if (existsSync(outDir)) rmSync(outDir, { recursive: true });
   mkdirSync(outDir, { recursive: true });
@@ -91,6 +104,9 @@ export function compose({ framework, modules: requested, out, name = "superteam-
   }
   for (const id of order) {
     for (const file of modules[id].files) {
+      if (base.companion && (file + "/").startsWith(base.companion.dir + "/")) {
+        throw new Error(`modules/${id} lists ${file}, but ${base.companion.dir}/ is generated from the ${base.companion.framework} template`);
+      }
       if (owners.has(file)) throw new Error(`File conflict: ${file} is provided by both ${owners.get(file)} and ${id}`);
       const src = join(modules[id].dir, "files", file);
       if (!existsSync(src)) throw new Error(`modules/${id} lists ${file} but files/${file} does not exist`);
@@ -125,12 +141,13 @@ export function compose({ framework, modules: requested, out, name = "superteam-
   const generatedDepFiles = depFiles ? [depFiles.dependencies, depFiles.devDependencies] : ["package.json"];
 
   // 3. .env.example
-  const env = order.flatMap((id) => modules[id].env.map((e) => ({ ...e, module: id })));
+  const envParts = [...order.map((id) => modules[id]), ...(companion ? [companion] : [])];
+  const env = envParts.flatMap((p) => p.env.map((e) => ({ ...e, module: p.id })));
   let envText = readFileSync(join(base.dir, ".env.example"), "utf8");
-  for (const id of order) {
-    if (!modules[id].env.length) continue;
-    envText += `\n# --- ${modules[id].name} ---\n`;
-    for (const e of modules[id].env) {
+  for (const p of envParts) {
+    if (!p.env.length) continue;
+    envText += `\n# --- ${p.name} ---\n`;
+    for (const e of p.env) {
       const tags = [e.required ? "required" : "optional", e.secret ? "SECRET, never commit or expose to the browser" : null]
         .filter(Boolean)
         .join(", ");
@@ -159,7 +176,18 @@ export function compose({ framework, modules: requested, out, name = "superteam-
     .join("\n\n---\n\n");
   writeFileSync(join(outDir, "README.md"), readme + "\n");
 
-  // 6. studio.manifest.json: what was generated, for the Agent Studio UI.
+  // 6. The companion server: a full, separate project (own package.json, README, .env.example).
+  let companionManifest = null;
+  if (companion) {
+    companionManifest = compose({
+      framework: companion.framework,
+      modules: companionModules,
+      out: join(outDir, companion.outDir),
+      name: `${name}-companion`,
+    });
+  }
+
+  // 7. studio.manifest.json: what was generated, for the Agent Studio UI.
   const manifest = {
     scaffoldVersion: SCAFFOLD_VERSION,
     framework,
@@ -170,8 +198,21 @@ export function compose({ framework, modules: requested, out, name = "superteam-
     devDependencies,
     scripts,
     env: env.map(({ key, required, secret, module }) => ({ key, required, secret, module })),
-    prerequisites: parts.flatMap((p) => p.prerequisites),
+    prerequisites: [
+      ...parts.flatMap((p) => p.prerequisites ?? []),
+      ...(companionManifest?.prerequisites ?? []).map((p) => `${companion.outDir}: ${p}`),
+    ],
   };
+  if (companionManifest) {
+    // Every file of the companion (its own studio.manifest.json describes it in full).
+    manifest.files = [...manifest.files, ...companionManifest.files.map((f) => `${companion.outDir}/${f}`)].sort();
+    manifest.companion = {
+      dir: companion.outDir,
+      framework: companion.framework,
+      modules: companionManifest.modules,
+      env: companionManifest.env,
+    };
+  }
   writeFileSync(join(outDir, "studio.manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
   return manifest;
 }
