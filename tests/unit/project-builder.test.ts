@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FW_ORDER, INTEGRATIONS, statusOf } from "@/config/integrations";
+import { FW_ORDER, INTEGRATIONS, dependentsOf, normalizeIntegrations, statusOf } from "@/config/integrations";
 import { codeFor } from "@/lib/project-builder/code";
 import { GeneratorUnavailableError, canDownload, getGenerator, previewGenerator, previewManifest, validateConfiguration } from "@/lib/project-builder/generator";
 import { deriveProject, slugify, validateName } from "@/lib/project-builder/project";
@@ -92,6 +92,18 @@ describe("compatibility catalog", () => {
     const verified = INTEGRATIONS.filter((i) => i.verifiedOn.length).map((i) => i.id);
     expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "spending"]);
     for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => fw === "next")).toBe(true);
+  });
+  it("switches on required capabilities, in dependency order", () => {
+    expect(normalizeIntegrations(["paidapi"], "next")).toEqual(["paidapi", "payments", "spending"]);
+    expect(normalizeIntegrations(["gemini", "spending"], "next")).toEqual(["gemini", "spending", "payments"]);
+    expect(normalizeIntegrations(["gemini", "payments"], "next")).toEqual(["gemini", "payments"]);
+    // N/A capabilities are dropped, not completed.
+    expect(normalizeIntegrations(["wallet", "gemini"], "python")).toEqual(["gemini"]);
+  });
+  it("finds what must be switched off with a requirement", () => {
+    expect(dependentsOf("payments", ["gemini", "payments", "spending", "paidapi"])).toEqual(["spending", "paidapi"]);
+    expect(dependentsOf("spending", ["payments", "spending", "paidapi"])).toEqual(["paidapi"]);
+    expect(dependentsOf("gemini", ["gemini", "payments"])).toEqual([]);
   });
   it("never claims a wallet for Python agents or Node services", () => {
     expect(statusOf("wallet", "python")).toBe("na");

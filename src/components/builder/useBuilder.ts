@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FRAMEWORKS, INTEGRATION_MAP, statusOf, type IntegrationId } from "@/config/integrations";
+import { FRAMEWORKS, INTEGRATION_MAP, dependentsOf, normalizeIntegrations, statusOf, type IntegrationId } from "@/config/integrations";
 import type { FrameworkId } from "@/config/schema";
 import type { CodeTab } from "@/lib/project-builder/code";
 import { getGenerator, validateConfiguration } from "@/lib/project-builder/generator";
@@ -46,7 +46,7 @@ export function useBuilder() {
     const search = window.location.search;
     const stored = readStored() ?? DEFAULT_BUILDER;
     let next = hasBuilderParams(search) ? parseBuilderParams(search, stored) : stored;
-    next = { ...next, integrations: next.integrations.filter((i) => statusOf(i, next.framework) !== "na") };
+    next = { ...next, integrations: normalizeIntegrations(next.integrations, next.framework) };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-off restore after hydration
     setCfg(next);
     setHydrated(true);
@@ -95,17 +95,30 @@ export function useBuilder() {
 
   const setName = (v: string) => update({ name: v });
 
+  const names = (ids: IntegrationId[]) => ids.map((d) => INTEGRATION_MAP[d].name).join(", ");
+
   const pickFramework = (fw: FrameworkId) => {
-    const dropped = cfg.integrations.filter((i) => statusOf(i, fw) === "na");
-    update({ framework: fw, integrations: cfg.integrations.filter((i) => !dropped.includes(i)) });
+    const integrations = normalizeIntegrations(cfg.integrations, fw);
+    const dropped = cfg.integrations.filter((i) => !integrations.includes(i));
+    update({ framework: fw, integrations });
     setLast(null);
-    setNotice(dropped.length ? `${dropped.map((d) => INTEGRATION_MAP[d].name).join(", ")} unplugged: not available for ${FRAMEWORKS[fw].tech}.` : null);
+    setNotice(dropped.length ? `${names(dropped)} unplugged: not available for ${FRAMEWORKS[fw].tech}.` : null);
   };
 
   const toggle = (iid: IntegrationId) => {
     if (statusOf(iid, cfg.framework) === "na") return;
     const on = cfg.integrations.includes(iid);
-    update({ integrations: on ? cfg.integrations.filter((x) => x !== iid) : [...cfg.integrations, iid] });
+    if (on) {
+      // Switching off a requirement also switches off what depends on it.
+      const dependents = dependentsOf(iid, cfg.integrations);
+      update({ integrations: cfg.integrations.filter((x) => x !== iid && !dependents.includes(x)) });
+      if (dependents.length) setNotice(`${names(dependents)} also switched off: ${dependents.length > 1 ? "they need" : "it needs"} ${INTEGRATION_MAP[iid].name}.`);
+    } else {
+      const integrations = normalizeIntegrations([...cfg.integrations, iid], cfg.framework);
+      const added = integrations.filter((x) => x !== iid && !cfg.integrations.includes(x));
+      update({ integrations });
+      if (added.length) setNotice(`${names(added)} also switched on: ${INTEGRATION_MAP[iid].name} needs ${added.length > 1 ? "them" : "it"}.`);
+    }
     clearTimeout(lastTimer.current);
     setLast(on ? null : iid);
     if (!on) lastTimer.current = setTimeout(() => setLast(null), HIGHLIGHT_MS);

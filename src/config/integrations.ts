@@ -338,3 +338,28 @@ export function statusOf(id: IntegrationId, fw: FrameworkId): CompatStatus {
 export function isIntegrationId(x: string): x is IntegrationId {
   return (INTEGRATION_IDS as string[]).includes(x);
 }
+
+/** `id` plus everything it requires, transitively, in dependency order. */
+function withRequirements(id: IntegrationId, seen: IntegrationId[] = []): IntegrationId[] {
+  if (seen.includes(id)) return seen;
+  for (const r of INTEGRATION_MAP[id].requires) withRequirements(r, seen);
+  seen.push(id);
+  return seen;
+}
+
+/**
+ * Makes a selection consistent for a framework: drops N/A capabilities and any
+ * capability whose requirements are N/A, then switches on missing requirements.
+ * Keeps the order of the input, with added requirements appended.
+ */
+export function normalizeIntegrations(ids: IntegrationId[], fw: FrameworkId): IntegrationId[] {
+  const usable = ids.filter((id) => withRequirements(id).every((r) => statusOf(r, fw) !== "na"));
+  const out = [...usable];
+  for (const id of usable) for (const r of withRequirements(id)) if (!out.includes(r)) out.push(r);
+  return out;
+}
+
+/** Selected capabilities that (transitively) require `id`, so must go when it is switched off. */
+export function dependentsOf(id: IntegrationId, selected: IntegrationId[]): IntegrationId[] {
+  return selected.filter((s) => s !== id && withRequirements(s).includes(id));
+}

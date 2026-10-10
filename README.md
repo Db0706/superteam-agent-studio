@@ -98,6 +98,7 @@ The **Next.js** entries for Gemini, Payments, Spending Controls and Paid API mat
 Rules the builder enforces:
 - **Expo plus a +SRV capability** (Gemini, Payments, Paid API) adds a `companion-server/`. Secret env vars are written to `companion-server/.env.example`; only `EXPO_PUBLIC_*` values stay in the app. **Gemini and payment secrets never go in Android client code.**
 - **N/A combinations** can't be switched on. Switching framework unplugs them and shows a notice.
+- **Required capabilities** follow automatically. Switching on Paid API also switches on Payments and Spending Controls, and switching off Payments also switches off what needs it. Both show a notice. Shared links and restored selections are completed the same way (`normalizeIntegrations` in `integrations.ts`).
 - **Python** projects show `requirements.txt` and never `package.json`.
 - The builder **never asks for credentials.** The project name is the only text input.
 
