@@ -1,0 +1,39 @@
+{
+  "id": "spending",
+  "kind": "module",
+  "framework": "python",
+  "name": "Spending Controls",
+  "summary": "A total budget and a per-payment cap, checked before every automatic payment.",
+  "requires": ["payments"],
+  "files": [
+    "agent/spending/__init__.py",
+    "agent/spending/policy.py",
+    "agent/spending/tracker.py",
+    "agent/spending/attach.py",
+    "tests/test_spending.py",
+    "tests/test_spending_x402.py"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test:spending": "python -m unittest discover -s tests -p \"test_spending*.py\" -v"
+  },
+  "env": [
+    {
+      "key": "AGENT_BUDGET_USD",
+      "example": "1.00",
+      "required": false,
+      "secret": false,
+      "note": "Total the agent may spend before it restarts. Default 1.00."
+    },
+    {
+      "key": "MAX_PAYMENT_USD",
+      "example": "0.10",
+      "required": false,
+      "secret": false,
+      "note": "Largest single payment allowed. Default 0.10."
+    }
+  ],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

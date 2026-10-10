@@ -32,7 +32,7 @@ export const ZIP_MODULES: Partial<Record<FrameworkId, IntegrationId[]>> = Object
     .map((c) => [c.framework, c.modules.map((m) => m.id).filter(isIntegrationId)]),
 );
 
-/** Display names of the frameworks that download today, e.g. "Next.js and Node.js". */
+/** Display names of the frameworks that download today, e.g. "Next.js, Node.js and Python". */
 const downloadableNames = () => {
   const names = (Object.keys(ZIP_MODULES) as FrameworkId[]).map((fw) => FRAMEWORKS[fw]?.tech.split(" ")[0] ?? fw);
   return names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : (names[0] ?? "nothing");

@@ -5,6 +5,6 @@
  * catalog.json but not here stays preview-only instead of failing at download.
  * Safe for client code.
  */
-export const FRAMEWORK_DIRS: Readonly<Record<string, string>> = { next: "templates/nextjs", node: "templates/node" };
+export const FRAMEWORK_DIRS: Readonly<Record<string, string>> = { next: "templates/nextjs", node: "templates/node", python: "templates/python" };
 
 export const isComposableFramework = (framework: string): boolean => Object.hasOwn(FRAMEWORK_DIRS, framework);
