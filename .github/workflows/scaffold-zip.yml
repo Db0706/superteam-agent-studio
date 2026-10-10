@@ -1,0 +1,38 @@
+name: Scaffold ZIP smoke test
+
+on:
+  pull_request:
+    paths:
+      - "vendor/**"
+      - "src/lib/scaffold/**"
+      - "src/config/integrations.ts"
+      - "scripts/vendor-scaffolds.mjs"
+      - "scripts/smoke-scaffold-zip.mjs"
+      - "scripts/test-zip.mjs"
+      - ".github/workflows/scaffold-zip.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      # The vendor check compares vendor/ against the scaffold repo itself.
+      - uses: actions/checkout@v4
+        with:
+          repository: Db0706/agent-studio-scaffolds
+          path: .scaffolds-src
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Vendored scaffolds match the pinned commit
+        run: node scripts/vendor-scaffolds.mjs --check --source .scaffolds-src
+      - name: Download, install, build and run generated projects
+        run: npm run test:zip
