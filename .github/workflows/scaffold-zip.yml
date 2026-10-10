@@ -21,12 +21,18 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      # The vendor check compares vendor/ against the scaffold repo itself.
+      - uses: actions/checkout@v4
+        with:
+          repository: Db0706/agent-studio-scaffolds
+          path: .scaffolds-src
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - name: Vendored scaffolds match the pinned commit
-        run: node scripts/vendor-scaffolds.mjs --check
+        run: node scripts/vendor-scaffolds.mjs --check --source .scaffolds-src
       - name: Download, install, build and run generated projects
         run: npm run test:zip
