@@ -152,7 +152,7 @@ interface ScaffoldGenerator {
 ## Known limitations
 
 - All event details, prizes, dates, the venue and the host role are placeholders (PROPOSED / SAMPLE / TBC). The "AGENT STUDIO by Superteam" wordmark and the "ST" tile are placeholder brand marks; replace them with approved assets.
-- The GitHub links point to `https://github.com/` until the repository exists (`src/config/site.ts`).
+- The header and footer GitHub links point to this repository; the Dashboard's "Starter repository" link points to [agent-studio-scaffolds](https://github.com/Db0706/agent-studio-scaffolds) (`src/config/site.ts`, `src/config/events.ts`).
 - The compatibility matrix and package versions are illustrative.
 - No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist for all four frameworks (Next.js, Expo, Python, Node.js); Wallet and Pay.sh selections stay previews until they have templates.
 
