@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // End-to-end check of the ZIP download: POST /api/scaffold, unzip, then install, typecheck, build and test the
-// generated project. Node projects are also started and probed over HTTP with no keys set.
-// Needs node, `unzip` and network access to the npm registry. No API keys, wallets or facilitator calls.
+// generated project. Node services and Python agents (and an Expo app's companion server) are also started and
+// probed over HTTP with no keys set. Next.js and Expo bundles are scanned for secrets.
+// Needs node, `unzip`, Python 3.10+ ($PYTHON, default python3) and network access to npm and PyPI.
+// No API keys, wallets or facilitator calls.
 //
 //   node scripts/smoke-scaffold-zip.mjs http://localhost:3000 [--live-402]
 //   node scripts/smoke-scaffold-zip.mjs http://localhost:3000 node-paidapi   # only matching cases
@@ -32,8 +34,13 @@ const CASES = [
   { name: "node-paidapi", framework: "node", integrations: ["paidapi"], modules: ["payments", "spending", "paidapi"], autoAdded: ["payments", "spending"] },
   { name: "node-gemini-paidapi", framework: "node", integrations: ["gemini", "paidapi"], modules: ["gemini", "payments", "spending", "paidapi"], autoAdded: ["payments", "spending"] },
   { name: "next-full", framework: "next", integrations: ["gemini", "payments", "spending", "paidapi"], modules: ["gemini", "payments", "spending", "paidapi"], autoAdded: [] },
+  { name: "next-wallet", framework: "next", integrations: ["wallet"], modules: ["payments", "spending", "paidapi", "wallet"], autoAdded: ["payments", "spending", "paidapi"] },
+  { name: "python-gemini-paidapi", framework: "python", integrations: ["gemini", "paidapi"], modules: ["gemini", "payments", "spending", "paidapi"], autoAdded: ["payments", "spending"] },
+  { name: "expo-gemini-paidapi", framework: "expo", integrations: ["gemini", "paidapi"], modules: ["gemini", "payments", "spending", "paidapi"], autoAdded: ["payments", "spending"] },
 ];
-const MODULE_LIST_FILE = { next: "lib/modules.ts", node: "src/modules.ts" };
+const MODULE_LIST_FILE = { next: "lib/modules.ts", node: "src/modules.ts", python: "agent/modules.py", expo: "lib/modules.ts" };
+// Strings that must never reach a bundle a user downloads (browser or Android app).
+const SECRET_MARKERS = ["GEMINI_API_KEY", "AGENT_PRIVATE_KEY", "@google/genai", "createKeyPairSignerFromBytes", "companion-server/src"];
 // Env vars that would change what the generated service sees.
 const UNSET_ENV = ["GEMINI_API_KEY", "PAY_TO_ADDRESS", "AGENT_PRIVATE_KEY", "X402_NETWORK", "X402_FACILITATOR_URL"];
 const SLUG = "smoke-app";
@@ -66,19 +73,68 @@ async function runCase(c, work) {
   assert(existsSync(join(dir, MODULE_LIST_FILE[c.framework])), `${MODULE_LIST_FILE[c.framework]} missing`);
   console.log(`  manifest ok (v${manifest.scaffoldVersion}, modules ${manifest.modules.join(",")})`);
 
-  const env = { ...process.env, NEXT_TELEMETRY_DISABLED: "1" };
+  const env = { ...process.env, NEXT_TELEMETRY_DISABLED: "1", EXPO_NO_TELEMETRY: "1", CI: "1" };
   for (const key of UNSET_ENV) delete env[key];
-  for (const cmd of ["npm install --no-audit --no-fund", "npm run typecheck", "npm run build", "npm run test:spending"]) {
-    console.log(`  $ ${cmd}`);
-    execSync(cmd, { cwd: dir, stdio: "inherit", env });
-  }
+  if (c.framework === "python") return checkPython(dir, manifest, env);
+  checkNpmProject(dir, manifest, env);
   if (c.framework === "node") await smokeNode(dir, manifest, env);
+  if (c.framework === "next") checkNoSecrets(join(dir, ".next", "static"));
+  if (c.framework === "expo") {
+    checkNoSecrets(join(dir, "dist"));
+    // The companion server is a separate Node.js project (the node template) inside the download.
+    assert(manifest.companion?.dir, "expo manifest has no companion server");
+    const companionDir = join(dir, manifest.companion.dir);
+    const companionManifest = JSON.parse(readFileSync(join(companionDir, "studio.manifest.json"), "utf8"));
+    assert(same(companionManifest.modules, manifest.companion.modules), `companion modules ${JSON.stringify(companionManifest.modules)}`);
+    console.log("  companion-server/:");
+    checkNpmProject(companionDir, companionManifest, env);
+    await smokeNode(companionDir, companionManifest, env);
+  }
+}
+
+function run(cmd, dir, env) {
+  console.log(`  $ ${cmd}`);
+  execSync(cmd, { cwd: dir, stdio: "inherit", env });
+}
+
+function checkNpmProject(dir, manifest, env) {
+  for (const cmd of ["npm install --no-audit --no-fund", "npm run typecheck", "npm run build"]) run(cmd, dir, env);
+  if (manifest.scripts["test:spending"]) run("npm run test:spending", dir, env);
+}
+
+/** venv → pip install → tests → CLI → HTTP smoke test of `python -m agent serve`. */
+async function checkPython(dir, manifest, env) {
+  const python = process.env.PYTHON || "python3";
+  const venvPython = join(dir, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+  run(`${python} -m venv .venv`, dir, env);
+  run(`"${venvPython}" -m pip install --disable-pip-version-check -q -r requirements.txt`, dir, env);
+  run(`"${venvPython}" -m unittest discover -s tests`, dir, env);
+  run(`"${venvPython}" -m agent`, dir, env);
+  assert(!existsSync(join(dir, ".env")), ".env must never be generated");
+  await smokeHttp(dir, manifest, env, venvPython, ["-m", "agent", "serve"]);
+}
+
+/** Anything in a browser or app bundle can be read by whoever downloads it. */
+function checkNoSecrets(bundleDir) {
+  const files = execFileSync("find", [bundleDir, "-type", "f"], { encoding: "utf8" }).split("\n").filter(Boolean);
+  assert(files.length, `${bundleDir} is empty`);
+  for (const file of files) {
+    const text = readFileSync(file, "latin1");
+    const hit = SECRET_MARKERS.find((m) => text.includes(m));
+    assert(!hit, `no-secrets: ${file} contains "${hit}"`);
+  }
+  console.log(`  no-secrets ok: ${files.length} bundled files`);
 }
 
 async function smokeNode(dir, manifest, baseEnv) {
+  await smokeHttp(dir, manifest, baseEnv, process.execPath, ["dist/server.js"]);
+  if (live402) await live402Check(dir, baseEnv);
+}
+
+async function smokeHttp(dir, manifest, baseEnv, command, args) {
   const port = await freePort();
   const env = { ...baseEnv, PORT: String(port) };
-  const child = spawn(process.execPath, ["dist/server.js"], { cwd: dir, env, stdio: ["ignore", "pipe", "pipe"] });
+  const child = spawn(command, args, { cwd: dir, env, stdio: ["ignore", "pipe", "pipe"] });
   let log = "";
   child.stdout.on("data", (d) => (log += d));
   child.stderr.on("data", (d) => (log += d));
@@ -99,13 +155,14 @@ async function smokeNode(dir, manifest, baseEnv) {
         (b) => /GEMINI_API_KEY is not set/.test(b?.error),
       );
     }
-    await expect("GET /premium-data (no PAY_TO_ADDRESS)", await fetch(`${url}/premium-data`), 500, (b) => /PAY_TO_ADDRESS is not set/.test(b?.error));
-    await expect("GET /api/buy", await fetch(`${url}/api/buy`), 200, (b) => b?.spending?.budgetUsd === "1.00");
-    await expect("POST /api/buy (no AGENT_PRIVATE_KEY)", await fetch(`${url}/api/buy`, { method: "POST" }), 400, (b) => /AGENT_PRIVATE_KEY is not set/.test(b?.error));
+    if (manifest.modules.includes("paidapi")) {
+      await expect("GET /premium-data (no PAY_TO_ADDRESS)", await fetch(`${url}/premium-data`), 500, (b) => /PAY_TO_ADDRESS is not set/.test(b?.error));
+      await expect("GET /api/buy", await fetch(`${url}/api/buy`), 200, (b) => b?.spending?.budgetUsd === "1.00");
+      await expect("POST /api/buy (no AGENT_PRIVATE_KEY)", await fetch(`${url}/api/buy`, { method: "POST" }), 400, (b) => /AGENT_PRIVATE_KEY is not set/.test(b?.error));
+    }
   } finally {
     child.kill();
   }
-  if (live402) await live402Check(dir, baseEnv);
 }
 
 /** Opt-in: with PAY_TO_ADDRESS set the server must answer 402 (this contacts the devnet facilitator). */
