@@ -249,6 +249,45 @@
         ],
         "prerequisites": [],
         "readme": "README.fragment.md"
+      },
+      {
+        "id": "wallet",
+        "kind": "module",
+        "framework": "next",
+        "name": "Wallet Connection",
+        "summary": "Visitors connect their own Solana wallet (Phantom, Solflare, Backpack, …) and pay your paid API from it, approving each payment in the wallet. Devnet only.",
+        "nav": {
+          "label": "Pay with your wallet",
+          "href": "/wallet"
+        },
+        "requires": [
+          "paidapi"
+        ],
+        "files": [
+          "components/wallet/WalletProvider.tsx",
+          "components/wallet/ConnectWallet.tsx",
+          "components/wallet/PayWithWallet.tsx",
+          "app/wallet/page.tsx"
+        ],
+        "dependencies": {
+          "@solana/react": "5.5.1",
+          "@wallet-standard/react": "1.0.3"
+        },
+        "devDependencies": {},
+        "scripts": {},
+        "env": [
+          {
+            "key": "NEXT_PUBLIC_SOLANA_RPC_URL",
+            "example": "https://api.devnet.solana.com",
+            "required": false,
+            "secret": false,
+            "note": "Devnet RPC the browser uses to build wallet payments. NEXT_PUBLIC_ values are visible to everyone, so never put a key here"
+          }
+        ],
+        "prerequisites": [
+          "A Solana browser wallet (Phantom, Solflare, Backpack, …) switched to devnet, holding devnet USDC from https://faucet.circle.com (no real money)"
+        ],
+        "readme": "README.fragment.md"
       }
     ]
   },

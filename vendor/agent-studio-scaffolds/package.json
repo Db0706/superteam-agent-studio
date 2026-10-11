@@ -1,6 +1,6 @@
 {
   "name": "agent-studio-scaffolds",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "Composable starter templates for Superteam Agent Studio.",
   "type": "module",

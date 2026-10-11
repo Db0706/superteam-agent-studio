@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.4.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0)
+Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.5.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0)
 
 ## Verified package versions (exact pins)
 
@@ -125,6 +125,17 @@ Same machine and date, Python 3.12.14 unless noted. Commands ran in the composed
 | P9 | `python -m agent serve --reload`: starts, reloads on file change; unknown path 404 JSON; gemini without key 500 "GEMINI_API_KEY is not set" | pass |
 | P10 | Composer: next and node output for **all 32** module subsets is byte-identical to the v0.2.0 composer (run before the version bump; afterwards only `studio.manifest.json` `scaffoldVersion` reads 0.3.0) | pass |
 
+## What was tested: Next.js Wallet Connection (`--framework next --modules wallet`)
+
+Same machine and date. `wallet` requires `paidapi` (and so `payments` + `spending`).
+
+| # | Test | Result |
+| --- | --- | --- |
+| W1 | `npm run verify -- next`: all six next combinations including `full-wallet` pass install → typecheck → build → tests → **no-secrets** (new: `.next/static`, everything a browser downloads, contains none of `GEMINI_API_KEY`, `AGENT_PRIVATE_KEY`, `@google/genai`, `createKeyPairSignerFromBytes`) | pass |
+| W2 | Dependencies: `@solana/react` 5.5.1 is released with `@solana/kit` 5.5.1 (the version x402's Solana packages need), so one `@solana/kit` is installed. `useWalletAccountTransactionSigner` returns a Kit `TransactionModifyingSigner`, which x402's `ExactSvmScheme` accepts directly: no adapter code | pass |
+| W3 | Browser (`next start`, Chrome): `/wallet` without any wallet installed shows "No Solana wallet found"; no console errors | pass |
+| W4 | Browser, with a **Wallet Standard test wallet** injected into the page (devnet only, `standard:connect` / `standard:events` / `solana:signTransaction`, throwaway Ed25519 key): the page lists it via Wallet Standard discovery, connects, and "Buy premium data with my wallet" makes the wallet sign **exactly one** transaction; x402 retries with it and the **live** x402.org facilitator rejects it with `invalid_exact_svm_transaction_simulation_failed` (the test wallet has no devnet USDC), which the page explains. Same point as P5/N-series: everything up to settlement | pass |
+
 ## What was tested: Expo app + companion server (`--framework expo`)
 
 Same machine and date.
@@ -140,11 +151,12 @@ Same machine and date.
 ## Matrix (`npm run verify`, final run)
 
 ```
-PASS  next-base                 install → typecheck → build
-PASS  next-gemini               install → typecheck → build
-PASS  next-payments             install → typecheck → build
-PASS  next-payments-spending    install → typecheck → build → test:spending
-PASS  next-full                 install → typecheck → build → test:spending
+PASS  next-base                 install → typecheck → build → no-secrets
+PASS  next-gemini               install → typecheck → build → no-secrets
+PASS  next-payments             install → typecheck → build → no-secrets
+PASS  next-payments-spending    install → typecheck → build → test:spending → no-secrets
+PASS  next-full                 install → typecheck → build → test:spending → no-secrets
+PASS  next-full-wallet          install → typecheck → build → test:spending → no-secrets
 PASS  node-base                 install → typecheck → build → smoke
 PASS  node-gemini               install → typecheck → build → smoke
 PASS  node-payments             install → typecheck → build → smoke
@@ -175,7 +187,8 @@ The expo `build` step is `expo export --platform android` (29 files: one Hermes 
 - Python: the same gaps (no real Gemini call, no settled payment, no funded `wallets`). The FastAPI settle path was read from the x402 source, and exercised only offline via the client tests. Windows (`.venv\Scripts`) was not tested.
 - Expo on a device or emulator. No Android SDK or emulator was used: the app was type-checked and bundled (`expo export`), not run. Expo Go for SDK 57 should load it; the screens' HTTP calls to the companion were not exercised from a phone. `lib/companion.ts`'s address logic (`EXPO_PUBLIC_COMPANION_URL` → Expo's `hostUri` → `10.0.2.2`) was read from the `expo-constants` types, not tested on a device.
 - Expo: an installable build (EAS Build / `expo run:android`), iOS, and web (no `react-native-web`; the template is Android-first).
-- The Wallet / Pay.sh capabilities.
+- Wallet Connection with a real wallet app (Phantom, Solflare, Backpack). Some wallets add their own instructions (e.g. transaction guards) to transactions they sign; an x402 facilitator may reject those. Needs a manual test.
+- Wallet Connection on Expo/Android (not built: Mobile Wallet Adapter needs a native development build, not Expo Go), and Pay.sh.
 
 ## Known limitations (by design for a starter)
 
