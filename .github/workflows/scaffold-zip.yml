@@ -11,7 +11,7 @@ permissions:
 jobs:
   zip:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       # The vendor check compares vendor/ against the scaffold repo itself.
@@ -24,8 +24,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # The python case builds a venv; templates support Python 3.10+.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - run: npm ci
       - name: Vendored scaffolds match the pinned commit
         run: node scripts/vendor-scaffolds.mjs --check --source .scaffolds-src
-      - name: Download, install, build and run generated projects
+      - name: Download, install, build and run generated projects (next, node, python, expo + wallet)
         run: npm run test:zip
