@@ -1,15 +1,8 @@
 name: Scaffold ZIP smoke test
 
+# Runs on every PR: `zip` is a required status check on main, so it must always report.
 on:
   pull_request:
-    paths:
-      - "vendor/**"
-      - "src/lib/scaffold/**"
-      - "src/config/integrations.ts"
-      - "scripts/vendor-scaffolds.mjs"
-      - "scripts/smoke-scaffold-zip.mjs"
-      - "scripts/test-zip.mjs"
-      - ".github/workflows/scaffold-zip.yml"
   workflow_dispatch:
 
 permissions:
