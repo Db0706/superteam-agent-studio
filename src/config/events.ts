@@ -36,7 +36,7 @@ const PROPOSED_RULES: EventConfig["rules"] = {
 
 const SHARED_LINKS: EventConfig["links"] = [
   { label: "Event brief", meta: "PDF · SOON", href: null },
-  { label: "Starter repository", meta: "GITHUB ↗", href: "https://github.com/" },
+  { label: "Starter repository", meta: "GITHUB ↗", href: "https://github.com/Db0706/agent-studio-scaffolds" },
   { label: "Community chat", meta: "AT KICK-OFF", href: null },
   { label: "Submission portal", meta: "OPENS AT KICK-OFF", href: null },
 ];
