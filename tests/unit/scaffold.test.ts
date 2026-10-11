@@ -156,9 +156,22 @@ describe("composeScaffold", () => {
     expect(manifest.companion).toBeUndefined();
   });
 
+  it("adds the wallet module for Next.js, byte-identical to compose.mjs", async () => {
+    const { compose } = await upstream();
+    const out = join(tempDir(), "wallet");
+    const expected = compose({ framework: "next", modules: ["wallet"], out, name: "parity-app" });
+    const actual = composeScaffold(ROOT, { framework: "next", modules: ["wallet"], name: "parity-app" });
+    expect(actual.manifest).toEqual(expected);
+    for (const f of actual.files) expect(f.data.equals(readFileSync(join(out, f.path))), f.path).toBe(true);
+    expect(actual.manifest.modules).toEqual(["payments", "spending", "paidapi", "wallet"]);
+    expect(actual.manifest.dependencies).toMatchObject({ "@solana/react": "5.5.1", "@solana/kit": "5.5.1" });
+    expect(actual.files.map((f) => f.path)).toContain("app/wallet/page.tsx");
+  });
+
   it("rejects unknown frameworks and modules", () => {
     expect(() => composeScaffold(ROOT, { framework: "flutter", modules: [] })).toThrow(/Unknown framework/);
-    expect(() => composeScaffold(ROOT, { framework: "next", modules: ["wallet"] })).toThrow(/Unknown module/);
+    expect(() => composeScaffold(ROOT, { framework: "next", modules: ["paysh"] })).toThrow(/Unknown module/);
+    expect(() => composeScaffold(ROOT, { framework: "expo", modules: ["wallet"] })).toThrow(/Unknown module/);
   });
 
   it.each([".env.local", "a/.env", ".env.production", "../x", "/etc/passwd", "keys/agent.keypair.json", "a//b"])("forbids %s", (p) => {
@@ -243,7 +256,13 @@ describe("zipAvailability", () => {
   });
   it("explains capabilities without a template", () => {
     const r = zipAvailability("next", ["gemini", "wallet", "paysh"]);
-    expect(r).toEqual({ ok: false, reason: expect.stringMatching(/Wallet Connection and .+ have no template yet/) });
+    expect(r).toEqual({ ok: false, reason: expect.stringMatching(/^Pay\.sh has no template yet/) });
+    const both = zipAvailability("expo", ["wallet", "paysh"]);
+    expect(both).toEqual({ ok: false, reason: expect.stringMatching(/Wallet Connection and Pay\.sh have no template yet/) });
+  });
+  it("allows Wallet Connection on Next.js only", () => {
+    expect(zipAvailability("next", ["wallet"])).toEqual({ ok: true, modules: ["wallet"] });
+    expect(zipAvailability("expo", ["wallet"]).ok).toBe(false);
   });
 });
 
@@ -299,7 +318,7 @@ describe("POST /api/scaffold handler", () => {
     ["bad name", post({ ...FULL, name: "9" }), 400],
     ["N/A capability", post({ ...FULL, framework: "python", integrations: ["wallet"] }), 400],
     ["oversized body", post({ ...FULL, name: "x".repeat(MAX_BODY_BYTES) }), 413],
-    ["capability without a template", post({ ...FULL, integrations: ["wallet"] }), 422],
+    ["capability without a template", post({ ...FULL, integrations: ["paysh"] }), 422],
   ])("rejects %s", async (_label, req, status) => {
     const res = await createScaffoldHandler()(req);
     expect(res.status).toBe(status);
@@ -346,7 +365,9 @@ describe("scaffoldGenerator", () => {
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "node", integrations: ["paidapi"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "python", integrations: ["gemini", "spending"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: ["gemini"] })).toBe(true);
-    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["wallet"] })).toBe(false);
+    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["paysh"] })).toBe(false);
+    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["wallet"] })).toBe(true);
+    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: ["wallet"] })).toBe(false);
   });
 
   it("downloads through the API route", async () => {
@@ -364,7 +385,7 @@ describe("scaffoldGenerator", () => {
   it("refuses selections without templates before calling the server", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    await expect(scaffoldGenerator.generateProject({ name: "a-b-c", framework: "next", integrations: ["wallet"] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
+    await expect(scaffoldGenerator.generateProject({ name: "a-b-c", framework: "next", integrations: ["paysh"] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

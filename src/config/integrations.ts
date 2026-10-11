@@ -9,7 +9,7 @@ import type { FrameworkId } from "./schema";
  * plus HTTP smoke tests of the Node and Python services; Expo apps bundle for
  * Android with no secrets inside, and their companion server is the verified
  * Node template; see its VERIFICATION.md). Those are listed in `verifiedOn`.
- * Wallet and Pay.sh have no real template yet. See README → "Integration catalog".
+ * Wallet is verified on Next.js only (scaffold v0.5.0); Pay.sh has no template. See README → "Integration catalog".
  */
 
 export type CompatStatus = "ok" | "server" | "unverified" | "na";
@@ -265,32 +265,30 @@ export const INTEGRATIONS: IntegrationDef[] = [
     id: "wallet",
     name: "Wallet Connection",
     short: "Wallet",
-    description: "Let people approve payments from a supported Solana wallet.",
-    // Unverified: x402's Solana stack is @solana/kit, so the web3.js 1.x / wallet-adapter
-    // packages below likely need replacing (Wallet Standard / kit-based) before this is built.
-    tech: "Wallet Standard (web) · Mobile Wallet Adapter (Android)",
-    external: { name: "User’s wallet app", description: "Users approve payments in a wallet app they already have." },
-    compatibility: { next: "ok", expo: "ok", python: "na", node: "na" },
+    description: "Let people pay your paid API from their own Solana wallet, approving each payment.",
+    // Official packages do the wallet work: @solana/react (released with @solana/kit 5.5.1, which
+    // x402 needs) + Wallet Standard. Its Kit signer plugs straight into x402's ExactSvmScheme.
+    tech: "@solana/react + Wallet Standard (Phantom, Solflare, Backpack, …) · x402 from the browser",
+    external: { name: "User’s wallet app", description: "Visitors approve each payment in a Solana wallet they already have." },
+    compatibility: { next: "ok", expo: "unverified", python: "na", node: "na" },
     reasons: {
+      expo: "No template yet: Mobile Wallet Adapter needs a native development build, not Expo Go.",
       python: "Agents pay with their own key, guarded by Spending Controls.",
       node: "Services receive payments. Set a payout address instead.",
     },
-    worksWith: ["payments"],
-    requires: [],
-    prerequisites: ["A Solana wallet app set to devnet, for testing"],
+    worksWith: ["payments", "paidapi"],
+    requires: ["paidapi"],
+    prerequisites: ["A Solana browser wallet (Phantom, Solflare, Backpack, …) on devnet, with devnet USDC from faucet.circle.com"],
     implementationStatus: "provisional",
-    verifiedOn: [],
+    verifiedOn: ["next"],
     files: {
-      next: ["components/wallet/WalletProvider.tsx", "components/wallet/ConnectButton.tsx"],
-      expo: ["lib/wallet/mobileWallet.ts", "components/ConnectWallet.tsx"],
+      next: ["components/wallet/WalletProvider.tsx", "components/wallet/ConnectWallet.tsx", "components/wallet/PayWithWallet.tsx", "app/wallet/page.tsx"],
     },
     packages: {
-      next: [["@solana/wallet-adapter-react", "^0.15.0"], ["@solana/web3.js", "^1.95.0"]],
-      expo: [["@solana-mobile/mobile-wallet-adapter-protocol-web3js", "^2.1.0"], ["@solana/web3.js", "^1.95.0"]],
+      next: [["@solana/react", "5.5.1"], ["@wallet-standard/react", "1.0.3"]],
     },
     env: {
-      next: [{ key: "NEXT_PUBLIC_SOLANA_RPC_URL", example: "https://api.devnet.solana.com", note: "" }],
-      expo: [{ key: "EXPO_PUBLIC_SOLANA_RPC_URL", example: "https://api.devnet.solana.com", note: "" }],
+      next: [{ key: "NEXT_PUBLIC_SOLANA_RPC_URL", example: "https://api.devnet.solana.com", note: "Devnet RPC for the browser. Public, never a key" }],
     },
   },
   {

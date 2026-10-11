@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FW_ORDER, INTEGRATIONS, dependentsOf, normalizeIntegrations, statusOf } from "@/config/integrations";
+import { FW_ORDER, INTEGRATIONS, INTEGRATION_MAP, dependentsOf, normalizeIntegrations, statusOf } from "@/config/integrations";
 import { codeFor } from "@/lib/project-builder/code";
 import { GeneratorUnavailableError, canDownload, getGenerator, previewGenerator, previewManifest, validateConfiguration } from "@/lib/project-builder/generator";
 import { deriveProject, slugify, validateName } from "@/lib/project-builder/project";
@@ -44,13 +44,14 @@ describe("deriveProject", () => {
   });
 
   it("Expo + secret-bearing capability adds a companion server and keeps the key out of the app", () => {
-    const p = deriveProject({ id: "mobile-app", framework: "expo", integrations: ["gemini", "wallet"] });
+    const p = deriveProject({ id: "mobile-app", framework: "expo", integrations: ["gemini", "payments"] });
     expect(p.needsCompanion).toBe(true);
     expect(p.files.map((f) => f.path)).toContain("companion-server/src/server.ts");
     const gemini = p.env.find((e) => e.key === "GEMINI_API_KEY")!;
     expect(gemini.file).toBe("companion-server/.env.example");
-    const rpc = p.env.find((e) => e.key === "EXPO_PUBLIC_SOLANA_RPC_URL")!;
-    expect(rpc.file).toBe(".env.example");
+    // Nothing secret is ever written to the app's own env file.
+    expect(p.env.filter((e) => e.file === ".env.example").map((e) => e.key)).not.toEqual(expect.arrayContaining(["GEMINI_API_KEY"]));
+    expect(p.env.find((e) => e.key === "AGENT_PRIVATE_KEY")!.file).toBe("companion-server/.env.example");
     expect(p.companions[0]).toMatchObject({ kind: "included", name: "companion-server/" });
   });
 
@@ -90,7 +91,8 @@ describe("compatibility catalog", () => {
   });
   it("only claims verified templates for the four built frameworks", () => {
     const verified = INTEGRATIONS.filter((i) => i.verifiedOn.length).map((i) => i.id);
-    expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "spending"]);
+    expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "spending", "wallet"]);
+    expect(INTEGRATION_MAP.wallet.verifiedOn).toEqual(["next"]);
     for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => ["next", "node", "python", "expo"].includes(fw))).toBe(true);
   });
   it("switches on required capabilities, in dependency order", () => {
