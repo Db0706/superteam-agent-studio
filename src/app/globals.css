@@ -9,8 +9,8 @@
      padding and wires stay in sync even when the browser font size is changed. */
   --spacing: 4px;
 
-  --font-sans: var(--font-archivo), system-ui, sans-serif;
-  --font-mono: var(--font-martian), ui-monospace, monospace;
+  --font-sans: "Archivo", system-ui, sans-serif;
+  --font-mono: "Martian Mono", ui-monospace, monospace;
 
   --color-canvas: #e9e9e4;
   --color-surface: #ffffff;

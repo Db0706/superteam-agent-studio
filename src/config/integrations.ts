@@ -73,7 +73,7 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
     envFile: ".env.local",
     manager: "npm",
     manifest: "package.json",
-    baseFiles: ["app/layout.tsx", "app/page.tsx", "app/globals.css", "lib/modules.ts", "next.config.ts", "tsconfig.json", "package.json", ".gitignore", ".env.example", "README.md", "studio.manifest.json"],
+    baseFiles: ["app/layout.tsx", "app/page.tsx", "app/globals.css", "components/ui.tsx", "components/Nav.tsx", "lib/modules.ts", "next.config.ts", "tsconfig.json", "package.json", ".gitignore", ".env.example", "README.md", "studio.manifest.json"],
     packages: {
       // next >=16.2.6 is required by @x402/next 2.28.
       base: [["next", "16.3.8"], ["react", "19.3.0"], ["react-dom", "19.3.0"], ["server-only", "0.0.1"]],
