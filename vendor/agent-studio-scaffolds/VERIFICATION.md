@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.5.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0)
+Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.5.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0)
 
 ## Verified package versions (exact pins)
 
@@ -124,6 +124,17 @@ Same machine and date, Python 3.12.14 unless noted. Commands ran in the composed
 | P8 | `python -m agent keygen` / `keygen --pay-to` write `.env`; `python -m agent wallets` against devnet RPC reports "no devnet USDC account yet" for both unfunded wallets | pass |
 | P9 | `python -m agent serve --reload`: starts, reloads on file change; unknown path 404 JSON; gemini without key 500 "GEMINI_API_KEY is not set" | pass |
 | P10 | Composer: next and node output for **all 32** module subsets is byte-identical to the v0.2.0 composer (run before the version bump; afterwards only `studio.manifest.json` `scaffoldVersion` reads 0.3.0) | pass |
+
+## What was tested: Next.js UI (0.6.0)
+
+The Next.js base and its gemini, paidapi and wallet pages use the Agent Studio "Schematic" look (`app/globals.css`, `components/ui.tsx`, `components/Nav.tsx`).
+
+| # | Test | Result |
+| --- | --- | --- |
+| U1 | `npm run verify -- next`: all six combinations pass, including the no-secrets scan of `.next/static` | pass |
+| U2 | Fonts (Archivo, Martian Mono) load in the browser from Google Fonts, not through `next/font/google`. `next/font/google` failed some Turbopack builds intermittently ("next/font/google queries have exactly one entry"), and builds now need no font download | pass |
+| U3 | Browser (`next start`, Chrome, 1440px and 375px): home lists the composed modules and next steps; `/premium` step 1 shows the live 402 price, pay-to address and network; step 2 shows a readable error when no agent key is set; the spending meter renders; `/chat` shows the missing-key hint; `/wallet` shows the no-wallet state; no horizontal scroll on mobile | pass |
+| U4 | node, python and expo output is byte-identical to 0.5.0 apart from `scaffoldVersion` | pass |
 
 ## What was tested: Next.js Wallet Connection (`--framework next --modules wallet`)
 

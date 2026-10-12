@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Martian_Mono } from "next/font/google";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { EventProvider } from "@/components/shell/EventContext";
 import { Footer } from "@/components/shell/Footer";
@@ -7,9 +6,11 @@ import { SITE_NAME } from "@/config/site";
 import { validateAllConfig } from "@/config/validate";
 import "./globals.css";
 
-// Archivo is used at width 125% for display type, so load the wdth axis.
-const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
-const martian = Martian_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-martian", display: "swap" });
+// Fonts load in the browser from Google Fonts. next/font/google started failing Turbopack builds
+// ("next/font/google queries have exactly one entry"), so the build no longer downloads fonts.
+// Archivo's width axis (62–125) gives the 125% display type.
+const FONTS =
+  "https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Martian+Mono:wght@400;500;600&display=swap";
 
 export const metadata: Metadata = {
   title: { default: SITE_NAME, template: `%s · ${SITE_NAME}` },
@@ -21,7 +22,12 @@ export const viewport: Viewport = { themeColor: "#161616" };
 export default function RootLayout({ children }: LayoutProps<"/">) {
   validateAllConfig();
   return (
-    <html lang="en-GB" className={`${archivo.variable} ${martian.variable}`}>
+    <html lang="en-GB">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="stylesheet" href={FONTS} />
+      </head>
       <body>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:bg-white focus:p-2">
           Skip to content

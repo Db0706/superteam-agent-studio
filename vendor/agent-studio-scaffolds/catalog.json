@@ -12,6 +12,8 @@
         "app/layout.tsx",
         "app/page.tsx",
         "app/globals.css",
+        "components/ui.tsx",
+        "components/Nav.tsx",
         "lib/modules.ts",
         "next.config.ts",
         "tsconfig.json",

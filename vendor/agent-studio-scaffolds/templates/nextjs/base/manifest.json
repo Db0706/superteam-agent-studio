@@ -9,6 +9,8 @@
     "app/layout.tsx",
     "app/page.tsx",
     "app/globals.css",
+    "components/ui.tsx",
+    "components/Nav.tsx",
     "lib/modules.ts",
     "next.config.ts",
     "tsconfig.json",
@@ -18,7 +20,13 @@
     "README.md"
   ],
   "modulesFile": "lib/modules.ts",
-  "generatedFiles": ["lib/modules.ts", "package.json", ".env.example", "README.md", "studio.manifest.json"],
+  "generatedFiles": [
+    "lib/modules.ts",
+    "package.json",
+    ".env.example",
+    "README.md",
+    "studio.manifest.json"
+  ],
   "dependencies": {
     "next": "16.3.8",
     "react": "19.3.0",
@@ -38,6 +46,8 @@
     "typecheck": "tsc --noEmit"
   },
   "env": [],
-  "prerequisites": ["Node.js 20.9 or newer (22 LTS recommended)"],
+  "prerequisites": [
+    "Node.js 20.9 or newer (22 LTS recommended)"
+  ],
   "readme": "README.fragment.md"
 }

@@ -1,27 +1,44 @@
 "use client";
 
-import Link from "next/link";
 import { useSelectedWalletAccount } from "@solana/react";
 import { ConnectWallet } from "@/components/wallet/ConnectWallet";
 import { PayWithWallet } from "@/components/wallet/PayWithWallet";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
+import { Led, Module, PageHeader } from "@/components/ui";
 
 export default function WalletPage() {
   return (
     <WalletProvider>
-      <p><Link href="/">← Home</Link></p>
-      <h1>Pay with your wallet</h1>
-      <p className="muted">
-        Connect your own Solana wallet and pay <code>/api/premium</code> with <strong>devnet test USDC</strong> (no real money).
-        Your wallet shows each payment and asks you to approve it.
-      </p>
-      <ConnectWallet />
-      <SelectedAccountPay />
+      <PageHeader eyebrow="Module · Wallet Connection" title={<>Pay with<br />your wallet.</>}>
+        Connect your own Solana wallet and pay <code>/api/premium</code> with <strong>devnet test USDC</strong> (no real
+        money). Your wallet shows each payment and asks you to approve it.
+      </PageHeader>
+      <div className="cols">
+        <ConnectPanel />
+        <PayPanel />
+      </div>
     </WalletProvider>
   );
 }
 
-function SelectedAccountPay() {
+function ConnectPanel() {
   const [account] = useSelectedWalletAccount();
-  return account ? <PayWithWallet account={account} /> : null;
+  return (
+    <Module label="A · Connect" right={account ? <><Led tone="ok" /> Connected</> : <><Led /> Not connected</>}>
+      <ConnectWallet />
+    </Module>
+  );
+}
+
+function PayPanel() {
+  const [account] = useSelectedWalletAccount();
+  return (
+    <Module label="B · Pay" right="Max $0.10 per payment">
+      {account ? (
+        <PayWithWallet account={account} />
+      ) : (
+        <div className="empty">Connect a wallet first.</div>
+      )}
+    </Module>
+  );
 }

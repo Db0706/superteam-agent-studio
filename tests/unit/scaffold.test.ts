@@ -5,6 +5,8 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { canDownload, GeneratorUnavailableError, getGenerator, ScaffoldRequestError, scaffoldGenerator } from "@/lib/project-builder/generator";
+import { normalizeIntegrations } from "@/config/integrations";
+import { deriveProject } from "@/lib/project-builder/project";
 import { SCAFFOLD, ZIP_MODULES, zipAvailability } from "@/lib/scaffold/catalog";
 import catalogJson from "../../vendor/agent-studio-scaffolds/catalog.json";
 import { composeScaffold, isForbiddenPath, VENDOR_DIR, type StudioManifest } from "@/lib/scaffold/compose";
@@ -166,6 +168,17 @@ describe("composeScaffold", () => {
     expect(actual.manifest.modules).toEqual(["payments", "spending", "paidapi", "wallet"]);
     expect(actual.manifest.dependencies).toMatchObject({ "@solana/react": "5.5.1", "@solana/kit": "5.5.1" });
     expect(actual.files.map((f) => f.path)).toContain("app/wallet/page.tsx");
+  });
+
+  it.each(FRAMEWORKS)("the Builder preview lists exactly the files the %s download contains", (framework) => {
+    const ids = ZIP_MODULES[framework] ?? [];
+    for (const modules of subsets(ids)) {
+      // The Builder switches on required capabilities the same way the composer adds them.
+      const integrations = normalizeIntegrations(modules, framework);
+      const preview = deriveProject({ id: "x", framework, integrations }).files.map((f) => f.path).sort();
+      const download = composeScaffold(ROOT, { framework, modules }).files.map((f) => f.path).sort();
+      expect(preview, `${framework}: ${modules.join("+") || "base"}`).toEqual(download);
+    }
   });
 
   it("rejects unknown frameworks and modules", () => {

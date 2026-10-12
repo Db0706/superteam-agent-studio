@@ -6,6 +6,7 @@ import { decodePaymentResponseHeader, wrapFetchWithPayment, x402Client } from "@
 import { ExactSvmScheme } from "@x402/svm/exact/client";
 import type { UiWalletAccount } from "@wallet-standard/react";
 import { useState } from "react";
+import { ExplorerLink } from "@/components/ui";
 import { WALLET_CHAIN } from "./WalletProvider";
 
 // x402 CAIP-2 id for Solana devnet: the same network the paid API charges on.
@@ -18,7 +19,7 @@ const MAX_PAYMENT = "$0.10";
 export function PayWithWallet({ account }: { account: UiWalletAccount }) {
   // The official hook turns the connected wallet into a @solana/kit signer, which x402 accepts as is.
   const signer = useWalletAccountTransactionSigner(account, WALLET_CHAIN);
-  const [result, setResult] = useState<unknown>(null);
+  const [result, setResult] = useState<PayResult | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function pay() {
@@ -44,16 +45,42 @@ export function PayWithWallet({ account }: { account: UiWalletAccount }) {
     }
   }
 
+  const signature = result?.receipt?.success ? result.receipt.transaction : undefined;
   return (
     <>
-      <button onClick={pay} disabled={busy}>
-        {busy ? "Waiting for your wallet…" : "Buy premium data with my wallet"}
-      </button>
-      <p className="muted">Max {MAX_PAYMENT} per payment · devnet test USDC only</p>
-      {result !== null && <pre>{JSON.stringify(result, null, 2)}</pre>}
+      <p className="small muted" style={{ margin: 0 }}>
+        Max {MAX_PAYMENT} per payment · devnet test USDC only. Your wallet will ask you to approve it.
+      </p>
+      <div className="row">
+        <button className="btn btn--primary" onClick={pay} disabled={busy}>
+          {busy ? "Waiting for your wallet…" : "Buy premium data ▸"}
+        </button>
+      </div>
+      <div aria-live="polite" className="stack">
+        {signature && (
+          <>
+            <p className="notice notice--ok" style={{ margin: 0 }}>
+              Paid from your wallet and settled on Solana devnet: <ExplorerLink signature={signature} />
+            </p>
+            <pre className="code">{JSON.stringify(result?.body, null, 2)}</pre>
+          </>
+        )}
+        {result && !signature && (
+          <p className="notice notice--fault" style={{ margin: 0 }}>
+            {result.error ?? `The paid API answered ${result.status}.`}
+          </p>
+        )}
+      </div>
     </>
   );
 }
+
+type PayResult = {
+  status?: number;
+  error?: string;
+  receipt?: { success?: boolean; transaction?: string } | null;
+  body?: unknown;
+};
 
 /** Why the server still answered 402 after the wallet signed (e.g. the wallet has no devnet USDC yet). */
 function paymentError(res: Response): string {
