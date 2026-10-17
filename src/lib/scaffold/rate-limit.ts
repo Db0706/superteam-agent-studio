@@ -35,6 +35,26 @@ export function createRateLimiter({ perClient, global, windowMs, now = Date.now 
   };
 }
 
+/**
+ * Download limits, per server instance per minute. Defaults are sized for a hackathon:
+ * a whole venue often shares one public IP (eduroam, campus NAT), and one instance
+ * builds roughly 200-400 ZIPs a second, so these only stop runaway scripts.
+ * Override on Vercel with SCAFFOLD_RATE_PER_IP / SCAFFOLD_RATE_GLOBAL (positive integers);
+ * anything else falls back to the default rather than disabling the limit.
+ */
+export const DEFAULT_RATE_LIMITS = { perClient: 120, global: 3000 } as const;
+
+export function rateLimitsFromEnv(env: Record<string, string | undefined>): { perClient: number; global: number } {
+  const read = (value: string | undefined, fallback: number) => {
+    const n = Number(value);
+    return value?.trim() && Number.isInteger(n) && n > 0 ? n : fallback;
+  };
+  return {
+    perClient: read(env.SCAFFOLD_RATE_PER_IP, DEFAULT_RATE_LIMITS.perClient),
+    global: read(env.SCAFFOLD_RATE_GLOBAL, DEFAULT_RATE_LIMITS.global),
+  };
+}
+
 /** Best-effort client address. Only trustworthy behind a proxy that sets these headers. */
 export function clientKey(req: Request): string {
   const fwd = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();

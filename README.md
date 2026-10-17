@@ -154,6 +154,15 @@ interface ScaffoldGenerator {
   It needs npm and PyPI but no keys, wallets or facilitator. Options: `npm run test:zip -- --skip-build node-paidapi` reuses `.next` and runs matching cases; `--live-402` additionally checks `/premium-data` answers 402, which contacts the devnet facilitator, so it is off by default. The smoke script also runs standalone against any running site: `node scripts/smoke-scaffold-zip.mjs <base-url>`. CI (`.github/workflows/scaffold-zip.yml`) runs it, plus `vendor-scaffolds.mjs --check`, on every pull request; its `zip` job is a required check for merging to `main`. It takes several minutes and about 1 GB of disk.
 - **UI.** After GENERATE PROJECT, **DOWNLOAD ZIP ↓** calls `generateProject` and saves `<name>.zip`. While it runs it shows BUILDING ZIP…; failures show `ZIP FAILED · <reason>` with **RETRY ZIP**. Any configuration change cancels a pending download.
 
+## Event day: download capacity and limits
+
+Load-tested 2026-10-17. One server instance builds a project ZIP in about 3–5 ms (200–400 ZIPs a second; 500 concurrent downloads finished in under 2 s using about 19 MB of memory). ZIPs are 28–49 KB. Capacity is not the constraint; the rate limit is.
+
+- `POST /api/scaffold` allows **120 downloads a minute per IP** and **3,000 a minute per server instance** (`src/lib/scaffold/rate-limit.ts`). A whole venue often shares one public IP (eduroam, campus NAT), so the per-IP limit is sized for a room, not a person. It's an abuse brake, not a quota: it's in memory, per instance.
+- To tune it on the day without a deploy of new code, set `SCAFFOLD_RATE_PER_IP` and/or `SCAFFOLD_RATE_GLOBAL` (positive integers) in the Vercel project's environment variables and redeploy. Invalid values fall back to the defaults instead of disabling the limit.
+- When limited, the Builder shows "Too many downloads. Try again in Ns." with a retry; nothing else breaks.
+- For a hard, site-wide limit across instances, add a rule in Vercel's Firewall.
+
 ## Known limitations
 
 - All event details, prizes, dates, the venue and the host role are placeholders (PROPOSED / SAMPLE / TBC). The "AGENT STUDIO by Superteam" wordmark and the "ST" tile are placeholder brand marks; replace them with approved assets.

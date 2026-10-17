@@ -6,7 +6,7 @@ import { validateConfiguration } from "@/lib/project-builder/generator";
 import { validateName } from "@/lib/project-builder/project";
 import { zipAvailability } from "./catalog";
 import { composeScaffold } from "./compose";
-import { clientKey, createRateLimiter } from "./rate-limit";
+import { clientKey, createRateLimiter, rateLimitsFromEnv } from "./rate-limit";
 import { createZip } from "./zip";
 import vendorJson from "../../../vendor/agent-studio-scaffolds/VENDOR.json";
 
@@ -59,7 +59,7 @@ export interface HandlerOptions {
 export function createScaffoldHandler({
   // Statically scoped so file tracing only includes the vendored templates.
   root = join(process.cwd(), "vendor", "agent-studio-scaffolds"),
-  limiter = createRateLimiter({ perClient: 10, global: 120, windowMs: 60_000 }),
+  limiter = createRateLimiter({ ...rateLimitsFromEnv(process.env), windowMs: 60_000 }),
 }: HandlerOptions = {}) {
   return async function POST(req: Request): Promise<Response> {
     const rate = limiter.take(clientKey(req));
