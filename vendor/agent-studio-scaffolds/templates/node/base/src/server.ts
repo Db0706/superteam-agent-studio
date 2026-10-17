@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import express, { type ErrorRequestHandler, type Express } from "express";
+import { renderLanding } from "./landing.js";
 import { modules } from "./modules.js";
 
 // Secrets come from .env.local (git-ignored) or the real environment. Never hard-code them.
@@ -12,8 +13,13 @@ try {
 const app = express();
 app.use(express.json({ limit: "100kb" }));
 
-// Home: lists every feature included in this service.
-app.get("/", (_req, res) => {
+// Home: lists every feature included in this service. Browsers get a readable page
+// (src/landing.ts); code (curl, fetch, other agents) gets JSON.
+app.get("/", (req, res) => {
+  if (req.accepts(["json", "html"]) === "html") {
+    res.type("html").send(renderLanding(modules, `${req.protocol}://${req.get("host")}`));
+    return;
+  }
   res.json({ service: "superteam-agent-service", modules });
 });
 

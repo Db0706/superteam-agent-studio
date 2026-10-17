@@ -1,17 +1,18 @@
 """The agent's HTTP service (FastAPI). Run it with `python -m agent serve`.
 
-GET / lists every feature in this project. Every file in agent/routes adds its own endpoints,
+GET / lists every feature in this project (a page for browsers, JSON for code). Every file in agent/routes adds its own endpoints,
 so adding a feature never means editing this file.
 """
 
 import logging
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from starlette.exceptions import HTTPException
 
 from . import routes
 from .config import load_env
+from .landing import render_landing
 from .modules import modules
 from .plugins import load_plugins
 
@@ -22,8 +23,11 @@ app = FastAPI(title="Superteam agent")
 
 
 @app.get("/")
-async def home() -> dict[str, object]:
-    return {"service": "superteam-agent", "modules": modules}
+async def home(request: Request) -> Response:
+    """Browsers get a readable page (agent/landing.py); code (curl, httpx, other agents) gets JSON."""
+    if "text/html" in request.headers.get("accept", ""):
+        return HTMLResponse(render_landing(modules, str(request.base_url).rstrip("/")))
+    return JSONResponse({"service": "superteam-agent", "modules": modules})
 
 
 for route in load_plugins(routes):

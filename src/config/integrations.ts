@@ -119,7 +119,7 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
     manifest: "requirements.txt",
     // `python -m agent` is the CLI; `python -m agent serve` runs the FastAPI service on :3000.
     baseFiles: [
-      "agent/__init__.py", "agent/__main__.py", "agent/config.py", "agent/plugins.py", "agent/modules.py", "agent/server.py",
+      "agent/__init__.py", "agent/__main__.py", "agent/config.py", "agent/plugins.py", "agent/modules.py", "agent/server.py", "agent/landing.py",
       "agent/commands/__init__.py", "agent/routes/__init__.py", "tests/test_agent.py", "pyproject.toml",
       "requirements.txt", "requirements-dev.txt", ".gitignore", ".env.example", "README.md", "studio.manifest.json",
     ],
@@ -143,7 +143,7 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
     manager: "npm",
     manifest: "package.json",
     // src/server.ts loads .env.local (process.loadEnvFile, Node >= 20.12) and every file in src/routes.
-    baseFiles: ["src/server.ts", "src/modules.ts", "tsconfig.json", "tsconfig.build.json", "package.json", ".gitignore", ".env.example", "README.md", "studio.manifest.json"],
+    baseFiles: ["src/server.ts", "src/landing.ts", "src/modules.ts", "tsconfig.json", "tsconfig.build.json", "package.json", ".gitignore", ".env.example", "README.md", "studio.manifest.json"],
     packages: {
       // express 5.x satisfies @x402/express 2.28's peer range (^4 || ^5).
       base: [["express", "5.2.1"]],
