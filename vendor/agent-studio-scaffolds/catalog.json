@@ -304,6 +304,7 @@
       "requires": [],
       "files": [
         "src/server.ts",
+        "src/landing.ts",
         "src/modules.ts",
         "tsconfig.json",
         "tsconfig.build.json",
@@ -555,6 +556,7 @@
         "agent/plugins.py",
         "agent/modules.py",
         "agent/server.py",
+        "agent/landing.py",
         "agent/commands/__init__.py",
         "agent/routes/__init__.py",
         "tests/test_agent.py",

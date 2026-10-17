@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.5.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0)
+Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.8.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0; node and python landing pages in 0.8.0)
 
 ## Verified package versions (exact pins)
 
@@ -124,6 +124,18 @@ Same machine and date, Python 3.12.14 unless noted. Commands ran in the composed
 | P8 | `python -m agent keygen` / `keygen --pay-to` write `.env`; `python -m agent wallets` against devnet RPC reports "no devnet USDC account yet" for both unfunded wallets | pass |
 | P9 | `python -m agent serve --reload`: starts, reloads on file change; unknown path 404 JSON; gemini without key 500 "GEMINI_API_KEY is not set" | pass |
 | P10 | Composer: next and node output for **all 32** module subsets is byte-identical to the v0.2.0 composer (run before the version bump; afterwards only `studio.manifest.json` `scaffoldVersion` reads 0.3.0) | pass |
+
+## What was tested: Node.js and Python landing pages (0.8.0)
+
+`GET /` answers by content negotiation: browsers (Accept `text/html`) get a page in the Agent Studio look listing every endpoint with copy-paste commands and next steps (`src/landing.ts`, `agent/landing.py`); everything else (curl's `*/*`, fetch, httpx, the Expo app's companion check, the smoke tests) gets the same JSON as before.
+
+| # | Test | Result |
+| --- | --- | --- |
+| L1 | `npm run verify -- node python`: all ten combinations pass, including the HTTP smoke tests that read `GET /` as JSON | pass |
+| L2 | curl without Accept → JSON `{service, modules}`; `Accept: text/html` → the page (node and python) | pass |
+| L3 | python: `pyright` clean; new tests cover both answers of `GET /` (JSON for `*/*`, page for `text/html`) | pass |
+| L4 | Browser (Chrome, 1440px): node and python pages render with the composed modules, commands on one line each (scrolling sideways when long), next steps adapted to the modules; python links FastAPI's `/docs` | pass |
+| L5 | next and expo output byte-identical to 0.7.0 apart from `scaffoldVersion` | pass |
 
 ## What was tested: Next.js UI (0.6.0)
 

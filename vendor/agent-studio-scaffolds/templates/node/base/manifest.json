@@ -7,6 +7,7 @@
   "requires": [],
   "files": [
     "src/server.ts",
+    "src/landing.ts",
     "src/modules.ts",
     "tsconfig.json",
     "tsconfig.build.json",
@@ -16,7 +17,13 @@
     "README.md"
   ],
   "modulesFile": "src/modules.ts",
-  "generatedFiles": ["src/modules.ts", "package.json", ".env.example", "README.md", "studio.manifest.json"],
+  "generatedFiles": [
+    "src/modules.ts",
+    "package.json",
+    ".env.example",
+    "README.md",
+    "studio.manifest.json"
+  ],
   "dependencies": {
     "express": "5.2.1"
   },
@@ -33,6 +40,8 @@
     "typecheck": "tsc --noEmit"
   },
   "env": [],
-  "prerequisites": ["Node.js 20.12 or newer (22 LTS recommended)"],
+  "prerequisites": [
+    "Node.js 20.12 or newer (22 LTS recommended)"
+  ],
   "readme": "README.fragment.md"
 }

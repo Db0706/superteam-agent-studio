@@ -12,6 +12,7 @@
     "agent/plugins.py",
     "agent/modules.py",
     "agent/server.py",
+    "agent/landing.py",
     "agent/commands/__init__.py",
     "agent/routes/__init__.py",
     "tests/test_agent.py",
@@ -28,7 +29,14 @@
     "dependencies": "requirements.txt",
     "devDependencies": "requirements-dev.txt"
   },
-  "generatedFiles": ["agent/modules.py", "requirements.txt", "requirements-dev.txt", ".env.example", "README.md", "studio.manifest.json"],
+  "generatedFiles": [
+    "agent/modules.py",
+    "requirements.txt",
+    "requirements-dev.txt",
+    ".env.example",
+    "README.md",
+    "studio.manifest.json"
+  ],
   "dependencies": {
     "fastapi": "0.143.0",
     "uvicorn": "0.54.0",
@@ -45,6 +53,8 @@
     "typecheck": "pyright"
   },
   "env": [],
-  "prerequisites": ["Python 3.10 or newer (3.12 recommended)"],
+  "prerequisites": [
+    "Python 3.10 or newer (3.12 recommended)"
+  ],
   "readme": "README.fragment.md"
 }
