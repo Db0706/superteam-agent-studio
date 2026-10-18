@@ -11,6 +11,7 @@ export const NAV = [
   { href: "/playground", label: "Playground" },
   { href: "/build", label: "Build" },
   { href: "/inspiration", label: "Inspiration" },
+  { href: "/start", label: "First 10 Minutes" },
 ] as const;
 
 function isActive(pathname: string, href: string) {
