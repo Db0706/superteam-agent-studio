@@ -35,6 +35,7 @@ test.describe("navigation", () => {
       ["Playground", "/playground", /Watch an agent/],
       ["Build", "/build", /Wire up your/],
       ["Inspiration", "/inspiration", /Big ideas start somewhere/],
+      ["First 10 Minutes", "/start", /Your first 10 minutes/],
       ["Dashboard", "/", /Build what the internet/],
     ] as const) {
       await navTo(page, label);
@@ -45,13 +46,13 @@ test.describe("navigation", () => {
       if (isMobile(page)) await page.getByRole("button", { name: "Close menu" }).click();
     }
     await page.goBack();
-    await expect(page).toHaveURL(/\/inspiration/);
+    await expect(page).toHaveURL(/\/start/);
     await page.goForward();
     await expect(page).toHaveURL(/\/$/);
   });
 
   test("no page scrolls horizontally", async ({ page }) => {
-    for (const path of ["/", "/playground", "/build", "/inspiration"]) {
+    for (const path of ["/", "/playground", "/build", "/inspiration", "/start"]) {
       await page.goto(path);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, path).toBeLessThanOrEqual(0);
@@ -170,9 +171,11 @@ test.describe("project builder", () => {
     await expect(page.getByRole("switch", { name: /Wallet Connection/ })).toHaveAttribute("aria-disabled", "true");
 
     await page.getByRole("button", { name: /Mobile Application/ }).click();
+    await expect(page.getByText("companion-server/", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: /Web Application/ }).click();
     await page.getByRole("switch", { name: /Wallet Connection/ }).click();
     await expect(page.getByRole("switch", { name: /Wallet Connection/ })).toHaveAttribute("aria-checked", "true");
-    await expect(page.getByText("companion-server/", { exact: true })).toBeVisible();
     await page.getByRole("tab", { name: "STRUCTURE" }).click();
     await expect(page.getByRole("tabpanel")).toContainText("ConnectWallet.tsx");
 
@@ -224,13 +227,13 @@ test.describe("project builder", () => {
     await expect(page.getByText(/^SAVED my-first-ai-agent\.zip/)).toBeVisible();
   });
 
-  test("frameworks without templates stay an honest preview with no download", async ({ page }) => {
+  test("modules without templates stay an honest preview with no download", async ({ page }) => {
     let downloaded = false;
     page.on("download", () => (downloaded = true));
     const posts: string[] = [];
     page.on("request", (r) => r.method() === "POST" && posts.push(r.url()));
-    await page.getByRole("button", { name: /Mobile Application/ }).click();
-    await expect(page.getByText(/Preview only\. Mobile Application templates aren't built yet/)).toBeVisible();
+    await page.getByRole("switch", { name: /Pay\.sh/ }).click();
+    await expect(page.getByText(/Preview only\. Pay\.sh has no template yet/)).toBeVisible();
     await page.getByRole("button", { name: /GENERATE PROJECT/ }).click();
     await expect(page.getByText(/CONFIGURED ·/)).toBeVisible();
     await expect(page.getByText(/Nothing has been generated or downloaded/)).toBeVisible();
@@ -281,5 +284,26 @@ test.describe("inspiration", () => {
   test("has no build-this shortcut", async ({ page }) => {
     await page.goto("/inspiration");
     await expect(page.getByRole("button", { name: /build this|generate/i })).toHaveCount(0);
+  });
+});
+
+test.describe("first 10 minutes guide", () => {
+  test("switches framework, keeps it in the URL and links to a ready Builder", async ({ page }) => {
+    await page.goto("/start");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Your first 10 minutes/);
+    await expect(page.getByText("$ npm run keygen -- --pay-to")).toBeVisible();
+
+    await page.getByRole("group", { name: "Framework" }).getByRole("button", { name: /Autonomous Agent/ }).click();
+    await expect(page).toHaveURL(/fw=python/);
+    await expect(page.getByText("$ python -m agent keygen --pay-to")).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByText("$ python -m agent buy")).toBeVisible();
+
+    await page.getByRole("link", { name: /Open Build, ready to download/ }).click();
+    await expect(page).toHaveURL(/\/build\?.*fw=python/);
+    await expect(page.getByRole("switch", { name: /Paid API/ })).toHaveAttribute("aria-checked", "true");
+    await page.getByRole("button", { name: /GENERATE PROJECT/ }).click();
+    await expect(page.getByRole("button", { name: "DOWNLOAD ZIP ↓" })).toBeEnabled();
   });
 });
