@@ -12,7 +12,7 @@ import catalogJson from "../../vendor/agent-studio-scaffolds/catalog.json";
 import { composeScaffold, isForbiddenPath, VENDOR_DIR, type StudioManifest } from "@/lib/scaffold/compose";
 import { FRAMEWORK_DIRS } from "@/lib/scaffold/frameworks";
 import { createScaffoldHandler, MAX_BODY_BYTES } from "@/lib/scaffold/handler";
-import { createRateLimiter } from "@/lib/scaffold/rate-limit";
+import { createRateLimiter, DEFAULT_RATE_LIMITS, rateLimitsFromEnv } from "@/lib/scaffold/rate-limit";
 import { crc32, createZip } from "@/lib/scaffold/zip";
 import { listZipEntries } from "@/lib/scaffold/zip-entries";
 
@@ -348,6 +348,19 @@ describe("POST /api/scaffold handler", () => {
     expect(Number(limited.headers.get("retry-after"))).toBeGreaterThan(0);
     expect((await limited.json()).retryable).toBe(true);
     expect((await h(post(FULL, { "x-forwarded-for": "198.51.100.1" }))).status).toBe(200);
+  });
+});
+
+describe("event rate limits", () => {
+  it("default to limits a whole venue behind one IP can live with", () => {
+    expect(rateLimitsFromEnv({})).toEqual({ perClient: 120, global: 3000 });
+    expect(DEFAULT_RATE_LIMITS.perClient).toBeGreaterThanOrEqual(100);
+  });
+  it("can be tuned with environment variables", () => {
+    expect(rateLimitsFromEnv({ SCAFFOLD_RATE_PER_IP: "300", SCAFFOLD_RATE_GLOBAL: "6000" })).toEqual({ perClient: 300, global: 6000 });
+  });
+  it.each(["", " ", "0", "-5", "1.5", "lots", "1e999"])("ignores a bad value (%j) instead of disabling the limit", (bad) => {
+    expect(rateLimitsFromEnv({ SCAFFOLD_RATE_PER_IP: bad, SCAFFOLD_RATE_GLOBAL: bad })).toEqual({ perClient: 120, global: 3000 });
   });
 });
 
