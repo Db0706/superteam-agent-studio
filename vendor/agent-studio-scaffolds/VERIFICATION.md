@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.8.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0; node and python landing pages in 0.8.0)
+Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.8.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0; node and python landing pages in 0.8.0; `paysh` module for all four in 0.9.0)
 
 ## Verified package versions (exact pins)
 
@@ -124,6 +124,17 @@ Same machine and date, Python 3.12.14 unless noted. Commands ran in the composed
 | P8 | `python -m agent keygen` / `keygen --pay-to` write `.env`; `python -m agent wallets` against devnet RPC reports "no devnet USDC account yet" for both unfunded wallets | pass |
 | P9 | `python -m agent serve --reload`: starts, reloads on file change; unknown path 404 JSON; gemini without key 500 "GEMINI_API_KEY is not set" | pass |
 | P10 | Composer: next and node output for **all 32** module subsets is byte-identical to the v0.2.0 composer (run before the version bump; afterwards only `studio.manifest.json` `scaffoldVersion` reads 0.3.0) | pass |
+
+## What was tested: Pay.sh (`--modules paysh`, 0.9.0)
+
+Pay.sh is the Solana Foundation's `pay` CLI (https://pay.sh, https://github.com/solana-foundation/pay, MIT). It is a command-line tool, not a library, so the starters call it and never bundle it. Tested with `pay 0.29.0` from Homebrew core on 2026-10-18.
+
+- **PS1. `pay` pays our devnet x402 charges.** `pay curl http://localhost:<port>/premium-data` against a composed node `paidapi` service: `pay` read the x402 V2 `PAYMENT-REQUIRED` challenge for `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`, created a devnet wallet (`pay account list` shows it under `devnet:`), and retried with a `PAYMENT-SIGNATURE` carrying `x402Version: 2`, scheme `exact` on that network (seen through a logging proxy). The facilitator answered `invalid_exact_svm_transaction_simulation_failed` because the new wallet was empty, which is the expected result before funding.
+- **PS2. Commands, Node and Next.js.** `npm run paysh` (pays the project's paid route; prints the "payment was refused, fund your Pay.sh wallet" hint on that failure), `npm run paysh -- wallet` (finds the devnet wallet in `pay account list`, reads its devnet USDC balance over RPC), `npm run paysh -- listing "Team Rocket"` (writes `pay-listing/providers/team-rocket/<name>/PAY.md`; `pay catalog check … --no-probe` reports "PAY.md check successful"). Typecheck and `npm run test:paysh` pass in `npm run verify`.
+- **PS3. Commands, Python.** `python -m agent paysh`, `--wallet` and `--listing` behave the same; pyright 0 errors; `tests/test_paysh.py` passes (listing layout and field limits, wallet parsing, a clear message when `pay` is not installed).
+- **PS4. A settled payment through `pay`.** Not tested yet: needs devnet USDC in the Pay.sh wallet from https://faucet.circle.com.
+
+Not tested: `pay claude` (needs a Claude Code login), `--sandbox` (Pay.sh's hosted test network at `402.surfnet.dev` did not answer on 2026-10-18), and submitting a listing (the public catalog only accepts mainnet APIs).
 
 ## What was tested: Node.js and Python landing pages (0.8.0)
 

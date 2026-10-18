@@ -232,8 +232,9 @@ test.describe("project builder", () => {
     page.on("download", () => (downloaded = true));
     const posts: string[] = [];
     page.on("request", (r) => r.method() === "POST" && posts.push(r.url()));
-    await page.getByRole("switch", { name: /Pay\.sh/ }).click();
-    await expect(page.getByText(/Preview only\. Pay\.sh has no template yet/)).toBeVisible();
+    await page.getByRole("button", { name: /Mobile Application/ }).click();
+    await page.getByRole("switch", { name: /Wallet Connection/ }).click();
+    await expect(page.getByText(/Preview only\. Wallet Connection has no template yet/)).toBeVisible();
     await page.getByRole("button", { name: /GENERATE PROJECT/ }).click();
     await expect(page.getByText(/CONFIGURED ·/)).toBeVisible();
     await expect(page.getByText(/Nothing has been generated or downloaded/)).toBeVisible();

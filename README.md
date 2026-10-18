@@ -91,7 +91,7 @@ The four tracks (Web / Next.js, Consumer Mobile / Expo, Autonomous Agents / Pyth
 
 ## Integration catalog (`src/config/integrations.ts`)
 
-The **Next.js**, **Node.js**, **Python** and **Expo** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.4.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8, Express 5.2.1 with `@x402/express` 2.28.0; Python 3.10+ with `x402[httpx,svm]` 2.25.0, `google-genai` 2.29.0 and FastAPI 0.143.0; Expo SDK 57 apps bundled for Android with no secrets inside; see that repo's `VERIFICATION.md`). Wallet Connection is verified on Next.js only; Pay.sh is still **provisional**. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
+The **Next.js**, **Node.js**, **Python** and **Expo** entries for Gemini, Payments, Spending Controls and Paid API match the real templates in `../agent-studio-scaffolds` (scaffold v0.4.0, verified 2026-10-10: x402 V2 2.28.0 on Solana devnet, `@google/genai` 2.28.0, Next 16.3.8, Express 5.2.1 with `@x402/express` 2.28.0; Python 3.10+ with `x402[httpx,svm]` 2.25.0, `google-genai` 2.29.0 and FastAPI 0.143.0; Expo SDK 57 apps bundled for Android with no secrets inside; see that repo's `VERIFICATION.md`). Wallet Connection is verified on Next.js only. Pay.sh (the Solana Foundation's `pay` CLI, scaffold v0.9.0) is verified on all four; on Expo it runs against the companion server. For each framework the catalog defines the base files, packages, scripts, env file and use case. Each integration has:
 
 `id`, `name`, `description`, `tech`, `external` service, `compatibility[framework]` (`ok` RDY · `server` +SRV · `unverified` UNV · `na` N/A), a `reasons` string for each framework, `worksWith` (advisory), `requires` (hard dependencies; the builder warns if they are off), `prerequisites`, `implementationStatus`, `verifiedOn` (frameworks with a verified template), and `files`, `packages` and `env` for each framework.
 
@@ -102,7 +102,7 @@ Rules the builder enforces:
 - **Python** projects show `requirements.txt` and never `package.json`.
 - The builder **never asks for credentials.** The project name is the only text input.
 
-Package versions, the Pay.sh package name, and the x402 header and network ids are **illustrative**. Verify them against the current x402 V2 spec and the scaffold repository before launch, and keep the UNV labels until CI proves each combination.
+Package versions and the x402 header and network ids are **illustrative**. Verify them against the current x402 V2 spec and the scaffold repository before launch, and keep the UNV labels until CI proves each combination.
 
 ## Playground simulation (`src/lib/simulation`)
 
@@ -135,7 +135,7 @@ interface ScaffoldGenerator {
 }
 ```
 
-- `getGenerator()` returns `scaffoldGenerator`, which builds real projects through **`POST /api/scaffold`** (`src/app/api/scaffold/route.ts`, logic in `src/lib/scaffold/handler.ts`). `zipAvailability(config)` says per selection whether a ZIP is possible and why not: only **Next.js** and **Node.js** have templates, and Wallet and Pay.sh have none yet, so those selections stay previews with a disabled **ZIP · PREVIEW ONLY** button that explains why. `listTemplates()` reports `next` and `node` as `verified` and the rest as `provisional`. A framework is downloadable only if it is in the vendored `catalog.json` *and* in `src/lib/scaffold/frameworks.ts` (the frameworks the in-memory composer can build), so re-vendoring a scaffold with a new framework never turns into a 500: it stays a preview until the port supports it. `previewGenerator` is the no-ZIP fallback.
+- `getGenerator()` returns `scaffoldGenerator`, which builds real projects through **`POST /api/scaffold`** (`src/app/api/scaffold/route.ts`, logic in `src/lib/scaffold/handler.ts`). `zipAvailability(config)` says per selection whether a ZIP is possible and why not: Wallet Connection on Expo is the one capability without a template, so that selection stays a preview with a disabled **ZIP · PREVIEW ONLY** button that explains why. `listTemplates()` reports `next` and `node` as `verified` and the rest as `provisional`. A framework is downloadable only if it is in the vendored `catalog.json` *and* in `src/lib/scaffold/frameworks.ts` (the frameworks the in-memory composer can build), so re-vendoring a scaffold with a new framework never turns into a 500: it stays a preview until the port supports it. `previewGenerator` is the no-ZIP fallback.
 - **Where templates come from.** A pinned copy of `Db0706/agent-studio-scaffolds` is vendored in `vendor/agent-studio-scaffolds/` (commit and version in `VENDOR.json`). The site needs no GitHub token and no network at runtime, and a deploy is reproducible. `next.config.ts` adds the folder to the route's output file tracing. To update it, commit in the scaffold repository, then:
 
   ```bash
@@ -168,7 +168,7 @@ Load-tested 2026-10-17. One server instance builds a project ZIP in about 3–5 
 - All event details, prizes, dates, the venue and the host role are placeholders (PROPOSED / SAMPLE / TBC). The "AGENT STUDIO by Superteam" wordmark and the "ST" tile are placeholder brand marks; replace them with approved assets.
 - The header and footer GitHub links point to this repository; the Dashboard's "Starter repository" link points to [agent-studio-scaffolds](https://github.com/Db0706/agent-studio-scaffolds) (`src/config/site.ts`, `src/config/events.ts`).
 - The compatibility matrix and package versions are illustrative.
-- No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist for all four frameworks (Next.js, Expo, Python, Node.js). Wallet Connection downloads for Next.js only (official `@solana/react` + Wallet Standard; not yet tested with a real wallet app); Wallet on Expo and Pay.sh stay previews until they have templates.
+- No accounts, persistence beyond `localStorage`, analytics, real payments or AI inference, all by design for this phase. Downloads exist for all four frameworks (Next.js, Expo, Python, Node.js). Wallet Connection downloads for Next.js only (official `@solana/react` + Wallet Standard; not yet tested with a real wallet app); Pay.sh downloads for all four (it uses the `pay` CLI, installed separately). Wallet on Expo stays a preview until it has a template.
 
 ## Changes from the prototype (deliberate, minimal)
 

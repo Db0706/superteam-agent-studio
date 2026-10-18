@@ -76,11 +76,6 @@ describe("deriveProject", () => {
     expect(lines.slice(1).every((l) => /^[│ ]*[├└]─ $/.test(l.segs[0].t))).toBe(true);
   });
 
-  it("marks unconfirmed packages as to-confirm", () => {
-    const p = deriveProject({ id: "x", framework: "node", integrations: ["paysh"] });
-    const lines = codeFor("deps", p, "x", "node");
-    expect(lines.some((l) => l.note === "to confirm")).toBe(true);
-  });
 });
 
 describe("compatibility catalog", () => {
@@ -92,7 +87,8 @@ describe("compatibility catalog", () => {
   });
   it("only claims verified templates for the four built frameworks", () => {
     const verified = INTEGRATIONS.filter((i) => i.verifiedOn.length).map((i) => i.id);
-    expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "spending", "wallet"]);
+    expect(verified.sort()).toEqual(["gemini", "paidapi", "payments", "paysh", "spending", "wallet"]);
+    expect(INTEGRATION_MAP.paysh.verifiedOn.sort()).toEqual(["expo", "next", "node", "python"]);
     expect(INTEGRATION_MAP.wallet.verifiedOn).toEqual(["next"]);
     for (const i of INTEGRATIONS) expect(i.verifiedOn.every((fw) => ["next", "node", "python", "expo"].includes(fw))).toBe(true);
   });

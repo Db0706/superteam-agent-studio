@@ -1,0 +1,16 @@
+{
+  "id": "paysh",
+  "kind": "module",
+  "framework": "expo",
+  "name": "Pay.sh",
+  "summary": "Pay your companion server's GET /premium-data (or any x402 API) with the Pay.sh `pay` CLI, let Claude Code pay through it, and draft a Pay.sh catalog listing.",
+  "requires": ["paidapi"],
+  "companionModules": ["paysh"],
+  "files": [],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {},
+  "env": [],
+  "prerequisites": ["The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"],
+  "readme": "README.fragment.md"
+}

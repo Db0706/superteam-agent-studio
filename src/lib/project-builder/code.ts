@@ -31,9 +31,7 @@ export function codeFor(tab: CodeTab, proj: DerivedProject, id: string, fw: Fram
     if (fw === "python") {
       return [
         L([S("# requirements.txt", "com")]),
-        ...proj.deps.map((d) =>
-          d.tbc ? L([S("# pay.sh client", "com")], d.tag, "to confirm") : L([S(d.name, "key"), S(">=", "pun"), S(d.version, "num")], d.tag),
-        ),
+        ...proj.deps.map((d) => L([S(d.name, "key"), S(">=", "pun"), S(d.version, "num")], d.tag)),
       ];
     }
     const out: CodeLine[] = [
@@ -49,11 +47,7 @@ export function codeFor(tab: CodeTab, proj: DerivedProject, id: string, fw: Fram
       out.push(L([S("  "), S(`"${label}"`, "key"), S(": {", "pun")]));
       list.forEach((d, i) =>
         out.push(
-          L(
-            [S("    "), S(`"${d.name}"`, "key"), S(": ", "pun"), S(`"${d.version}"`, d.tbc ? "com" : "str"), S(i < list.length - 1 ? "," : "", "pun")],
-            d.tag,
-            d.tbc ? "to confirm" : "",
-          ),
+          L([S("    "), S(`"${d.name}"`, "key"), S(": ", "pun"), S(`"${d.version}"`, "str"), S(i < list.length - 1 ? "," : "", "pun")], d.tag),
         ),
       );
       out.push(L([S(last ? "  }" : "  },", "pun")]));

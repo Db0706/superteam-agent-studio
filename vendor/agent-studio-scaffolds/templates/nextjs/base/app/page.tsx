@@ -69,6 +69,14 @@ function nextSteps() {
       </>,
     );
   }
+  if (has("paysh")) {
+    steps.push(
+      <>
+        Install the Pay.sh CLI with <code>brew install pay</code>, then run <code>npm run paysh</code> to pay your own API from
+        your Pay.sh wallet, or <code>pay claude</code> to let Claude Code pay for it.
+      </>,
+    );
+  }
   steps.push(
     <>
       Read <code>README.md</code>: every module explains what it does and which files are its own.
