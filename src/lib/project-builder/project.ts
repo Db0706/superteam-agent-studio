@@ -62,8 +62,6 @@ export interface Dependency {
   version: string;
   tag: IntegrationId | null;
   dev: boolean;
-  /** Package name or version still to be confirmed. */
-  tbc: boolean;
 }
 
 export interface EnvVar {
@@ -183,7 +181,7 @@ export function deriveProject({ id, framework, integrations }: { id: string; fra
     (list ?? []).forEach(([name, version]) => {
       if (seen.has(name)) return;
       seen.add(name);
-      deps.push({ name, version, tag, dev, tbc: version === "TBC" });
+      deps.push({ name, version, tag, dev });
     });
   add(fw.packages.base, null, false);
   valid.forEach((i) => add(INTEGRATION_MAP[i].packages[framework], i, false));

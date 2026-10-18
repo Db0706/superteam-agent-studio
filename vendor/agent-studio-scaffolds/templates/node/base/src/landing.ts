@@ -23,6 +23,8 @@ function tryIt(id: string, origin: string): [string, string][] {
       ];
     case "spending":
       return [["The agent's budget so far", `curl ${origin}/api/buy`]];
+    case "paysh":
+      return [["Pay it with the Pay.sh CLI (brew install pay)", "npm run paysh"]];
     default:
       return [];
   }

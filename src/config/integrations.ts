@@ -9,7 +9,7 @@ import type { FrameworkId } from "./schema";
  * plus HTTP smoke tests of the Node and Python services; Expo apps bundle for
  * Android with no secrets inside, and their companion server is the verified
  * Node template; see its VERIFICATION.md). Those are listed in `verifiedOn`.
- * Wallet is verified on Next.js only (scaffold v0.5.0); Pay.sh has no template. See README → "Integration catalog".
+ * Wallet is verified on Next.js only (scaffold v0.5.0). Pay.sh is verified on all four (scaffold v0.9.0). See README → "Integration catalog".
  */
 
 export type CompatStatus = "ok" | "server" | "unverified" | "na";
@@ -168,7 +168,7 @@ const LIMITS: EnvVarDef[] = [
   { key: "AGENT_BUDGET_USD", example: "1.00", note: "Total allowed spend" },
   { key: "MAX_PAYMENT_USD", example: "0.10", note: "Largest single payment" },
 ];
-const PAYSH_KEY: EnvVarDef = { key: "PAYSH_API_KEY", example: "", note: "Placeholder, confirm in docs" };
+const PAYSH_URL: EnvVarDef = { key: "PAYSH_SERVICE_URL", example: "", note: "Your deployed https:// address, for the Pay.sh listing" };
 
 export const INTEGRATIONS: IntegrationDef[] = [
   {
@@ -238,28 +238,25 @@ export const INTEGRATIONS: IntegrationDef[] = [
     id: "paysh",
     name: "Pay.sh",
     short: "Pay.sh",
-    description: "Connect supported payment tooling and services.",
-    tech: "Pay.sh client · package name to be confirmed (no \"pay.sh\" package on npm)",
-    external: { name: "Pay.sh", description: "Account and key. Setup to be confirmed." },
-    compatibility: { next: "unverified", expo: "unverified", python: "unverified", node: "ok" },
-    reasons: {
-      next: "Not yet tested with Next.js.",
-      expo: "Not yet tested on Android.",
-      python: "No verified Python client yet.",
-    },
-    worksWith: ["payments"],
-    requires: [],
-    prerequisites: ["Pay.sh account (setup to be confirmed)"],
+    description: "Pay APIs with Solana's Pay.sh tool, let Claude Code pay for yours, and draft a listing for the Pay.sh catalog.",
+    // Pay.sh (Solana Foundation) is a CLI, not a library: the starters call `pay` and never bundle it.
+    tech: "Pay.sh `pay` CLI from the Solana Foundation · x402 on devnet · pay-skills catalog listing",
+    external: { name: "Pay.sh CLI", description: "Free and open source: brew install pay, or npm install -g @solana/pay. No account." },
+    compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
+    reasons: { expo: "Pay.sh runs on your computer against the companion server." },
+    worksWith: ["payments", "paidapi"],
+    requires: ["paidapi"],
+    prerequisites: ["The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"],
     implementationStatus: "provisional",
-    verifiedOn: [],
+    verifiedOn: ["next", "node", "python", "expo"],
     files: {
-      next: ["lib/payments/paysh.ts"],
-      expo: ["lib/payments/paysh.ts"],
-      python: ["agent/integrations/paysh.py"],
-      node: ["src/integrations/paysh.ts"],
+      next: ["lib/paysh/listing.ts", "scripts/paysh.ts", "scripts/test-paysh.ts"],
+      expo: [],
+      python: ["agent/commands/paysh.py", "tests/test_paysh.py"],
+      node: ["src/lib/paysh/listing.ts", "scripts/paysh.ts", "scripts/test-paysh.ts"],
     },
-    packages: { next: [["pay.sh", "TBC"]], expo: [["pay.sh", "TBC"]], node: [["pay.sh", "TBC"]], python: [["pay.sh", "TBC"]] },
-    env: { next: [PAYSH_KEY], expo: [PAYSH_KEY], python: [PAYSH_KEY], node: [PAYSH_KEY] },
+    packages: {},
+    env: { next: [PAYSH_URL], expo: [], python: [PAYSH_URL], node: [PAYSH_URL] },
   },
   {
     id: "wallet",

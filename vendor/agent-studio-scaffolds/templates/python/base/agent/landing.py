@@ -27,6 +27,8 @@ def _try_it(module_id: str, origin: str) -> list[tuple[str, str]]:
         ]
     if module_id == "spending":
         return [("The agent's budget so far", f"curl {origin}/api/buy")]
+    if module_id == "paysh":
+        return [("Pay it with the Pay.sh CLI (brew install pay)", "python -m agent paysh")]
     return []
 
 

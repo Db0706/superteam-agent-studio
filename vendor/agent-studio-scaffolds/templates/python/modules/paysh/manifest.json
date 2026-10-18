@@ -1,0 +1,32 @@
+{
+  "id": "paysh",
+  "kind": "module",
+  "framework": "python",
+  "name": "Pay.sh",
+  "summary": "Pay your own GET /premium-data (or any x402 API) with the Pay.sh `pay` CLI, let Claude Code pay through it, and draft a Pay.sh catalog listing.",
+  "requires": [
+    "paidapi"
+  ],
+  "files": [
+    "agent/commands/paysh.py",
+    "tests/test_paysh.py"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "paysh": "python -m agent paysh"
+  },
+  "env": [
+    {
+      "key": "PAYSH_SERVICE_URL",
+      "example": "",
+      "required": false,
+      "secret": false,
+      "note": "Your deployed https:// address, used in the Pay.sh catalog listing. Leave empty while you build locally."
+    }
+  ],
+  "prerequisites": [
+    "The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"
+  ],
+  "readme": "README.fragment.md"
+}
