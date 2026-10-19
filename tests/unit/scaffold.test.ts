@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { canDownload, GeneratorUnavailableError, getGenerator, ScaffoldRequestError, scaffoldGenerator } from "@/lib/project-builder/generator";
+import { canDownload, getGenerator, ScaffoldRequestError, scaffoldGenerator } from "@/lib/project-builder/generator";
 import { normalizeIntegrations } from "@/config/integrations";
 import { deriveProject } from "@/lib/project-builder/project";
 import { SCAFFOLD, ZIP_MODULES, zipAvailability } from "@/lib/scaffold/catalog";
@@ -27,6 +27,25 @@ type ComposeMjs = {
   catalog(): unknown;
 };
 const upstream = (): Promise<ComposeMjs> => import(/* @vite-ignore */ pathToFileURL(join(ROOT, "scripts/compose.mjs")).href);
+
+/**
+ * Every capability a framework can use has a template today, so the "no template yet" path is
+ * tested against a vendored catalog with one module taken out, as a future capability would be.
+ */
+async function withoutTemplate<T>(framework: string, moduleId: string, run: () => Promise<T>): Promise<T> {
+  vi.resetModules();
+  vi.doMock("../../vendor/agent-studio-scaffolds/catalog.json", () => ({
+    default: (catalogJson as { framework: string; modules: { id: string }[] }[]).map((c) =>
+      c.framework === framework ? { ...c, modules: c.modules.filter((m) => m.id !== moduleId) } : c,
+    ),
+  }));
+  try {
+    return await run();
+  } finally {
+    vi.doUnmock("../../vendor/agent-studio-scaffolds/catalog.json");
+    vi.resetModules();
+  }
+}
 
 const subsets = <T,>(xs: T[]): T[][] => xs.reduce<T[][]>((acc, x) => [...acc, ...acc.map((s) => [...s, x])], [[]]);
 
@@ -183,7 +202,7 @@ describe("composeScaffold", () => {
 
   it("rejects unknown frameworks and modules", () => {
     expect(() => composeScaffold(ROOT, { framework: "flutter", modules: [] })).toThrow(/Unknown framework/);
-    expect(() => composeScaffold(ROOT, { framework: "expo", modules: ["wallet"] })).toThrow(/Unknown module/);
+    expect(() => composeScaffold(ROOT, { framework: "expo", modules: ["nope"] })).toThrow(/Unknown module/);
   });
 
   it.each([".env.local", "a/.env", ".env.production", "../x", "/etc/passwd", "keys/agent.keypair.json", "a//b"])("forbids %s", (p) => {
@@ -266,13 +285,13 @@ describe("zipAvailability", () => {
       vi.resetModules();
     }
   });
-  it("explains capabilities without a template", () => {
-    const r = zipAvailability("expo", ["gemini", "wallet"]);
+  it("explains capabilities without a template", async () => {
+    const r = await withoutTemplate("expo", "wallet", async () => (await import("@/lib/scaffold/catalog")).zipAvailability("expo", ["gemini", "wallet"]));
     expect(r).toEqual({ ok: false, reason: expect.stringMatching(/^Wallet Connection has no template yet/) });
   });
-  it("allows Wallet Connection on Next.js only", () => {
+  it("allows Wallet Connection on Next.js and Expo", () => {
     expect(zipAvailability("next", ["wallet"])).toEqual({ ok: true, modules: ["wallet"] });
-    expect(zipAvailability("expo", ["wallet"]).ok).toBe(false);
+    expect(zipAvailability("expo", ["wallet"])).toEqual({ ok: true, modules: ["wallet"] });
   });
 });
 
@@ -328,12 +347,19 @@ describe("POST /api/scaffold handler", () => {
     ["bad name", post({ ...FULL, name: "9" }), 400],
     ["N/A capability", post({ ...FULL, framework: "python", integrations: ["wallet"] }), 400],
     ["oversized body", post({ ...FULL, name: "x".repeat(MAX_BODY_BYTES) }), 413],
-    ["capability without a template", post({ ...FULL, framework: "expo", integrations: ["paidapi", "wallet"] }), 422],
   ])("rejects %s", async (_label, req, status) => {
     const res = await createScaffoldHandler()(req);
     expect(res.status).toBe(status);
     expect(res.headers.get("content-type")).toMatch(/json/);
     expect(typeof (await res.json()).error).toBe("string");
+  });
+
+  it("rejects a capability without a template", async () => {
+    const res = await withoutTemplate("expo", "wallet", async () =>
+      (await import("@/lib/scaffold/handler")).createScaffoldHandler()(post({ ...FULL, framework: "expo", integrations: ["paidapi", "wallet"] })),
+    );
+    expect(res.status).toBe(422);
+    expect((await res.json()).error).toMatch(/Wallet Connection has no template yet/);
   });
 
   it("rate limits per client with Retry-After", async () => {
@@ -383,14 +409,14 @@ describe("scaffoldGenerator", () => {
     expect(templates.filter((t) => !(FRAMEWORKS as readonly string[]).includes(t.framework)).every((t) => t.status === "provisional")).toBe(true);
   });
 
-  it("can download every framework, but not capabilities without a template", () => {
+  it("can download every capability on every framework that supports it", () => {
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["gemini"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "node", integrations: ["paidapi"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "python", integrations: ["gemini", "spending"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: ["gemini"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["paysh"] })).toBe(true);
     expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "next", integrations: ["wallet"] })).toBe(true);
-    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: ["wallet"] })).toBe(false);
+    expect(canDownload(scaffoldGenerator, { name: "a-b-c", framework: "expo", integrations: ["wallet"] })).toBe(true);
   });
 
   it("downloads through the API route", async () => {
@@ -408,7 +434,10 @@ describe("scaffoldGenerator", () => {
   it("refuses selections without templates before calling the server", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    await expect(scaffoldGenerator.generateProject({ name: "a-b-c", framework: "expo", integrations: ["wallet"] })).rejects.toBeInstanceOf(GeneratorUnavailableError);
+    await withoutTemplate("expo", "wallet", async () => {
+      const gen = await import("@/lib/project-builder/generator");
+      await expect(gen.scaffoldGenerator.generateProject({ name: "a-b-c", framework: "expo", integrations: ["wallet"] })).rejects.toBeInstanceOf(gen.GeneratorUnavailableError);
+    });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

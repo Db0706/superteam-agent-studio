@@ -17,4 +17,4 @@ npm run wallets              # after getting faucet USDC: should show ✓ for bo
 
 > ⚠️ `AGENT_PRIVATE_KEY` lives only in `companion-server/.env.local`. Never copy it into the app or an `EXPO_PUBLIC_` variable.
 
-To let *people* pay from their own wallet app (instead of the companion's agent), you need a wallet connection such as Solana Mobile Wallet Adapter. That isn't part of this template yet.
+To let *people* pay from their own wallet app (instead of the companion's agent), add the **Wallet Connection** module: it uses Solana Mobile Wallet Adapter and needs a development build.

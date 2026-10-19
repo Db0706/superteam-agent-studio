@@ -81,7 +81,7 @@ export function FirstTenMinutes() {
             <Module label="DONE" right={<><Led color={COLORS.ok} /> YOU PAID FOR DATA</>}>
               <div className="flex flex-col gap-3 p-4 text-[14px] leading-normal text-ink-2">
                 <p className="m-0">
-                  That was a real payment on a real network, made by code you own. Now make it yours: change what the paid endpoint returns, set your own price, or let a visitor pay from their own wallet with the Wallet Connection module (Web Application only).
+                  That was a real payment on a real network, made by code you own. Now make it yours: change what the paid endpoint returns, set your own price, or let a visitor pay from their own wallet with the Wallet Connection module (Web Application, or Mobile Application on Android).
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Link href="/inspiration" className="btn-secondary !h-11 !px-4 !text-[14px] hover:!no-underline">
