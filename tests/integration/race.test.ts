@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { aiRaceTemplate } from "@/core/tournament/templates";
 import { verifyReceipt, type ReceiptPayload } from "@/core/verification/receipts";
 import { finaliseLayer } from "@/server/engine/scheduler";
-import { configHash, drainJobs, endLayer, rpc, rpcError, runTick, signedInUser, startHarness, validated, type Harness } from "./harness";
+import { configHash, drainJobs, endLayer, eventSlug, rpc, rpcError, runTick, signedInUser, startHarness, validated, type Harness } from "./harness";
 
 /**
  * Acceptance scenario (directive §22): an organiser runs a survival AI Race with eight
@@ -35,17 +35,17 @@ const TEAMS = [
 ] as const;
 
 beforeAll(async () => {
-  h = await startHarness();
+  h = await startHarness({ scope: "race" });
   // The event and its approved participant list (as imported from Luma).
   const [ev] = await h.sql<{ id: string }[]>`
     insert into public.events (slug, name, short_name, status, starts_at, details)
-    values ('race-test', 'Race Test Event', 'Race Test', 'published', now(), '{}') returning id`;
+    values (${eventSlug(h)}, 'Race Test Event', 'Race Test', 'published', now(), '{}') returning id`;
   eventId = ev.id;
   await h.sql`insert into public.event_tracks (event_id, track, name, status) values (${eventId}, 'build', 'Build Track', 'confirmed'), (${eventId}, 'policy', 'Policy Track', 'confirmed')`;
   for (const [name] of TEAMS) {
-    await h.sql`insert into public.registrations (event_id, email, full_name, ticket, status) values (${eventId}, ${`${name}@race.test`}, ${name}, 'hackathon', 'approved')`;
+    await h.sql`insert into public.registrations (event_id, email, full_name, ticket, status) values (${eventId}, ${`${name}@${h.domain}`}, ${name}, 'hackathon', 'approved')`;
   }
-  await h.sql`insert into public.registrations (event_id, email, full_name, ticket, status) values (${eventId}, 'panel@race.test', 'Panel Only', 'panel', 'approved')`;
+  await h.sql`insert into public.registrations (event_id, email, full_name, ticket, status) values (${eventId}, ${`panel@${h.domain}`}, 'Panel Only', 'panel', 'approved')`;
 
   const org = await signedInUser(h, "organiser");
   await h.sql`insert into public.event_roles (event_id, user_id, role) values (${eventId}, ${org.id}, 'organiser')`;

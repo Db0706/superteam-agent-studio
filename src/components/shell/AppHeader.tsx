@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { SITE } from "@/config/site";
 import { useEvent } from "./EventContext";
 
 export const NAV = [
   { href: "/", label: "Dashboard" },
+  { href: "/race", label: "AI Race" },
   { href: "/playground", label: "Playground" },
   { href: "/build", label: "Build" },
   { href: "/inspiration", label: "Inspiration" },
@@ -18,7 +19,8 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function AppHeader() {
+/** `account` is a server-rendered slot (sign-in link or account menu), streamed behind Suspense. */
+export function AppHeader({ account }: { account?: ReactNode }) {
   const pathname = usePathname();
   const { event, events, setEventId } = useEvent();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -82,9 +84,7 @@ export function AppHeader() {
               );
             })}
           </div>
-          <a href={SITE.githubUrl} target="_blank" rel="noopener noreferrer" className="!text-[#EDEDE8]">
-            GITHUB ↗
-          </a>
+          {account}
           {!onBuild && (
             <Link href="/build" className="flex h-8 items-center rounded-[3px] bg-signal px-3 font-mono text-[11px] font-semibold !text-white hover:bg-signal-hover hover:!no-underline">
               START BUILDING ▸
@@ -142,6 +142,7 @@ export function AppHeader() {
               );
             })}
           </div>
+          {account && <div className="flex flex-wrap items-center gap-3 border-t border-inv-div pt-3">{account}</div>}
           <div className="grid grid-cols-2 gap-1.5">
             <a href={SITE.githubUrl} target="_blank" rel="noopener noreferrer" className="grid h-11 place-items-center rounded-[3px] border border-inv-div-2 font-mono text-[11px] font-medium !text-[#EDEDE8]">
               GITHUB ↗

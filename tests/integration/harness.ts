@@ -24,9 +24,18 @@ export const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 export const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 export const DB_URL = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:54622/postgres";
 
-export const TEST_DOMAIN = "race.test";
+/**
+ * Each test file uses its own email domain and event slug prefix, and only ever deletes its own
+ * rows, so several test files (or parallel development sessions) can share one local database.
+ */
+export interface HarnessOptions {
+  /** Short unique name for this test file, e.g. "race" or "ops". */
+  scope: string;
+}
 
 export interface Harness {
+  scope: string;
+  domain: string;
   sql: Sql;
   env: EngineEnv;
   host: { url: string; close: () => Promise<void> };
@@ -35,9 +44,10 @@ export interface Harness {
   close(): Promise<void>;
 }
 
-export async function startHarness(): Promise<Harness> {
+export async function startHarness(opts: HarnessOptions): Promise<Harness> {
   const sql = createSql(DB_URL, 20);
-  await cleanDatabase(sql);
+  const domain = `${opts.scope}.test`;
+  await cleanScope(sql, opts.scope);
   const host = await startHost({ sql, fixtures: true });
   const env: EngineEnv = {
     challengeBaseUrl: host.url,
@@ -49,6 +59,8 @@ export async function startHarness(): Promise<Harness> {
   const admin = createClient(API_URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   const anon = createClient(API_URL, ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   return {
+    scope: opts.scope,
+    domain,
     sql,
     env,
     host,
@@ -61,14 +73,19 @@ export async function startHarness(): Promise<Harness> {
   };
 }
 
-export async function cleanDatabase(sql: Sql) {
-  await sql`truncate public.events, public.audit_logs, public.worker_heartbeats, public.platform_admins cascade`;
-  await sql`delete from auth.users where email like ${"%@" + TEST_DOMAIN}`;
+/** Deletes this scope's events (cascading to everything event-scoped) and its test users. */
+export async function cleanScope(sql: Sql, scope: string) {
+  await sql`delete from public.audit_logs where event_id in (select id from public.events where slug like ${`test-${scope}-%`})`;
+  await sql`delete from public.events where slug like ${`test-${scope}-%`}`;
+  await sql`delete from auth.users where email like ${`%@${scope}.test`}`;
 }
+
+/** A unique event slug for this scope. */
+export const eventSlug = (h: Pick<Harness, "scope">, name = "event") => `test-${h.scope}-${name}`;
 
 /** Creates a confirmed user and returns a client signed in as them. */
 export async function signedInUser(h: Harness, name: string): Promise<{ id: string; email: string; client: SupabaseClient }> {
-  const email = `${name}@${TEST_DOMAIN}`;
+  const email = `${name}@${h.domain}`;
   const password = `pw-${name}-0123456789`;
   const { data, error } = await h.admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { display_name: name } });
   if (error) throw error;
