@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.8.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0; node and python landing pages in 0.8.0; `paysh` module for all four in 0.9.0)
+Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.8.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0; node and python landing pages in 0.8.0; `paysh` module for all four in 0.9.0; expo `wallet` module in 0.10.0)
 
 ## Verified package versions (exact pins)
 
@@ -125,6 +125,17 @@ Same machine and date, Python 3.12.14 unless noted. Commands ran in the composed
 | P9 | `python -m agent serve --reload`: starts, reloads on file change; unknown path 404 JSON; gemini without key 500 "GEMINI_API_KEY is not set" | pass |
 | P10 | Composer: next and node output for **all 32** module subsets is byte-identical to the v0.2.0 composer (run before the version bump; afterwards only `studio.manifest.json` `scaffoldVersion` reads 0.3.0) | pass |
 
+## What was tested: Expo Wallet Connection (`--framework expo --modules wallet`, 0.10.0)
+
+Official packages do the wallet work: `@solana-mobile/mobile-wallet-adapter-protocol(-kit)` 3.0.1 (Solana Mobile) on `@solana/kit` 8.5.0, which `@x402/svm` 2.28.0 accepts (peer `>=5.1.0`). Our code is a ~40-line adapter (`lib/wallet/mobileWallet.ts`) from MWA's `transact()` to a kit `TransactionPartialSigner`, plus `lib/wallet/crypto-polyfill.ts`, which gives kit `crypto.subtle.digest` and `crypto.getRandomValues` from `expo-crypto` (Hermes has no WebCrypto; without it kit fails with "No digest implementation could be found"). `expo-dev-client` 57.0.19 and `expo-crypto` 57.0.3 follow the SDK table and the two-week rule.
+
+- **E9. Development build.** `expo prebuild` + `gradlew assembleDebug` (10 min first build, 4 min after adding `expo-crypto`), installed on the Android 16 (API 36) emulator. Expo Go can't load MWA's native module, which the README says.
+- **E10. Connect.** With Solana Mobile's `fakewallet-v1-debug.apk` (from the official `@solana-mobile/mobile-wallet-adapter-protocol@3.0.1` release) installed, **Connect wallet** opened the wallet's "Authorize dapp" screen showing the app's name and `Cluster: devnet`; after Authorize the app showed the account as a base58 address.
+- **E11. Pay.** **Buy premium data** fetched the companion's 402, built the x402 `exact` transaction in the app, opened the wallet's "Sign transaction(s)" screen (1 payload), and after Authorize retried with `PAYMENT-SIGNATURE`. The companion's facilitator answered `invalid_exact_svm_transaction_simulation_failed`, shown in the app with the faucet hint: the expected result for an unfunded wallet. fakewallet makes a new key every session, so a settled payment needs a real wallet app (Phantom, Solflare, Backpack) holding devnet USDC: not tested yet.
+- **no-secrets.** `@x402/svm` imports all of `@solana/kit`, and Metro keeps unused exports, so kit's key loader is in the bundle without being called. For `wallet` the bundle check allows that one library name, and a new check fails if the app's own `app/`, `lib/` or `components/` code loads a key (tested by planting a `createKeyPairSignerFromBytes` import: caught).
+
+Test environment notes: this machine's emulator had no working DNS (networks connected, never validated), so the run used `adb reverse` for Metro, the companion and a small local JSON-RPC relay to devnet, with `EXPO_PUBLIC_SOLANA_RPC_URL=http://127.0.0.1:8899`. On a phone with normal internet none of that is needed.
+
 ## What was tested: Pay.sh (`--modules paysh`, 0.9.0)
 
 Pay.sh is the Solana Foundation's `pay` CLI (https://pay.sh, https://github.com/solana-foundation/pay, MIT). It is a command-line tool, not a library, so the starters call it and never bundle it. Tested with `pay 0.29.0` from Homebrew core on 2026-10-18.
@@ -235,7 +246,7 @@ The expo `build` step is `expo export --platform android` (29 files: one Hermes 
 - Expo on a physical phone (the emulator run is E6–E8). Originally no Android SDK or emulator was used: the app was type-checked and bundled (`expo export`), not run. Expo Go for SDK 57 should load it; the screens' HTTP calls to the companion were not exercised from a phone. `lib/companion.ts`'s address logic (`EXPO_PUBLIC_COMPANION_URL` → Expo's `hostUri` → `10.0.2.2`) was read from the `expo-constants` types, not tested on a device.
 - Expo: an installable build (EAS Build / `expo run:android`), iOS, and web (no `react-native-web`; the template is Android-first).
 - Wallet Connection with more than one real wallet app. One real browser wallet settled a payment (W5) with no extra instructions added; other wallets may add their own instructions (e.g. transaction guards), which an x402 facilitator may reject. Worth a manual test with each of Phantom, Solflare and Backpack.
-- Wallet Connection on Expo/Android (not built: Mobile Wallet Adapter needs a native development build, not Expo Go), and Pay.sh.
+- A settled Expo wallet payment from a real wallet app (E11 reached the facilitator with fakewallet). Pay.sh: see PS4.
 
 ## Known limitations (by design for a starter)
 
@@ -245,4 +256,4 @@ The expo `build` step is `expo export --platform android` (29 files: one Hermes 
 - Only devnet USDC is priced. Other tokens are refused.
 - Python: the x402 Solana client does its RPC lookups synchronously, so a purchase briefly blocks the agent's event loop (and the FastAPI service when `POST /api/buy` runs). Fine for a starter; move purchases to a worker for anything busy. The service binds to `127.0.0.1` by default because `POST /api/buy` has no authentication.
 - Expo: the app talks to the companion over plain `http://` in development (Expo Go allows it). Android release builds need `https://`, so the companion must be deployed behind TLS and `EXPO_PUBLIC_COMPANION_URL` set before building. The companion's endpoints have no authentication (see `/api/buy` above); a phone on the same Wi-Fi can reach it.
-- Expo: users can't pay from their own wallet yet. The companion's agent pays with its devnet key. A wallet connection (Mobile Wallet Adapter) is the separate Wallet capability.
+- Expo: without the Wallet Connection module, the companion's agent pays with its devnet key. With it, people pay from their own wallet app (Android only: Mobile Wallet Adapter doesn't exist on iOS), which needs a development build instead of Expo Go.

@@ -227,23 +227,27 @@ test.describe("project builder", () => {
     await expect(page.getByText(/^SAVED my-first-ai-agent\.zip/)).toBeVisible();
   });
 
-  test("modules without templates stay an honest preview with no download", async ({ page }) => {
-    let downloaded = false;
-    page.on("download", () => (downloaded = true));
-    const posts: string[] = [];
-    page.on("request", (r) => r.method() === "POST" && posts.push(r.url()));
+  test("downloads an Expo app with Wallet Connection and no secrets in the app", async ({ page }) => {
+    // "No template yet" can't happen with today's catalog; tests/unit/scaffold.test.ts covers that path.
+    await page.getByLabel("What are you building?").fill("Wallet Phone");
     await page.getByRole("button", { name: /Mobile Application/ }).click();
     await page.getByRole("switch", { name: /Wallet Connection/ }).click();
-    await expect(page.getByText(/Preview only\. Wallet Connection has no template yet/)).toBeVisible();
+    await expect(page.getByRole("switch", { name: /Wallet Connection/ })).toHaveAttribute("aria-checked", "true");
     await page.getByRole("button", { name: /GENERATE PROJECT/ }).click();
-    await expect(page.getByText(/CONFIGURED ·/)).toBeVisible();
-    await expect(page.getByText(/Nothing has been generated or downloaded/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "ZIP · PREVIEW ONLY" })).toBeDisabled();
-    await expect(page.getByText("GEMINI_API_KEY", { exact: true })).toBeVisible();
-    expect(downloaded).toBe(false);
-    expect(posts).toEqual([]);
-    await page.getByRole("button", { name: "EDIT" }).click();
-    await expect(page.getByRole("button", { name: /GENERATE PROJECT/ })).toBeVisible();
+    await expect(page.getByText("Ready to download.")).toBeVisible();
+
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "DOWNLOAD ZIP ↓" }).click()]);
+    expect(download.suggestedFilename()).toBe("wallet-phone.zip");
+    const zip = readFileSync((await download.path())!);
+    const manifest = JSON.parse(readZipEntry(zip, "wallet-phone/studio.manifest.json").toString("utf8"));
+    expect(manifest.framework).toBe("expo");
+    expect(manifest.modules).toEqual(expect.arrayContaining(["paidapi", "wallet"]));
+    const pkg = JSON.parse(readZipEntry(zip, "wallet-phone/package.json").toString("utf8"));
+    expect(pkg.dependencies["@solana-mobile/mobile-wallet-adapter-protocol-kit"]).toBe("3.0.1");
+    expect(pkg.scripts["android:dev"]).toBe("expo run:android");
+    // The app signs through the wallet app; only the companion server ever holds a key.
+    const appEnv = readZipEntry(zip, "wallet-phone/.env.example").toString("utf8");
+    expect(appEnv).not.toMatch(/AGENT_PRIVATE_KEY/);
   });
 
   test("never asks for credentials", async ({ page }) => {
