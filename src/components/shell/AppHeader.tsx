@@ -4,10 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { SITE } from "@/config/site";
-import { useEvent } from "./EventContext";
 
 export const NAV = [
-  { href: "/", label: "Dashboard" },
+  { href: "/", label: "Home" },
   { href: "/race", label: "AI Race" },
   { href: "/playground", label: "Playground" },
   { href: "/build", label: "Build" },
@@ -33,7 +32,6 @@ export function AppHeaderFallback({ account }: { account?: ReactNode }) {
 }
 
 function HeaderFrame({ account, pathname }: { account?: ReactNode; pathname: string }) {
-  const { event, events, setEventId } = useEvent();
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastPath, setLastPath] = useState(pathname);
   const onBuild = pathname.startsWith("/build");
@@ -54,7 +52,7 @@ function HeaderFrame({ account, pathname }: { account?: ReactNode; pathname: str
   return (
     <header className="sticky top-0 z-40 bg-ink text-[#EDEDE8]">
       <div className="page-wrap flex h-14 items-center gap-6">
-        <Link href="/" className="flex flex-none items-baseline gap-2.5 !text-[#EDEDE8] hover:!no-underline" aria-label="Agent Studio by Superteam: Dashboard">
+        <Link href="/" className="flex flex-none items-baseline gap-2.5 !text-[#EDEDE8] hover:!no-underline" aria-label="Agent Studio by Superteam: Home">
           <span className="wide text-[14px] tracking-[0.02em]">AGENT STUDIO</span>
           <span className="font-mono text-[10px] font-normal text-dim-2">by Superteam</span>
         </Link>
@@ -77,24 +75,6 @@ function HeaderFrame({ account, pathname }: { account?: ReactNode; pathname: str
           })}
         </nav>
         <div className="hidden flex-none items-center gap-3.5 font-mono text-[11px] font-medium min-[1120px]:flex">
-          <div role="group" aria-label="Hackathon event" className="flex overflow-hidden rounded-[3px] border border-inv-div-2">
-            {events.map((e) => {
-              const a = e.id === event.id;
-              return (
-                <button
-                  key={e.id}
-                  type="button"
-                  title={e.shortName}
-                  aria-pressed={a}
-                  onClick={() => setEventId(e.id)}
-                  className="border-0 px-[9px] py-1.5 font-mono text-[11px] font-medium"
-                  style={{ background: a ? "#EDEDE8" : "transparent", color: a ? "#161616" : "#8E8E87" }}
-                >
-                  {e.code}
-                </button>
-              );
-            })}
-          </div>
           {account}
           {!onBuild && (
             <Link href="/build" className="flex h-8 items-center rounded-[3px] bg-signal px-3 font-mono text-[11px] font-semibold !text-white hover:bg-signal-hover hover:!no-underline">
@@ -136,23 +116,6 @@ function HeaderFrame({ account, pathname }: { account?: ReactNode; pathname: str
               );
             })}
           </nav>
-          <div role="group" aria-label="Hackathon event" className="mt-2 grid grid-cols-2 gap-1.5">
-            {events.map((e) => {
-              const a = e.id === event.id;
-              return (
-                <button
-                  key={e.id}
-                  type="button"
-                  aria-pressed={a}
-                  onClick={() => setEventId(e.id)}
-                  className="h-11 rounded-[3px] border border-inv-div-2 font-mono text-[11px] font-medium"
-                  style={{ background: a ? "#EDEDE8" : "transparent", color: a ? "#161616" : "#8E8E87" }}
-                >
-                  {e.shortName}
-                </button>
-              );
-            })}
-          </div>
           {account && <div className="flex flex-wrap items-center gap-3 border-t border-inv-div pt-3">{account}</div>}
           <div className="grid grid-cols-2 gap-1.5">
             <a href={SITE.githubUrl} target="_blank" rel="noopener noreferrer" className="grid h-11 place-items-center rounded-[3px] border border-inv-div-2 font-mono text-[11px] font-medium !text-[#EDEDE8]">

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { EVENTS } from "@/config/events";
+import { FALLBACK_EVENT } from "@/config/active-event";
 import { trackIdSchema } from "@/config/schema";
 import { validateAllConfig } from "@/config/validate";
 import { filterIdeas, IDEAS, NO_FILTERS, pickNext, type Idea } from "@/lib/inspiration/ideas";
@@ -9,12 +9,12 @@ describe("configuration", () => {
   it("passes schema validation", () => {
     expect(() => validateAllConfig()).not.toThrow();
   });
-  it("labels every unconfirmed event fact", () => {
-    for (const e of EVENTS) {
-      for (const f of [e.dates, e.deadline, e.prizePool, e.venue]) expect(f.status).not.toBe("CONFIRMED");
-      expect(e.sponsors).toHaveLength(0);
-      expect(e.judging.criteria.reduce((a, c) => a + c.weight, 0)).toBe(100);
-    }
+  it("labels every event fact and invents nothing unconfirmed", () => {
+    const e = FALLBACK_EVENT;
+    for (const f of [e.venue, e.organisers, e.supporters, e.agenda, e.prizes, e.teams, e.judging]) expect(["confirmed", "proposed", "sample", "tbc"]).toContain(f.status);
+    expect(e.judging.status).toBe("tbc");
+    expect(e.teams.status).toBe("tbc");
+    expect(e.tracks.map((t) => t.track)).toEqual(["build", "policy"]);
   });
 });
 

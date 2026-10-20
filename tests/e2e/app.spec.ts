@@ -36,7 +36,7 @@ test.describe("navigation", () => {
       ["Build", "/build", /Wire up your/],
       ["Inspiration", "/inspiration", /Big ideas start somewhere/],
       ["First 10 Minutes", "/start", /Your first 10 minutes/],
-      ["Dashboard", "/", /Build what the internet/],
+      ["Home", "/", /Build the future of AI/],
     ] as const) {
       await navTo(page, label);
       await expect(page).toHaveURL(new RegExp(`${path === "/" ? "/$" : path}`));
@@ -63,22 +63,17 @@ test.describe("navigation", () => {
 test.describe("dashboard", () => {
   test("CTAs lead to the right pages", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("main").getByRole("link", { name: "START BUILDING" }).click();
+    await page.getByRole("main").getByRole("link", { name: "GET A STARTER", exact: true }).click();
     await expect(page).toHaveURL(/\/build/);
     await page.goto("/");
     await page.getByRole("link", { name: "TRY THE PLAYGROUND" }).click();
     await expect(page).toHaveURL(/\/playground/);
   });
 
-  test("event switch updates copy and persists in the URL", async ({ page }) => {
+  test("race CTA opens the AI Race", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Agent Studio · Cambridge" })).toBeVisible();
-    await page.getByRole("group", { name: "Choose event" }).getByRole("button", { name: /Imperial/ }).click();
-    await expect(page.getByRole("heading", { name: "Agent Studio · Imperial" })).toBeVisible();
-    await expect(page).toHaveURL(/event=imperial/);
-    await expect(page.getByText("Sat 6 to Sun 7 Mar 2027")).toBeVisible();
-    await page.reload();
-    await expect(page.getByRole("heading", { name: "Agent Studio · Imperial" })).toBeVisible();
+    await page.getByRole("main").getByRole("link", { name: /JOIN THE AI RACE/ }).click();
+    await expect(page).toHaveURL(/\/race/);
   });
 
   test("track card preselects the framework in the builder", async ({ page }) => {
@@ -90,8 +85,10 @@ test.describe("dashboard", () => {
 
   test("shows honesty labels", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("PENDING ORGANISER APPROVAL")).toBeVisible();
-    await expect(page.getByText("No sponsorships or funding commitments are confirmed yet.")).toBeVisible();
+    // The event block streams in over a fallback, so match only what is on screen.
+    await expect(page.getByText("Criteria and judges to be announced.").filter({ visible: true })).toBeVisible();
+    await expect(page.getByText("TBC").filter({ visible: true }).first()).toBeVisible();
+    await expect(page.getByText(/Leaving the race never affects your track submission/).filter({ visible: true })).toBeVisible();
     await expect(page.getByText("SAMPLE").first()).toBeVisible();
   });
 });
