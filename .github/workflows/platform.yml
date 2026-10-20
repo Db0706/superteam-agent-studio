@@ -1,0 +1,48 @@
+name: Platform (database) tests
+
+# Integration tests and a smaller load test against a real local Supabase stack: the migrations,
+# RLS, database functions, scheduler, worker and verifier together.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  platform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.90.0
+      - run: npm ci
+      - name: Start Supabase (migrations applied from supabase/migrations)
+        run: supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,mailpit,postgres-meta
+      - name: Export connection settings
+        run: |
+          supabase status -o env > .supabase.env
+          set -a; . ./.supabase.env; set +a
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "DATABASE_URL=$DB_URL"
+          } >> "$GITHUB_ENV"
+      - name: Seed the event
+        run: npm run db:seed
+      - name: Integration tests
+        run: npm run test:integration
+      - name: Load test (100 participants, 2 layers)
+        run: npm run test:load
+        env:
+          LOAD_TEAMS: "25"
+          LOAD_LAYERS: "2"
