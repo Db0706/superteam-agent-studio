@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { AdminNav } from "./AdminNav";
+import { Suspense } from "react";
+import { AdminNav, AdminNavFrame } from "./AdminNav";
 
 export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · Agent Studio" } };
 
@@ -14,7 +15,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <span className="eyebrow">ORGANISER COMMAND CENTRE</span>
       </div>
-      <AdminNav />
+      <Suspense fallback={<AdminNavFrame pathname="" />}>
+        <AdminNav />
+      </Suspense>
       {children}
     </div>
   );

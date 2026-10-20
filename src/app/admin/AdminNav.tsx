@@ -21,7 +21,10 @@ export const ADMIN_SECTIONS = [
 ] as const;
 
 export function AdminNav() {
-  const pathname = usePathname();
+  return <AdminNavFrame pathname={usePathname()} />;
+}
+
+export function AdminNavFrame({ pathname }: { pathname: string }) {
   return (
     <nav aria-label="Admin" className="flex flex-wrap gap-1 border-b border-hairline pb-3">
       {ADMIN_SECTIONS.map((s) => {

@@ -21,7 +21,18 @@ function isActive(pathname: string, href: string) {
 
 /** `account` is a server-rendered slot (sign-in link or account menu), streamed behind Suspense. */
 export function AppHeader({ account }: { account?: ReactNode }) {
-  const pathname = usePathname();
+  return <HeaderFrame account={account} pathname={usePathname()} />;
+}
+
+/**
+ * Same header before the URL is known (dynamic routes prerender without it, so the layout wraps
+ * AppHeader in <Suspense> with this as the fallback): identical, just no active item.
+ */
+export function AppHeaderFallback({ account }: { account?: ReactNode }) {
+  return <HeaderFrame account={account} pathname="" />;
+}
+
+function HeaderFrame({ account, pathname }: { account?: ReactNode; pathname: string }) {
   const { event, events, setEventId } = useEvent();
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastPath, setLastPath] = useState(pathname);

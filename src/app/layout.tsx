@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { AccountMenu } from "@/components/platform/AccountMenu";
-import { AppHeader } from "@/components/shell/AppHeader";
+import { AppHeader, AppHeaderFallback } from "@/components/shell/AppHeader";
 import { EventProvider } from "@/components/shell/EventContext";
 import { Footer } from "@/components/shell/Footer";
 import { SITE_NAME } from "@/config/site";
@@ -36,7 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <EventProvider>
           <div className="canvas-dots flex min-h-screen flex-col">
-            <AppHeader account={<Suspense fallback={null}><AccountMenu /></Suspense>} />
+            <Suspense fallback={<AppHeaderFallback />}>
+              <AppHeader account={<Suspense fallback={null}><AccountMenu /></Suspense>} />
+            </Suspense>
             <main id="main" className="flex-1">
               {children}
             </main>
