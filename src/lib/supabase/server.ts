@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
 
 /**
@@ -12,6 +13,8 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
  * boundary (or a route marked `instant = false`).
  */
 export async function createSupabaseServer() {
+  // Request-time from here on: the client checks token expiry against the clock.
+  await connection();
   const store = await cookies();
   return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
