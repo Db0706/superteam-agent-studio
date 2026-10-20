@@ -7,17 +7,20 @@ import { activeBlockFor, httpBlocks } from "@/lib/simulation/http";
 import { BUDGET_MAX, BUDGET_MIN, BUDGET_STEP, FLOW_STAGES, SCENARIO_ORDER, SCENARIOS, STAGE_CAPTIONS } from "@/lib/simulation/scenarios";
 import { useSimulation, type Outcome, type Simulation } from "./useSimulation";
 
-export function Playground() {
+/** The simulated payment agent: every step runs in the browser, nothing is sent or paid. */
+export function AgentSimulation() {
   const sim = useSimulation();
   return (
-    <div className="page-wrap flex flex-col gap-4 pb-20 pt-[clamp(28px,4vw,48px)]">
-      <div className="mb-2 flex flex-wrap items-end justify-between gap-5">
-        <div className="flex flex-col gap-3.5">
-          <h1 className="display-l">
-            Watch an agent
-            <br />
-            pay its way.
-          </h1>
+    <section id="agent-simulation" aria-labelledby="sim-h" className="flex scroll-mt-20 flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-5">
+        <div className="flex flex-col gap-2">
+          <span className="flex items-center gap-2">
+            <span className="eyebrow">SIMULATION</span>
+            <span className="rounded-[2px] border border-warn-border bg-warn-tint px-1.5 py-[3px] font-mono text-[9.5px] text-warn-text">SIMULATED · NO REAL AI OR PAYMENTS</span>
+          </span>
+          <h2 id="sim-h" className="section-h">
+            Watch an agent pay its way.
+          </h2>
         </div>
         <p className="m-0 max-w-[400px] text-[15px] leading-normal text-ink-2 [text-wrap:pretty]">
           Pick a scenario, set a budget and step through every decision, from finding a service to paying for it.
@@ -29,7 +32,7 @@ export function Playground() {
         <ActivityLog sim={sim} />
       </div>
       <TechInspector sim={sim} />
-    </div>
+    </section>
   );
 }
 

@@ -43,7 +43,7 @@ function Hero() {
             GET A STARTER
           </Link>
           <Link href="/playground" className="btn-secondary">
-            TRY THE PLAYGROUND
+            AI CAPABILITY LAB
           </Link>
         </div>
         <ul className="m-0 flex list-none flex-wrap gap-[18px] p-0 font-mono text-[10.5px] text-muted">
@@ -309,7 +309,7 @@ function Starters() {
 }
 
 const JOURNEY = [
-  { n: "01 · EXPLORE", where: "PLAYGROUND", title: "See it work", desc: "Watch a simulated agent plan, call a tool and stay within its limits.", href: "/playground", primary: false },
+  { n: "01 · EXPLORE", where: "AI CAPABILITY LAB", title: "See what it takes", desc: "Each AI capability, the starter code for it and how the race checks it.", href: "/playground", primary: false },
   { n: "02 · IDEATE", where: "INSPIRATION", title: "Find your angle", desc: "Spin up a real problem in research, health, policy or campus life.", href: "/inspiration", primary: false },
   { n: "03 · BUILD", where: "BUILDER", title: "Get a starter", desc: "Pick a framework and capabilities. See exactly what your starter contains.", href: "/build", primary: true },
 ];

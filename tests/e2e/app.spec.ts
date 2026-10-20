@@ -32,7 +32,7 @@ test.describe("navigation", () => {
   test("every page is reachable from the header, with active state and back/forward", async ({ page }) => {
     await page.goto("/");
     for (const [label, path, heading] of [
-      ["Playground", "/playground", /Watch an agent/],
+      ["AI Lab", "/playground", /What AI apps/],
       ["Build", "/build", /Wire up your/],
       ["Inspiration", "/inspiration", /Big ideas start somewhere/],
       ["First 10 Minutes", "/start", /Your first 10 minutes/],
@@ -66,7 +66,7 @@ test.describe("dashboard", () => {
     await page.getByRole("main").getByRole("link", { name: "GET A STARTER", exact: true }).click();
     await expect(page).toHaveURL(/\/build/);
     await page.goto("/");
-    await page.getByRole("link", { name: "TRY THE PLAYGROUND" }).click();
+    await page.getByRole("main").getByRole("link", { name: "AI CAPABILITY LAB", exact: true }).click();
     await expect(page).toHaveURL(/\/playground/);
   });
 

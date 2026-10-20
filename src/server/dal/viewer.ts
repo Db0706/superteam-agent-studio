@@ -45,9 +45,12 @@ export const getActiveEvent = cache(async (): Promise<EventSummary | null> => {
 export const getViewer = cache(async (eventId?: string | null): Promise<Viewer | null> => {
   if (!isSupabaseConfigured()) return null;
   const supabase = await createSupabaseServer();
-  const { data: auth } = await supabase.auth.getUser();
-  const user = auth.user;
-  if (!user) return null;
+  // Verified locally against the project's signing keys where possible (see proxy.ts). The
+  // database still checks the same token on every query through RLS.
+  const { data: auth } = await supabase.auth.getClaims();
+  const claims = auth?.claims;
+  if (!claims?.sub) return null;
+  const user = { id: claims.sub, email: typeof claims.email === "string" ? claims.email : undefined };
   const [profile, admin, roles, membership, registration] = await Promise.all([
     supabase.from("profiles").select("display_name, email").eq("id", user.id).maybeSingle(),
     supabase.from("platform_admins").select("user_id").eq("user_id", user.id).maybeSingle(),

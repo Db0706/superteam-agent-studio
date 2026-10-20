@@ -21,7 +21,10 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  // getClaims verifies the token locally with the project's signing keys (asymmetric keys, the
+  // default for new projects) and refreshes it when it's about to expire, so page requests don't
+  // each make a round trip to the auth server.
+  await supabase.auth.getClaims();
   return response;
 }
 
