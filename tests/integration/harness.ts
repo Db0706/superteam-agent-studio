@@ -47,6 +47,13 @@ export interface Harness {
 export async function startHarness(opts: HarnessOptions): Promise<Harness> {
   const sql = createSql(DB_URL, 20);
   const domain = `${opts.scope}.test`;
+  // A running worker (npm run worker) would claim this test's jobs and tick its layers with its
+  // own keys and timing, making results flaky. Refuse to start rather than fail mysteriously.
+  const live = await sql`select worker_id from public.worker_heartbeats where last_seen > now() - interval '20 seconds'`;
+  if (live.length) {
+    await sql.end();
+    throw new Error(`Stop the running worker (${live.map((w) => w.worker_id).join(", ")}) before running integration tests.`);
+  }
   await cleanScope(sql, opts.scope);
   const host = await startHost({ sql, fixtures: true });
   const env: EngineEnv = {
