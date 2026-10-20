@@ -24,6 +24,8 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
   const reduced = usePrefersReducedMotion();
   const seen = useRef(new Set(initial.recent.map((r) => r.id)));
   const [banner, setBanner] = useState<SpectatorState["recent"][number] | null>(null);
+  const seenNotices = useRef(new Set(initial.notices.map((n) => n.id)));
+  const [notice, setNotice] = useState<SpectatorState["notices"][number] | null>(null);
 
   const reload = useCallback(async () => {
     const next = await fetchSpectatorState(state.tournament.id);
@@ -31,6 +33,9 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
     const fresh = next.recent.filter((r) => !seen.current.has(r.id) && (r.kind === "participant.qualified" || r.kind === "participant.eliminated" || r.kind === "layer.opened"));
     for (const r of next.recent) seen.current.add(r.id);
     if (fresh.length) setBanner(fresh.at(-1)!);
+    const newNotice = next.notices.find((n) => !seenNotices.current.has(n.id));
+    for (const n of next.notices) seenNotices.current.add(n.id);
+    if (newNotice) setNotice(newNotice);
     setState(next);
   }, [state.tournament.id]);
 
@@ -50,6 +55,11 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
       void supabase.removeChannel(channel);
     };
   }, [state.tournament.id, reload]);
+  useEffect(() => {
+    if (!notice) return;
+    const id = setTimeout(() => setNotice(null), 15000);
+    return () => clearTimeout(id);
+  }, [notice]);
   useEffect(() => {
     if (!banner) return;
     const id = setTimeout(() => setBanner(null), 7000);
@@ -89,6 +99,12 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
           {state.tournament.name.toUpperCase()}
         </span>
       </header>
+      {state.notices[0] && (
+        <div className="flex items-baseline gap-[1vw] truncate px-[3vw] py-[1.2vh] font-mono text-[clamp(12px,1vw,18px)]" style={{ borderBottom: "1px solid #2D2D2A", color: PAPER }}>
+          <span style={{ color: SIGNAL }}>NOTICE</span>
+          <span className="truncate">{state.notices[0].title}</span>
+        </div>
+      )}
 
       <main className="grid flex-1 grid-cols-[1.35fr_1fr] gap-[3vw] px-[3vw] py-[3.5vh]">
         <section className="flex min-w-0 flex-col justify-between gap-[3vh]">
@@ -127,6 +143,25 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
             <Stat label="OUT" value={out.length} color={FAULT} />
             <Stat label="VERIFIED" value={state.verifications.passed} color={OK} />
           </div>
+          {state.winners.length > 0 && (
+            <div className="flex flex-col gap-[1vh] rounded-[4px] px-[1vw] py-[1.4vh]" style={{ border: `2px solid ${OK}` }}>
+              <span className="font-mono text-[clamp(11px,0.9vw,15px)] tracking-[0.08em]" style={{ color: OK }}>
+                WINNERS
+              </span>
+              <ul className="m-0 flex list-none flex-col gap-[0.8vh] p-0">
+                {state.winners.map((w) => (
+                  <li key={`${w.track}-${w.place}`} className="flex flex-col">
+                    <span className="wide text-[clamp(16px,1.6vw,30px)] leading-tight">{w.team || w.project}</span>
+                    <span className="font-mono text-[clamp(10px,0.85vw,15px)]" style={{ color: DIM }}>
+                      {w.track.toUpperCase()} TRACK · PLACE {w.place}
+                      {w.title ? ` · ${w.title.toUpperCase()}` : ""}
+                      {w.project && w.team ? ` · ${w.project}` : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="flex min-h-0 flex-1 flex-col gap-[1vh]">
             <span className="font-mono text-[clamp(11px,0.9vw,15px)] tracking-[0.08em]" style={{ color: DIM }}>
               TEAMS
@@ -151,6 +186,15 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
         </section>
       </main>
 
+      {notice && (
+        <div role="status" className="absolute inset-x-[6vw] top-[16vh] z-10 flex flex-col gap-[1.4vh] rounded-[6px] px-[2.4vw] py-[3vh]" style={{ background: "#1E1648", border: `2px solid ${SIGNAL}`, animation: reduced ? undefined : "sx-in .35s ease-out" }}>
+          <span className="font-mono text-[clamp(12px,1vw,18px)] tracking-[0.08em]" style={{ color: SIGNAL }}>
+            ANNOUNCEMENT
+          </span>
+          <span className="wide text-[clamp(28px,3.4vw,64px)] leading-tight">{notice.title}</span>
+          {notice.body && <span className="text-[clamp(16px,1.5vw,28px)] leading-snug" style={{ color: PAPER }}>{notice.body}</span>}
+        </div>
+      )}
       {banner && (
         <div
           role="status"

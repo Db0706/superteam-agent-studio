@@ -23,7 +23,7 @@ async function Board() {
   if (!event) return <Blank text="No active event." />;
   const featured = pickFeatured(await listRaceTournaments(event.id));
   if (!featured) return <Blank text={`${event.name}: the race starts soon.`} />;
-  const state = await loadSpectatorState(featured.id, event.name);
+  const state = await loadSpectatorState(featured.id, event);
   if (!state) return <Blank text="The race starts soon." />;
   return <VenueBoard initial={state} timezone={event.timezone} />;
 }

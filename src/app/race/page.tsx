@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import { Module } from "@/components/system";
 import { PlatformNotConfigured } from "@/components/platform/NotConfigured";
 import { RaceDashboard } from "@/components/race/RaceDashboard";
+import { NoticeFeed } from "@/components/race/NoticeFeed";
+import { fetchNotices } from "./actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { listRaceTournaments, loadRaceState, pickFeatured } from "@/server/dal/race";
 import { getActiveEvent, getViewer } from "@/server/dal/viewer";
@@ -30,11 +32,13 @@ export default function RacePage() {
 async function Race() {
   const event = await getActiveEvent();
   if (!event) return <PlatformNotConfigured feature="The AI Race" />;
-  const viewer = await getViewer(event.id);
-  const featured = pickFeatured(await listRaceTournaments(event.id));
+  const [viewer, list, notices] = await Promise.all([getViewer(event.id), listRaceTournaments(event.id), fetchNotices()]);
+  const featured = pickFeatured(list);
+  const feed = <NoticeFeed initial={notices} timezone={event.timezone} />;
   if (!featured) {
     return (
       <div className="flex max-w-[720px] flex-col gap-4">
+        {feed}
         <span className="eyebrow">AI RACE · {event.short_name.toUpperCase()}</span>
         <h1 className="display-l">The race hasn&apos;t been announced yet.</h1>
         <Module label="WHILE YOU WAIT">
@@ -50,5 +54,10 @@ async function Race() {
   }
   const state = await loadRaceState(featured.id, viewer ? { userId: viewer.userId, teamId: viewer.team?.id ?? null } : null);
   if (!state) return <PlatformNotConfigured feature="The AI Race" />;
-  return <RaceDashboard initial={state} timezone={event.timezone} />;
+  return (
+    <>
+      {feed}
+      <RaceDashboard initial={state} timezone={event.timezone} />
+    </>
+  );
 }
