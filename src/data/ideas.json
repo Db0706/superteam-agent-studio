@@ -3748,5 +3748,545 @@
    "What if volunteers could donate their expenses back with one tap?",
    "Could the charity set a weekly allowance instead of claims?"
   ]
+ },
+ {
+  "id": 251,
+  "title": "Plain English abstract explainer",
+  "industry": "Research",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Researchers outside a field skim abstracts full of jargon they cannot follow.",
+  "challenge": "Simplifying the language without dropping the caveats that make the finding true.",
+  "direction": "A web app that rewrites an abstract at three reading levels, linking every claim back to the sentence it came from.",
+  "angles": [
+   "What if it flagged claims the abstract makes but the paper never tests?",
+   "Could a non-specialist rate which version felt clearest?"
+  ]
+ },
+ {
+  "id": 252,
+  "title": "Methods section gap finder",
+  "industry": "Research",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Methods sections often leave out the settings another lab would need to repeat the work.",
+  "challenge": "Spotting what is missing, not just summarising what is there.",
+  "direction": "A web app that extracts parameters from a methods section into a checklist and highlights gaps against a field template.",
+  "angles": [
+   "What if reviewers saw the gap list before reading the paper?",
+   "Could it draft the exact question to send the authors?"
+  ]
+ },
+ {
+  "id": 253,
+  "title": "Contradiction map for a literature",
+  "industry": "Research",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Two papers on the same question can disagree for years before anyone notices.",
+  "challenge": "Telling a real contradiction apart from different samples or methods.",
+  "direction": "A web app that retrieves papers on a question, extracts each claim with its conditions, and maps where findings conflict.",
+  "angles": [
+   "What if every link on the map quoted the evidence on both sides?",
+   "Could it propose the experiment that would settle a dispute?"
+  ]
+ },
+ {
+  "id": 254,
+  "title": "Lab notebook by voice",
+  "industry": "Research",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Bench scientists wearing gloves stop writing notes, then forget what they changed.",
+  "challenge": "Turning a muttered aside into a structured, timestamped entry.",
+  "direction": "A mobile app that transcribes spoken notes and extracts reagents, quantities and deviations into a searchable notebook.",
+  "angles": [
+   "What if it asked a follow-up when a quantity was missing?",
+   "Could a photo of the bench be attached to each entry?"
+  ]
+ },
+ {
+  "id": 255,
+  "title": "Field sample label reader",
+  "industry": "Research",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Fieldwork labels get smudged, and typing them up later introduces errors.",
+  "challenge": "Reading handwritten labels in rain, mud and poor light.",
+  "direction": "A mobile app that reads sample labels and site notes from photos, fills a structured record and flags anything it is unsure of.",
+  "angles": [
+   "What if it worked fully offline until you were back in signal?",
+   "Could it warn you when two samples share an ID?"
+  ]
+ },
+ {
+  "id": 256,
+  "title": "Conference poster companion",
+  "industry": "Research",
+  "track": "mobile",
+  "difficulty": "Advanced",
+  "type": "Mobile app",
+  "problem": "After a busy poster session, you remember the faces but not the findings.",
+  "challenge": "Linking a quick, angled photo of a poster to the right paper or preprint.",
+  "direction": "A mobile app that reads a poster photo, finds related papers by retrieval, and builds a reading list with your own notes attached.",
+  "angles": [
+   "What if it suggested one question to ask the presenter?",
+   "Could it group posters by the method they share?"
+  ]
+ },
+ {
+  "id": 257,
+  "title": "Weekly preprint digest",
+  "industry": "Research",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "New preprints in a narrow topic arrive faster than anyone can skim them.",
+  "challenge": "Ranking relevance to one person's actual project, not to the field at large.",
+  "direction": "An agent that reads a researcher's own abstracts, then each week picks five new preprints and explains why each one matters to them.",
+  "angles": [
+   "What if you could reply to say a pick was wrong, and it learnt?",
+   "Could a whole lab share one digest with a note per person?"
+  ]
+ },
+ {
+  "id": 258,
+  "title": "Citation claim verifier",
+  "industry": "Research",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Papers often cite a source for a claim the source does not actually make.",
+  "challenge": "Finding the supporting passage, or showing there is none, in a long PDF.",
+  "direction": "An agent that follows each citation in a draft, retrieves the cited text and marks claims as supported, partial or unsupported.",
+  "angles": [
+   "What if it ran before submission rather than after review?",
+   "Could it suggest a better source when a citation fails?"
+  ]
+ },
+ {
+  "id": 259,
+  "title": "Simulation run planner with limits",
+  "industry": "Research",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Parameter sweeps waste compute on regions of the space that were never promising.",
+  "challenge": "Letting an agent choose the next runs without exhausting the cluster allocation.",
+  "direction": "An agent that reads previous results, proposes the next batch of simulation runs and stops at a set compute limit, keeping a log a human signs off.",
+  "angles": [
+   "What if it had to justify every run in one sentence?",
+   "How do you stop it chasing a bug that looks like a discovery?"
+  ]
+ },
+ {
+  "id": 260,
+  "title": "Quantity and unit extraction API",
+  "industry": "Research",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Numbers in papers come in mixed units that make comparison across studies painful.",
+  "challenge": "Catching quantities hidden in tables, footnotes and ranges.",
+  "direction": "An API that takes a passage of text and returns every quantity with its unit, normalised, plus the sentence it came from.",
+  "angles": [
+   "What if it spotted values that look like typos?",
+   "Could it build a comparison table across ten papers at once?"
+  ]
+ },
+ {
+  "id": 261,
+  "title": "Dataset card drafter",
+  "industry": "Research",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Shared datasets often arrive with no description of how they were collected.",
+  "challenge": "Drafting an honest card without guessing at details only the authors know.",
+  "direction": "An API that inspects a dataset and its README, drafts a structured data card and lists the questions only the authors can answer.",
+  "angles": [
+   "What if the card noted likely biases in the sample?",
+   "Could repositories ask for a card before accepting an upload?"
+  ]
+ },
+ {
+  "id": 262,
+  "title": "Grounded answers over a lab's papers",
+  "industry": "Research",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "New lab members ask questions that the group's past theses already answer.",
+  "challenge": "Answering only from the lab's own documents, and saying so when the answer is not there.",
+  "direction": "A retrieval API over a group's papers and theses that returns answers with page citations and declines when the evidence is thin.",
+  "angles": [
+   "What if it showed which answers had gone out of date?",
+   "Could it point new members to the person who wrote each chapter?"
+  ]
+ },
+ {
+  "id": 263,
+  "title": "Model card readability check",
+  "industry": "AI Governance",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Model documentation is written for engineers, so procurement and policy staff skip it.",
+  "challenge": "Flagging missing risk information without overwhelming a non-technical reader.",
+  "direction": "A web app that checks a model card for missing sections and rewrites the key risks in plain language for a decision maker.",
+  "angles": [
+   "What if it scored cards so buyers could compare them?",
+   "Could it suggest the three questions to ask the vendor?"
+  ]
+ },
+ {
+  "id": 264,
+  "title": "AI policy clause comparer",
+  "industry": "AI Governance",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Institutions draft AI use policies from scratch, unaware of how peers worded the same rule.",
+  "challenge": "Matching clauses that mean the same thing in very different words.",
+  "direction": "A web app that splits uploaded policies into clauses, groups similar ones across documents and shows where they diverge.",
+  "angles": [
+   "What if it highlighted rules that no one else has adopted?",
+   "Could a committee vote on clauses side by side?"
+  ]
+ },
+ {
+  "id": 265,
+  "title": "AI incident triage board",
+  "industry": "AI Governance",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Reports of AI system failures arrive as free text and are hard to compare.",
+  "challenge": "Labelling harm type and severity consistently enough to spot real trends.",
+  "direction": "A web app that extracts structured fields from incident reports, clusters similar cases and shows reviewers the evidence behind each label.",
+  "angles": [
+   "What if two reviewers disagreed with the model's label?",
+   "Could early clusters warn of a problem before it spreads?"
+  ]
+ },
+ {
+  "id": 266,
+  "title": "Automated decision explainer",
+  "industry": "AI Governance",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "People cannot tell whether a service they use relies on automated decisions about them.",
+  "challenge": "Reading dense terms and notices accurately from a phone screenshot.",
+  "direction": "A mobile app that reads a service's privacy notice from a screenshot and explains what is automated and how to ask for a human review.",
+  "angles": [
+   "What if it drafted the request for a human review?",
+   "Could it keep a list of services that never say?"
+  ]
+ },
+ {
+  "id": 267,
+  "title": "Consultation response helper",
+  "industry": "AI Governance",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Public consultations on AI rules get few replies because the documents are long and dense.",
+  "challenge": "Helping people answer in their own words without the app putting words in their mouths.",
+  "direction": "A mobile app that summarises a consultation question by question and records a spoken reply that it tidies but never changes in substance.",
+  "angles": [
+   "What if it showed which questions most people skipped?",
+   "Could students submit as a group with each view kept separate?"
+  ]
+ },
+ {
+  "id": 268,
+  "title": "Chatbot testing field log",
+  "industry": "AI Governance",
+  "track": "mobile",
+  "difficulty": "Advanced",
+  "type": "Mobile app",
+  "problem": "Policy researchers testing public chatbots lose track of which prompts produced which answers.",
+  "challenge": "Keeping a reliable, timestamped record that would stand up in a published report.",
+  "direction": "A mobile app that logs prompts, responses and screenshots from chatbot tests, tags failures by category and exports an evidence pack.",
+  "angles": [
+   "What if it reran old prompts each month to catch changes?",
+   "Could several testers merge their logs without duplicates?"
+  ]
+ },
+ {
+  "id": 269,
+  "title": "AI guidance change watcher",
+  "industry": "AI Governance",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Small teams miss updates to AI guidance because it is scattered across many official sites.",
+  "challenge": "Separating real changes in meaning from new formatting or dates.",
+  "direction": "An agent that checks a list of guidance pages each week, summarises what changed and names the internal policies that might be affected.",
+  "angles": [
+   "What if it drafted the one-line update for the staff newsletter?",
+   "Could it track guidance from several countries side by side?"
+  ]
+ },
+ {
+  "id": 270,
+  "title": "Impact assessment first drafter",
+  "industry": "AI Governance",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Teams put off algorithmic impact assessments because the template is long and the questions abstract.",
+  "challenge": "Drafting useful answers without inventing facts about the system.",
+  "direction": "An agent that interviews the project lead in chat, fills an impact assessment template and marks every answer it could not ground in their replies.",
+  "angles": [
+   "What if it flagged answers that contradict each other?",
+   "Could a reviewer see the interview behind each answer?"
+  ]
+ },
+ {
+  "id": 271,
+  "title": "Research agent with an audit trail",
+  "industry": "AI Governance",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Institutions want to allow autonomous research agents but cannot see what they did or why.",
+  "challenge": "Logging every tool call and decision without making the agent too slow to use.",
+  "direction": "An agent harness that enforces an allow list of tools, asks a human before risky actions and writes a readable log of each step.",
+  "angles": [
+   "What if an auditor could replay any run step by step?",
+   "Which actions should always need a human, and who decides?"
+  ]
+ },
+ {
+  "id": 272,
+  "title": "Evaluation results in plain words",
+  "industry": "AI Governance",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Benchmark reports list dozens of scores that policy readers cannot interpret.",
+  "challenge": "Explaining what a score shows without overstating what it proves.",
+  "direction": "An API that takes raw evaluation results and returns a short plain-language summary of what the scores do and do not show.",
+  "angles": [
+   "What if it always named the tests that were not run?",
+   "Could it compare two models for a non-technical committee?"
+  ]
+ },
+ {
+  "id": 273,
+  "title": "Chat log risk tagger",
+  "industry": "AI Governance",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Institutions running chatbots have no shared way to label risky requests in their logs.",
+  "challenge": "Tagging consistently across topics without storing anyone's personal details.",
+  "direction": "An API that strips personal data from chat logs, classifies them against a published risk taxonomy and returns counts for a monthly report.",
+  "angles": [
+   "What if the taxonomy could be swapped for a local one?",
+   "Could it show how risk patterns shift during exam season?"
+  ]
+ },
+ {
+  "id": 274,
+  "title": "Policy question evaluation harness",
+  "industry": "AI Governance",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Nobody checks whether a chatbot answers questions about local rules correctly before staff rely on it.",
+  "challenge": "Scoring answers fairly when the right answer can be worded many ways.",
+  "direction": "An API that runs graded questions against any model, scores answers with a rubric and a second model, and reports where the two disagree.",
+  "angles": [
+   "What if staff could add a question every time the bot got one wrong?",
+   "How do you check the marking model itself?"
+  ]
+ },
+ {
+  "id": 275,
+  "title": "Reading list triage",
+  "industry": "University Life",
+  "track": "web",
+  "difficulty": "Beginner",
+  "type": "Web app",
+  "problem": "Students get forty item reading lists with no sense of which pieces matter most.",
+  "challenge": "Ranking readings by usefulness without discouraging wider reading.",
+  "direction": "A web app that reads a reading list and the lecture outline, then suggests an order with a one-line reason for each item.",
+  "angles": [
+   "What if it marked which readings the exam questions lean on?",
+   "Could tutors correct the order for the whole cohort?"
+  ]
+ },
+ {
+  "id": 276,
+  "title": "Supervision meeting summariser",
+  "industry": "University Life",
+  "track": "web",
+  "difficulty": "Intermediate",
+  "type": "Web app",
+  "problem": "Actions agreed in supervision meetings get lost by the following week.",
+  "challenge": "Separating decisions from general discussion in a messy conversation.",
+  "direction": "A web app that turns a meeting recording into a short list of decisions, actions and open questions, shared with student and supervisor.",
+  "angles": [
+   "What if it opened the next meeting with last week's actions?",
+   "Could both people edit the summary before it is saved?"
+  ]
+ },
+ {
+  "id": 277,
+  "title": "Timetable clash resolver",
+  "industry": "University Life",
+  "track": "web",
+  "difficulty": "Advanced",
+  "type": "Web app",
+  "problem": "Joint honours students regularly find two compulsory lectures at the same time.",
+  "challenge": "Proposing fixes that respect room sizes, staff availability and hundreds of other students.",
+  "direction": "A web app where a language model reads course rules and a solver finds alternative slots, with each suggestion explained in plain language.",
+  "angles": [
+   "What if students could see the trade-off behind each option?",
+   "Could it spot clashes before the timetable is published?"
+  ]
+ },
+ {
+  "id": 278,
+  "title": "Notice board to calendar",
+  "industry": "University Life",
+  "track": "mobile",
+  "difficulty": "Beginner",
+  "type": "Mobile app",
+  "problem": "Important notices are buried among posters on crowded corridor boards.",
+  "challenge": "Reading dates and places reliably from a cluttered, angled photo.",
+  "direction": "A mobile app that reads a photo of a notice board, pulls out events and deadlines and adds the ones you choose to your calendar.",
+  "angles": [
+   "What if it filtered notices by your course and interests?",
+   "Could friends share a board snapshot with each other?"
+  ]
+ },
+ {
+  "id": 279,
+  "title": "Library shelf finder",
+  "industry": "University Life",
+  "track": "mobile",
+  "difficulty": "Intermediate",
+  "type": "Mobile app",
+  "problem": "Students find a book in the catalogue, then wander the stacks for twenty minutes.",
+  "challenge": "Reading spines that are narrow, faded and printed sideways.",
+  "direction": "A mobile app that reads book spines through the camera and guides you to the title you searched for.",
+  "angles": [
+   "What if it suggested the books shelved next to yours?",
+   "Could it report misplaced books to library staff?"
+  ]
+ },
+ {
+  "id": 280,
+  "title": "Accessible lecture companion",
+  "industry": "University Life",
+  "track": "mobile",
+  "difficulty": "Advanced",
+  "type": "Mobile app",
+  "problem": "Students with hearing or processing differences struggle to follow fast lectures with dense slides.",
+  "challenge": "Live captions that keep up with technical terms and link them to the current slide.",
+  "direction": "A mobile app that captions a lecture live, learns course vocabulary from the slides and builds searchable notes afterwards.",
+  "angles": [
+   "What if it slowed nothing down but let you rewind any sentence?",
+   "Could the lecturer see which slides caused the most rewinds?"
+  ]
+ },
+ {
+  "id": 281,
+  "title": "Coursework deadline keeper",
+  "industry": "University Life",
+  "track": "agents",
+  "difficulty": "Beginner",
+  "type": "Agent",
+  "problem": "Coursework deadlines are spread across emails, handbooks and course pages.",
+  "challenge": "Pulling every date out of documents written in different formats.",
+  "direction": "An agent that reads the documents a student shares, builds one deadline list and suggests a plan starting a week before each one.",
+  "angles": [
+   "What if it noticed two deadlines landing in the same week?",
+   "Could it adjust the plan when an extension is granted?"
+  ]
+ },
+ {
+  "id": 282,
+  "title": "Welfare signposting assistant",
+  "industry": "University Life",
+  "track": "agents",
+  "difficulty": "Intermediate",
+  "type": "Agent",
+  "problem": "Students in difficulty often do not know which university service to contact first.",
+  "challenge": "Pointing to the right service quickly while never acting as a counsellor.",
+  "direction": "An agent grounded in a university's own support pages that suggests the right contact and hands over to a human whenever risk is mentioned.",
+  "angles": [
+   "What if it worked out of hours, when offices are closed?",
+   "How do you test that it always escalates when it should?"
+  ]
+ },
+ {
+  "id": 283,
+  "title": "Student society admin agent",
+  "industry": "University Life",
+  "track": "agents",
+  "difficulty": "Advanced",
+  "type": "Agent",
+  "problem": "Student society committees spend hours on room bookings, minutes and handover notes.",
+  "challenge": "Letting an agent draft and file paperwork without sending anything unapproved.",
+  "direction": "An agent that drafts minutes, booking requests and handover documents from committee chats, holding every outgoing message for a human to approve.",
+  "angles": [
+   "What if next year's committee could ask it why a decision was made?",
+   "Which tasks should it never be allowed to do alone?"
+  ]
+ },
+ {
+  "id": 284,
+  "title": "Course handbook question API",
+  "industry": "University Life",
+  "track": "services",
+  "difficulty": "Beginner",
+  "type": "API service",
+  "problem": "Students email staff questions that the course handbook already answers.",
+  "challenge": "Quoting the right paragraph instead of a confident guess.",
+  "direction": "An API that answers questions from a handbook with the exact paragraph quoted, and says clearly when the handbook is silent.",
+  "angles": [
+   "What if unanswered questions went to staff as a weekly list?",
+   "Could it spot where two handbooks contradict each other?"
+  ]
+ },
+ {
+  "id": 285,
+  "title": "Module feedback theme finder",
+  "industry": "University Life",
+  "track": "services",
+  "difficulty": "Intermediate",
+  "type": "API service",
+  "problem": "Module feedback surveys produce hundreds of comments that staff only skim.",
+  "challenge": "Grouping comments into themes without losing the minority views.",
+  "direction": "An API that clusters free-text feedback, names each theme with example quotes and reports how many students raised it.",
+  "angles": [
+   "What if it compared themes with last year's survey?",
+   "Could students see what changed because of their feedback?"
+  ]
+ },
+ {
+  "id": 286,
+  "title": "AI use disclosure checker",
+  "industry": "University Life",
+  "track": "services",
+  "difficulty": "Advanced",
+  "type": "API service",
+  "problem": "Students are unsure how much AI help each assignment allows, and the rules differ by module.",
+  "challenge": "Giving a clear answer per assignment while keeping an honest record of what was used.",
+  "direction": "An API that reads module rules and a student's account of their AI use, says whether it fits and drafts a disclosure statement to submit.",
+  "angles": [
+   "What if markers saw the disclosure alongside the work?",
+   "How do you handle a rule that is genuinely ambiguous?"
+  ]
  }
 ]

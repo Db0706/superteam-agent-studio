@@ -32,11 +32,11 @@ const ideaSchema = z.object({
 });
 
 describe("idea library", () => {
-  it("has 250 valid, unique ideas", () => {
-    expect(IDEAS).toHaveLength(250);
+  it("has 286 valid, unique ideas", () => {
+    expect(IDEAS).toHaveLength(286);
     IDEAS.forEach((i) => ideaSchema.parse(i));
-    expect(new Set(IDEAS.map((i) => i.id)).size).toBe(250);
-    expect(new Set(IDEAS.map((i) => i.title.toLowerCase())).size).toBe(250);
+    expect(new Set(IDEAS.map((i) => i.id)).size).toBe(286);
+    expect(new Set(IDEAS.map((i) => i.title.toLowerCase())).size).toBe(286);
   });
 
   it("covers a wide range of industries and every track", () => {

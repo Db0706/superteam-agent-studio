@@ -43,7 +43,7 @@ Integration tests share the local Supabase database: each test file passes its o
 1. **Core infrastructure** ✅ migrations, RLS, functions, DAL, auth, admin shell.
 2. **Tournament engine** ✅ config, modes, state machine, scheduling, advancement, pause/resume/extend/reinstate/override, rehearsal configs.
 3. **Verification engine** ✅ protocol, safe client, plugins for 8 layers + API contract + devnet settlement + human review, challenge services, receipts, queue, retries.
-4. **AI-first frontend:** landing, navigation, Playground labels, Inspiration categories, Builder adapters.
-5. **Tournament interfaces:** race dashboard, team workspace, venue display, admin builder, control room.
-6. **Event operations:** mentors, Luma CSV import, submissions, judging, announcements, command centre.
-7. **Hardening:** permission tests, deadline and concurrency tests, 300-user load test, rehearsal, runbook.
+4. **AI-first frontend** ✅ landing from the event database, navigation, AI Capability Lab labels, Inspiration categories, race adapter in the Builder.
+5. **Tournament interfaces** ✅ race dashboard, team workspace, venue display, admin builder, control room.
+6. **Event operations** ✅ mentors, Luma CSV import, submissions, judging, announcements, command centre.
+7. **Hardening** ✅ permission tests, deadline and concurrency tests, 300-user load test, real-clock rehearsal, runbook. Remaining: production setup (needs the organisers' accounts) and a load test against hosted Supabase.

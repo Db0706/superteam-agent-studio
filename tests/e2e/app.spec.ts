@@ -263,7 +263,7 @@ test.describe("inspiration", () => {
     await expect(page.getByRole("region", { name: "Recently explored" }).getByRole("button")).toHaveCount(1);
 
     await page.getByLabel("INDUSTRY").selectOption("Legal");
-    await expect(page.getByText(/10 OF 250 IDEAS MATCH/)).toBeVisible();
+    await expect(page.getByText(/10 OF 286 IDEAS MATCH/)).toBeVisible();
     await expect(page.locator("article").first()).toContainText("LEGAL");
 
     await page.getByLabel("DIFFICULTY").selectOption("Advanced");
@@ -271,7 +271,7 @@ test.describe("inspiration", () => {
     await page.getByLabel("TRACK").selectOption("Autonomous Agents");
     await expect(page.getByText("No ideas match every filter.")).toBeVisible();
     await page.getByRole("button", { name: "CLEAR FILTERS", exact: true }).click();
-    await expect(page.getByText(/250 OF 250 IDEAS MATCH/)).toBeVisible();
+    await expect(page.getByText(/286 OF 286 IDEAS MATCH/)).toBeVisible();
   });
 
   test("space bar shuffles", async ({ page }) => {
