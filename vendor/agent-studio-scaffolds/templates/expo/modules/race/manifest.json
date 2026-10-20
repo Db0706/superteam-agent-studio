@@ -1,0 +1,17 @@
+{
+  "id": "race",
+  "kind": "module",
+  "framework": "expo",
+  "name": "AI Race adapter",
+  "summary": "Your companion server speaks the race protocol (ASRP/1) so the AI Race verifier can test it. You write the AI logic for each task type.",
+  "nav": { "label": "Race readiness", "href": "/race" },
+  "requires": [],
+  "companionModules": ["race"],
+  "files": ["app/race.tsx"],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {},
+  "env": [],
+  "prerequisites": ["A team on Agent Studio (for the verifier token)", "A public https:// URL for the companion server when you race (deploy it, or a tunnel such as ngrok)"],
+  "readme": "README.fragment.md"
+}

@@ -164,7 +164,7 @@ describe("AI Race, end to end", () => {
   });
 
   it("lets organisers inspect evidence, reinstate a team and override a decision, with an audit trail", async () => {
-    const [attempt] = await h.sql<{ id: string }[]>`select a.id from public.verification_attempts a join public.tournament_participants tp on tp.id = a.participant_id where tp.display_name = 'Borealis' and a.status = 'failed' limit 1`;
+    const [attempt] = await h.sql<{ id: string }[]>`select a.id from public.verification_attempts a join public.tournament_participants tp on tp.id = a.participant_id where a.tournament_id = ${tournamentId} and tp.display_name = 'Borealis' and a.status = 'failed' limit 1`;
     const evidence = await rpc<Record<string, unknown>>(organiser, "attempt_evidence", { p_attempt: attempt.id });
     expect(evidence.plugin).toBe("memory.multiturn");
     expect(await rpcError(teams.borealis.client, "attempt_evidence", { p_attempt: attempt.id })).toMatch(/Only organisers/);

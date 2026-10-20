@@ -25,6 +25,8 @@ export interface TickReport {
   ran: boolean;
   started: number;
   opened: number;
+  /** Rehearsals only: attempts queued for fixture teams. */
+  fixtureAttempts: number;
   closing: number;
   finalising: number;
   finalised: number;
@@ -38,7 +40,7 @@ export async function tick(
   opts: { closingGraceSeconds?: number } = {},
 ): Promise<TickReport> {
   const grace = opts.closingGraceSeconds ?? CLOSING_GRACE_SECONDS;
-  const report: TickReport = { ran: false, started: 0, opened: 0, closing: 0, finalising: 0, finalised: 0, blocked: 0, completed: 0 };
+  const report: TickReport = { ran: false, started: 0, opened: 0, fixtureAttempts: 0, closing: 0, finalising: 0, finalised: 0, blocked: 0, completed: 0 };
   const ran = await sql.begin(async (tx) => {
     const [{ locked }] = await tx<{ locked: boolean }[]>`select pg_try_advisory_xact_lock(${SCHEDULER_LOCK}) as locked`;
     if (!locked) return false;
@@ -59,6 +61,20 @@ export async function tick(
       returning r.tournament_id, r.layer_key, r.deadline_at`;
     report.opened = opened.length;
     for (const o of opened) await emit(tx, o.tournament_id, "layer.opened", { layer: o.layer_key, deadline: o.deadline_at.toISOString() });
+
+    // Rehearsals: fixture teams have nobody to press "Run verification", so each one still
+    // competing gets one attempt as soon as a layer is open. Never happens in a real tournament.
+    const fixtureAttempts = await tx<{ id: string }[]>`
+      insert into public.verification_attempts (tournament_id, layer_run_id, participant_id, attempt_no, version, endpoint_url, request_id)
+      select r.tournament_id, r.id, p.id, 1, r.version, p.fixture_endpoint, 'fixture:' || r.id
+      from public.layer_runs r
+      join public.tournaments t on t.id = r.tournament_id and t.simulation and t.status = 'running'
+      join public.tournament_participants p on p.tournament_id = r.tournament_id and p.fixture_endpoint is not null and p.state in ('active', 'qualified')
+      where r.state = 'open' and r.opens_at <= now() and r.deadline_at > now()
+        and not exists (select 1 from public.verification_attempts a where a.layer_run_id = r.id and a.participant_id = p.id)
+      returning id`;
+    if (fixtureAttempts.length) await tx`insert into public.verification_jobs (attempt_id) select unnest(${fixtureAttempts.map((a) => a.id)}::uuid[])`;
+    report.fixtureAttempts = fixtureAttempts.length;
 
     const closing = await tx<{ tournament_id: string; layer_key: string }[]>`
       update public.layer_runs r set state = 'closing', closing_at = now()

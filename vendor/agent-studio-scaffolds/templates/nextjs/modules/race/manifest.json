@@ -1,0 +1,32 @@
+{
+  "id": "race",
+  "kind": "module",
+  "framework": "next",
+  "name": "AI Race adapter",
+  "summary": "Speaks the race protocol (ASRP/1) so the AI Race verifier can test your app. You write the AI logic for each task type.",
+  "nav": { "label": "Race readiness", "href": "/race" },
+  "requires": [],
+  "files": [
+    "lib/race/protocol.ts",
+    "lib/race/adapter.ts",
+    "lib/race/handlers.ts",
+    "lib/race/tools.ts",
+    "app/agent-studio/v1/health/route.ts",
+    "app/agent-studio/v1/tasks/route.ts",
+    "app/race/page.tsx",
+    "scripts/test-race.ts",
+    "scripts/race-try.ts"
+  ],
+  "dependencies": {},
+  "devDependencies": { "tsx": "4.23.15" },
+  "scripts": {
+    "test:race": "tsx --test scripts/test-race.ts",
+    "race:try": "tsx scripts/race-try.ts"
+  },
+  "env": [
+    { "key": "AGENT_STUDIO_VERIFIER_TOKEN", "example": "", "required": true, "secret": true, "note": "From your team page on Agent Studio. Only the race verifier sends it." },
+    { "key": "AGENT_STUDIO_APP_NAME", "example": "my-race-app", "required": false, "secret": false, "note": "Name shown in the health response." }
+  ],
+  "prerequisites": ["A team on Agent Studio (for the verifier token)", "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"],
+  "readme": "README.fragment.md"
+}

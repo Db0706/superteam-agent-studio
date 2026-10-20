@@ -33,7 +33,7 @@ async function schedulerLoop() {
   while (!stopping) {
     try {
       const r = await tick(sql, log);
-      if (r.started || r.opened || r.closing || r.finalising || r.finalised || r.completed) log("scheduler.tick", { ...r });
+      if (r.started || r.opened || r.fixtureAttempts || r.closing || r.finalising || r.finalised || r.completed) log("scheduler.tick", { ...r });
     } catch (err) {
       log("scheduler.error", { error: (err as Error).message });
     }

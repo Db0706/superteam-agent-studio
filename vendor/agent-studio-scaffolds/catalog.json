@@ -247,6 +247,58 @@
         "readme": "README.fragment.md"
       },
       {
+        "id": "race",
+        "kind": "module",
+        "framework": "next",
+        "name": "AI Race adapter",
+        "summary": "Speaks the race protocol (ASRP/1) so the AI Race verifier can test your app. You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness",
+          "href": "/race"
+        },
+        "requires": [],
+        "files": [
+          "lib/race/protocol.ts",
+          "lib/race/adapter.ts",
+          "lib/race/handlers.ts",
+          "lib/race/tools.ts",
+          "app/agent-studio/v1/health/route.ts",
+          "app/agent-studio/v1/tasks/route.ts",
+          "app/race/page.tsx",
+          "scripts/test-race.ts",
+          "scripts/race-try.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "test:race": "tsx --test scripts/test-race.ts",
+          "race:try": "tsx scripts/race-try.ts"
+        },
+        "env": [
+          {
+            "key": "AGENT_STUDIO_VERIFIER_TOKEN",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From your team page on Agent Studio. Only the race verifier sends it."
+          },
+          {
+            "key": "AGENT_STUDIO_APP_NAME",
+            "example": "my-race-app",
+            "required": false,
+            "secret": false,
+            "note": "Name shown in the health response."
+          }
+        ],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
         "id": "spending",
         "kind": "module",
         "framework": "next",
@@ -569,6 +621,56 @@
         "readme": "README.fragment.md"
       },
       {
+        "id": "race",
+        "kind": "module",
+        "framework": "node",
+        "name": "AI Race adapter",
+        "summary": "Speaks the race protocol (ASRP/1) so the AI Race verifier can test your app. You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness (GET /race)",
+          "href": "/race"
+        },
+        "requires": [],
+        "files": [
+          "src/race/protocol.ts",
+          "src/race/adapter.ts",
+          "src/race/handlers.ts",
+          "src/race/tools.ts",
+          "src/routes/race.ts",
+          "scripts/test-race.ts",
+          "scripts/race-try.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "test:race": "tsx --test scripts/test-race.ts",
+          "race:try": "tsx scripts/race-try.ts"
+        },
+        "env": [
+          {
+            "key": "AGENT_STUDIO_VERIFIER_TOKEN",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From your team page on Agent Studio. Only the race verifier sends it."
+          },
+          {
+            "key": "AGENT_STUDIO_APP_NAME",
+            "example": "my-race-app",
+            "required": false,
+            "secret": false,
+            "note": "Name shown in the health response."
+          }
+        ],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
         "id": "spending",
         "kind": "module",
         "framework": "node",
@@ -862,6 +964,56 @@
         "readme": "README.fragment.md"
       },
       {
+        "id": "race",
+        "kind": "module",
+        "framework": "python",
+        "name": "AI Race adapter",
+        "summary": "Speaks the race protocol (ASRP/1) so the AI Race verifier can test your agent (python -m agent race to try a task). You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness (GET /race)",
+          "href": "/race"
+        },
+        "requires": [],
+        "files": [
+          "agent/race/__init__.py",
+          "agent/race/protocol.py",
+          "agent/race/adapter.py",
+          "agent/race/handlers.py",
+          "agent/race/tools.py",
+          "agent/routes/race.py",
+          "agent/commands/race.py",
+          "tests/test_race.py"
+        ],
+        "dependencies": {
+          "httpx": "0.28.1"
+        },
+        "devDependencies": {},
+        "scripts": {
+          "race": "python -m agent race"
+        },
+        "env": [
+          {
+            "key": "AGENT_STUDIO_VERIFIER_TOKEN",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From your team page on Agent Studio. Only the race verifier sends it."
+          },
+          {
+            "key": "AGENT_STUDIO_APP_NAME",
+            "example": "my-race-agent",
+            "required": false,
+            "secret": false,
+            "note": "Name shown in the health response."
+          }
+        ],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
         "id": "spending",
         "kind": "module",
         "framework": "python",
@@ -1078,6 +1230,33 @@
         "env": [],
         "prerequisites": [
           "The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "race",
+        "kind": "module",
+        "framework": "expo",
+        "name": "AI Race adapter",
+        "summary": "Your companion server speaks the race protocol (ASRP/1) so the AI Race verifier can test it. You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness",
+          "href": "/race"
+        },
+        "requires": [],
+        "companionModules": [
+          "race"
+        ],
+        "files": [
+          "app/race.tsx"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL for the companion server when you race (deploy it, or a tunnel such as ngrok)"
         ],
         "readme": "README.fragment.md"
       },
