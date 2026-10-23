@@ -149,22 +149,26 @@
           "lib/payments/config.ts",
           "lib/payments/server.ts",
           "lib/payments/client.ts",
+          "lib/payments/transfer.ts",
           "scripts/keygen.ts",
-          "scripts/wallets.ts"
+          "scripts/wallets.ts",
+          "scripts/test-transfer.ts"
         ],
         "dependencies": {
           "@x402/core": "2.28.0",
           "@x402/next": "2.28.0",
           "@x402/fetch": "2.28.0",
           "@x402/svm": "2.28.0",
-          "@solana/kit": "5.5.1"
+          "@solana/kit": "5.5.1",
+          "@solana-program/token": "0.9.0"
         },
         "devDependencies": {
           "tsx": "4.23.15"
         },
         "scripts": {
           "keygen": "tsx scripts/keygen.ts",
-          "wallets": "tsx scripts/wallets.ts"
+          "wallets": "tsx scripts/wallets.ts",
+          "test:transfer": "tsx --test scripts/test-transfer.ts"
         },
         "env": [
           {
@@ -538,22 +542,26 @@
           "src/lib/payments/config.ts",
           "src/lib/payments/server.ts",
           "src/lib/payments/client.ts",
+          "src/lib/payments/transfer.ts",
           "scripts/keygen.ts",
-          "scripts/wallets.ts"
+          "scripts/wallets.ts",
+          "scripts/test-transfer.ts"
         ],
         "dependencies": {
           "@x402/core": "2.28.0",
           "@x402/express": "2.28.0",
           "@x402/fetch": "2.28.0",
           "@x402/svm": "2.28.0",
-          "@solana/kit": "5.5.1"
+          "@solana/kit": "5.5.1",
+          "@solana-program/token": "0.9.0"
         },
         "devDependencies": {
           "tsx": "4.23.15"
         },
         "scripts": {
           "keygen": "tsx scripts/keygen.ts",
-          "wallets": "tsx scripts/wallets.ts"
+          "wallets": "tsx scripts/wallets.ts",
+          "test:transfer": "tsx --test scripts/test-transfer.ts"
         },
         "env": [
           {
@@ -903,8 +911,10 @@
           "agent/payments/config.py",
           "agent/payments/server.py",
           "agent/payments/client.py",
+          "agent/payments/transfer.py",
           "agent/commands/keygen.py",
-          "agent/commands/wallets.py"
+          "agent/commands/wallets.py",
+          "tests/test_transfer.py"
         ],
         "dependencies": {
           "x402[httpx,svm]": "2.25.0",

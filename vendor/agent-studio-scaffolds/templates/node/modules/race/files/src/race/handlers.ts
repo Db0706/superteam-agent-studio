@@ -42,5 +42,8 @@ export const handlers: Record<TaskType, Handler> = {
   converse: notYet("converse", "handlers.converse"),
 
   // Autonomous Workflow: plan and run several tool calls toward a goal, within task.limits.
+  // The on-chain payment stage also sends a run_workflow task ("Pay 0.01 devnet USDC to <address>
+  // with the memo …"). With the payments module: payUsdc(await loadAgentSigner(), { to, amountUsdc, memo })
+  // from ../lib/payments/transfer.js, then return { data: { signature } }.
   run_workflow: notYet("run_workflow", "handlers.run_workflow"),
 };

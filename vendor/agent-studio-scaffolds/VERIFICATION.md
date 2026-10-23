@@ -20,6 +20,7 @@ Checked against the npm registry and PyPI on 2026-10-10. The x402 behaviour was 
 | `@x402/fetch` | 2.28.0 | `wrapFetchWithPayment`, `x402Client` |
 | `@x402/svm` | 2.28.0 | Solana `exact` scheme (`@x402/svm/exact/server`, `@x402/svm/exact/client`) |
 | `@solana/kit` | 5.5.1 | Must be **5.x**: `@x402/svm` depends on `@solana-program/token@0.9`, `token-2022@0.6.1` and `compute-budget@0.11`, which all peer-require `@solana/kit ^5`. Kit 6.x causes peer conflicts. |
+| `@solana-program/token` | 0.9.0 | Used directly by `payments/transfer` (USDC transfer + recipient account). The same version `@x402/svm` already installs, so it adds nothing to the tree; newer releases need kit 6. `payUsdc` was checked end to end on a local Agave 3.1.14 validator with the devnet USDC mint cloned: the platform's payment verifier passed it, and rejected a replayed memo and an underpayment. Python's `pay_usdc` was checked the same way. |
 | `tsx` | 4.23.15 | runs `scripts/*.ts` (keygen, wallets, pay, tests); in node also `npm run dev` (`tsx watch`) and `examples/client.ts` |
 | `express` (node) | 5.2.1 | `@x402/express@2.28.0` peer-requires `express ^4 \|\| ^5`. 5.3.0 came out the day before testing, so the previous release is used. |
 | `@types/express` (node) | 5.0.6 | latest; `@x402/express`'s own `.d.ts` imports Express types |

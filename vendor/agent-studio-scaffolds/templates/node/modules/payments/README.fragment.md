@@ -26,6 +26,8 @@
 
 **Code:** `src/lib/payments/server.ts` (charge for an endpoint with `paidRoute(...)`, built on [`@x402/express`](https://www.npmjs.com/package/@x402/express)), `src/lib/payments/client.ts` (a `fetch` that pays automatically), `src/lib/payments/config.ts` (devnet-only settings).
 
+**Paying an address directly (the AI Race's on-chain payment stage):** `src/lib/payments/transfer.ts` has `payUsdc(signer, { to, amountUsdc, memo })`. It sends devnet USDC from the agent wallet to any address, with an optional memo, creates the recipient's USDC account if needed, and waits until devnet confirms. It returns `{ signature }`. Pass the spending module's tracker as `{ guard }` to keep it within your budget. `npm run test:transfer` checks it offline. The agent wallet needs devnet SOL for fees (faucet.solana.com) and devnet USDC (faucet.circle.com); if it doesn't, the error says which.
+
 **Charge for your own endpoint** in any file in `src/routes/`:
 
 ```ts

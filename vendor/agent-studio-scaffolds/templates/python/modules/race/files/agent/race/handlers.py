@@ -51,5 +51,8 @@ HANDLERS: dict[TaskType, Handler] = {
     # Redis configured it survives serverless hosting, where a plain variable forgets between turns.
     "converse": not_yet("converse"),
     # Autonomous Workflow: plan and run several tool calls toward a goal, within task["limits"].
+    # The on-chain payment stage also sends a run_workflow task ("Pay 0.01 devnet USDC to <address>
+    # with the memo …"). With the payments module: await pay_usdc(load_agent_keypair(), to=..., amount_usdc=..., memo=...)
+    # from agent.payments.transfer, then return {"data": {"signature": signature}}.
     "run_workflow": not_yet("run_workflow"),
 }

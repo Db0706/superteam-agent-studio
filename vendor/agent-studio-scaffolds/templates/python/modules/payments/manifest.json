@@ -10,8 +10,10 @@
     "agent/payments/config.py",
     "agent/payments/server.py",
     "agent/payments/client.py",
+    "agent/payments/transfer.py",
     "agent/commands/keygen.py",
-    "agent/commands/wallets.py"
+    "agent/commands/wallets.py",
+    "tests/test_transfer.py"
   ],
   "dependencies": {
     "x402[httpx,svm]": "2.25.0",
