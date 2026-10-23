@@ -8,7 +8,7 @@ The site still works without Supabase: the landing page, AI Lab, Builder (ZIP do
 
 | Variable | Required | What it is |
 | --- | --- | --- |
-| `DATABASE_URL` | yes | Postgres connection string. On Vercel use Supabase's **transaction pooler** (port 6543; prepared statements are turned off automatically). The worker can use the session pooler (5432) or the direct connection. |
+| `DATABASE_URL` | yes | Postgres connection string. On Vercel use Supabase's **transaction pooler** (port 6543; prepared statements are turned off automatically). Use the transaction pooler for the worker too: the session pooler's client limit is too low for two workers. |
 | `DATABASE_POOL_SIZE` | no | Connections per process (default 10). Use 3 on Vercel: each function instance opens its own pool. |
 | `CHALLENGE_BASE_URL` | prod | Public `https://` address of the app. Tool and knowledge-source URLs in race tasks point at `{CHALLENGE_BASE_URL}/api/race/challenge/…`, so it must be reachable from the internet. Falls back to `NEXT_PUBLIC_SITE_URL`. |
 | `RECEIPT_SIGNING_KEY` | prod | HMAC key for verification receipts (32+ random bytes). Changing it invalidates existing receipts. |

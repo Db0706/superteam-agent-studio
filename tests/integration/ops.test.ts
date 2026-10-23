@@ -66,6 +66,15 @@ describe("permissions", () => {
     expect(subErr).not.toBeNull();
   });
 
+  it("only exposes read helpers to anonymous callers", async () => {
+    const open = await h.sql<{ proname: string }[]>`
+      select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`;
+    const allowed = ["event_leaderboard", "has_event_role", "is_organiser", "is_platform_admin", "is_team_member", "owns_participant", "server_now", "team_university"];
+    expect(open.map((r) => r.proname).filter((n) => !allowed.includes(n))).toEqual([]);
+    expect(await rpcError(h.anon, "create_team", { p_event: eventId, p_name: "x", p_track: "build" })).toMatch(/permission denied/);
+  });
+
   it("keeps organiser actions for organisers", async () => {
     expect(await rpcError(alice.client, "set_event_role", { p_event: eventId, p_email: `alice@${h.domain}`, p_role: "organiser", p_grant: true })).toMatch(/organiser/i);
     expect(await rpcError(alice.client, "import_registrations", { p_event: eventId, p_rows: [] })).toMatch(/organiser/i);

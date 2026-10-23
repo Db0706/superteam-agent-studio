@@ -44,10 +44,10 @@ export function fixtureToken(participantId: string, secret: string): string {
 
 export async function loadAttemptContext(sql: Sql, attemptId: string) {
   const [row] = await sql<
-    (AttemptRow & { layer_key: string; config: { layers: unknown[] }; verifier_token: string | null; fixture_endpoint: string | null })[]
+    (AttemptRow & { layer_key: string; config: { layers: unknown[] }; verifier_token: string | null; fixture_endpoint: string | null; team_id: string | null })[]
   >`
     select a.id, a.tournament_id, a.layer_run_id, a.participant_id, a.attempt_no, a.version, a.submitted_at, a.endpoint_url,
-           r.layer_key, v.config, pr.verifier_token, tp.fixture_endpoint
+           r.layer_key, v.config, pr.verifier_token, tp.fixture_endpoint, tp.team_id
     from public.verification_attempts a
     join public.layer_runs r on r.id = a.layer_run_id
     join public.tournament_versions v on v.tournament_id = a.tournament_id and v.version = a.version
@@ -148,6 +148,18 @@ export async function runAttempt(sql: Sql, env: EngineEnv, attemptId: string): P
     },
     evidence(key, value) {
       evidence[key] = value;
+    },
+    async team() {
+      if (!row.team_id) return null;
+      try {
+        const [t] = await sql<{ name: string }[]>`select name from public.teams where id = ${row.team_id}`;
+        if (!t) return null;
+        const submissions = await sql<{ track: string; status: string; title: string; fields: Record<string, unknown> }[]>`
+          select track::text, status::text, title, fields from public.submissions where team_id = ${row.team_id}`;
+        return { name: t.name, submissions: [...submissions] };
+      } catch (err) {
+        throw new InfrastructureError(`could not read team records: ${(err as Error).message}`);
+      }
     },
   };
 

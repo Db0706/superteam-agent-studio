@@ -22,8 +22,8 @@ Three pieces: a **Supabase** project (Postgres, Auth, Realtime), the **Next.js a
 
 ## 3. Worker (Railway or similar)
 
-1. New service from this repository. `railway.json` sets everything: no build step, start command `npm run worker`, two replicas, always restart.
-2. Variables: `DATABASE_URL` (session pooler, port 5432), `CHALLENGE_BASE_URL`, `RECEIPT_SIGNING_KEY`, `VERIFIER_SEED_SECRET`, `FIXTURE_SECRET` (the **same values** as Vercel: the app's challenge services and the worker must agree), `WORKER_CONCURRENCY=16`, `NODE_ENV=production`, and `NPM_CONFIG_INCLUDE=dev` (the worker runs TypeScript with `tsx`, a dev dependency).
+1. New service from this repository. `railway.json` sets everything: no build step, start command `npm run worker`, two replicas in Europe (Amsterdam, near the Supabase database in Ireland), always restart.
+2. Variables: `DATABASE_URL` (the **transaction pooler**, port 6543: the session pooler's client limit is too low for two workers; the worker only uses transaction-scoped locks, so transaction pooling is safe), `CHALLENGE_BASE_URL`, `RECEIPT_SIGNING_KEY`, `VERIFIER_SEED_SECRET`, `FIXTURE_SECRET` (the **same values** as Vercel: the app's challenge services and the worker must agree), `WORKER_CONCURRENCY=16`, `NODE_ENV=production`, and `NPM_CONFIG_INCLUDE=dev` (the worker runs TypeScript with `tsx`, a dev dependency).
 3. Two replicas: the scheduler takes an advisory lock each tick and jobs are leased, so two workers never decide the same thing twice; if one dies, the other carries on. A worker started anywhere else (for example `npm run worker` on a laptop with the production `DATABASE_URL`) is an equally safe emergency backup.
 4. Check **Admin → Overview**: the worker panel shows a heartbeat within a few seconds.
 

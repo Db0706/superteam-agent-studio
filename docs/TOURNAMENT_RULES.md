@@ -24,6 +24,17 @@ The mechanics the platform enforces. The **official rules, timings, layers and p
 | Checkpoint | Nobody is eliminated; each layer is recorded as passed or missed. |
 | Hybrid | Each layer is either eliminating or a checkpoint, as configured. |
 
+## Points races
+
+A points race is a checkpoint race where every layer is worth points:
+
+- **Build stages** are milestones of the team's own product (for example: app live, idea locked in, AI feature working, on-chain payment, submitted). They stay open for the whole build sprint and can be done in any order. The platform confirms each one from the team's live app or its own records.
+- **Challenges** open in timed windows.
+- A layer's points count from the team's **first verified pass**, straight away, not at the deadline. Passing again doesn't score twice.
+- Organisers can change a layer's points during the race, and award or deduct points for things run off the platform. Both are logged with a reason and show on the leaderboard.
+- The leaderboard ranks teams by points; on equal points, whoever got there first ranks higher. Universities are compared by **average points per team**, so a side with more teams has no advantage.
+- If the organisers choose finalists from the leaderboard, they announce how many on the day.
+
 A team's decision for a layer is made once. Ties are broken in the published order (for example: higher score, then earlier pass, then fewer attempts).
 
 ## Fairness
