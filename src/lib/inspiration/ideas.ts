@@ -3,7 +3,7 @@ import { TRACK_LABEL } from "@/config/tracks";
 import type { TrackId } from "@/config/schema";
 
 /**
- * Offline idea library (250 ideas). #1-24 are the design's original samples;
+ * Offline idea library (286 ideas). #1-24 are the design's original samples;
  * the rest were written to the same schema. No network or AI calls.
  */
 
@@ -26,7 +26,10 @@ export interface Idea {
 export const IDEAS = rawIdeas as Idea[];
 
 export const ALL = "All";
-export const INDUSTRIES = [ALL, ...[...new Set(IDEAS.map((i) => i.industry))].sort()];
+/** Shown first in the industry filter: where AI meets the event's tracks. The rest follow A to Z. */
+const PRIORITY = ["Research", "AI Governance", "University Life", "Science", "Healthcare", "Education", "Accessibility", "Climate", "Civic"];
+const present = new Set(IDEAS.map((i) => i.industry));
+export const INDUSTRIES = [ALL, ...PRIORITY.filter((p) => present.has(p)), ...[...present].filter((i) => !PRIORITY.includes(i)).sort()];
 export const TRACK_OPTIONS = [ALL, ...Object.values(TRACK_LABEL)];
 export const DIFFICULTIES = [ALL, "Beginner", "Intermediate", "Advanced"];
 export const APP_TYPES = [ALL, "Web app", "Mobile app", "Agent", "API service"];

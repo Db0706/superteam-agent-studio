@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.8.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0; node and python landing pages in 0.8.0; `paysh` module for all four in 0.9.0; expo `wallet` module in 0.10.0)
+Date: 2026-10-10 · Machine: macOS (Darwin 25), Node 22.13.1, npm 10.9.2 · Scaffold version 0.8.0 (Next.js results first recorded for 0.1.0; node added in 0.2.0; python added in 0.3.0, Python 3.12.14 and 3.10.21; expo added in 0.4.0; next `wallet` module added in 0.5.0; next UI redesign in 0.6.0; expo UI redesign in 0.7.0; node and python landing pages in 0.8.0; `paysh` module for all four in 0.9.0; expo `wallet` module in 0.10.0; `race` adapter for all four in 0.11.0)
 
 ## Verified package versions (exact pins)
 
@@ -125,6 +125,15 @@ Same machine and date, Python 3.12.14 unless noted. Commands ran in the composed
 | P9 | `python -m agent serve --reload`: starts, reloads on file change; unknown path 404 JSON; gemini without key 500 "GEMINI_API_KEY is not set" | pass |
 | P10 | Composer: next and node output for **all 32** module subsets is byte-identical to the v0.2.0 composer (run before the version bump; afterwards only `studio.manifest.json` `scaffoldVersion` reads 0.3.0) | pass |
 
+## What was tested: AI Race adapter (`--modules race`, 0.11.0)
+
+The `race` module speaks ASRP/1, the protocol the Agent Studio race verifier uses: token check, nonce echo, the answer envelope and routing by task type. The AI logic for each task type is left to the team (each handler starts as a placeholder that returns a clear error), because building those capabilities is the race. Next.js and Node share the same `protocol`/`adapter`/`handlers`/`tools` files; Python mirrors them; Expo puts the adapter in the companion server.
+
+- **R1. Offline protocol tests.** `npm run test:race` (Next, Node, Expo companion) and `tests/test_race.py` (Python), 5 tests each: health needs the token (503 unset, 401 wrong), unknown callers get 401 `unauthorized`, malformed tasks 400 `invalid_input` with the nonce echoed, answers are wrapped with the echoed nonce, `TaskError` maps to the matching protocol error, unbuilt task types say so.
+- **R2. HTTP smoke test** (Node, Python, Expo companion): health 401 without the token and 200 `ready` with it; tasks 401 with a wrong token, 400 for a malformed task, 500 with "not built yet" for `respond`; `GET /race` reports the token as set and every task type as not built.
+- **R3. Against the real verifier.** `tests/integration/scaffold-adapter.test.ts` in superteam-agent-studio composes `node-race`, starts it twice with a real team's verifier token, and runs layer 1 (First Intelligence, `ai.respond`) through the real job queue, worker and verifier. With `respond` written (a deterministic stand-in for a model, so no key is needed) the attempt **passed 100/100**; untouched, it **failed** with health passing and the feedback "This app doesn't handle "respond" tasks yet".
+- **Not tested:** a team's real model answering every layer (that is the race), and deployed hosts (Vercel function limits for long `run_workflow` tasks: the route sets `maxDuration = 60`).
+
 ## What was tested: Expo Wallet Connection (`--framework expo --modules wallet`, 0.10.0)
 
 Official packages do the wallet work: `@solana-mobile/mobile-wallet-adapter-protocol(-kit)` 3.0.1 (Solana Mobile) on `@solana/kit` 8.5.0, which `@x402/svm` 2.28.0 accepts (peer `>=5.1.0`). Our code is a ~40-line adapter (`lib/wallet/mobileWallet.ts`) from MWA's `transact()` to a kit `TransactionPartialSigner`, plus `lib/wallet/crypto-polyfill.ts`, which gives kit `crypto.subtle.digest` and `crypto.getRandomValues` from `expo-crypto` (Hermes has no WebCrypto; without it kit fails with "No digest implementation could be found"). `expo-dev-client` 57.0.19 and `expo-crypto` 57.0.3 follow the SDK table and the two-week rule.
@@ -206,30 +215,39 @@ Same machine and date.
 | E4 | Metro `blockList`: an app screen importing `../companion-server/src/lib/ai/gemini` makes `expo export` fail with "Unable to resolve module" | pass |
 | E5 | `npx expo install --check` (online) on the full app: it reports newer patches published since (`expo ~57.0.27`, `expo-router ~57.0.25`, …), which is why verify checks against the installed SDK's own table instead. `EXPO_OFFLINE=1 npx expo install --check` passes but did not catch a deliberately wrong `react-native-screens` pin in `package.json` (it checks installed versions), so it isn't used. | informational |
 
-## Matrix (`npm run verify`, final run)
+## Matrix (`npm run verify`, final run, 0.11.0)
 
 ```
 PASS  next-base                 install → typecheck → build → no-secrets
 PASS  next-gemini               install → typecheck → build → no-secrets
+PASS  next-race                 install → typecheck → build → test:race → no-secrets
+PASS  next-race-gemini          install → typecheck → build → test:race → no-secrets
 PASS  next-payments             install → typecheck → build → no-secrets
 PASS  next-payments-spending    install → typecheck → build → test:spending → no-secrets
-PASS  next-full                 install → typecheck → build → test:spending → no-secrets
-PASS  next-full-wallet          install → typecheck → build → test:spending → no-secrets
+PASS  next-full                 install → typecheck → build → test:spending → test:paysh → test:race → no-secrets
+PASS  next-full-wallet          install → typecheck → build → test:spending → test:paysh → test:race → no-secrets
 PASS  node-base                 install → typecheck → build → smoke
 PASS  node-gemini               install → typecheck → build → smoke
+PASS  node-race                 install → typecheck → build → test:race → smoke
+PASS  node-race-gemini          install → typecheck → build → test:race → smoke
 PASS  node-payments             install → typecheck → build → smoke
 PASS  node-payments-spending    install → typecheck → build → test:spending → smoke
-PASS  node-full                 install → typecheck → build → test:spending → smoke
+PASS  node-full                 install → typecheck → build → test:spending → test:paysh → test:race → smoke
 PASS  python-base               venv → install → compile → typecheck → test → cli → smoke
 PASS  python-gemini             venv → install → compile → typecheck → test → cli → smoke
+PASS  python-race               venv → install → compile → typecheck → test → cli → smoke
+PASS  python-race-gemini        venv → install → compile → typecheck → test → cli → smoke
 PASS  python-payments           venv → install → compile → typecheck → test → cli → smoke
 PASS  python-payments-spending  venv → install → compile → typecheck → test → cli → smoke
 PASS  python-full               venv → install → compile → typecheck → test → cli → smoke
 PASS  expo-base                 install → sdk-versions → typecheck → build → no-secrets
 PASS  expo-gemini               install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:smoke
+PASS  expo-race                 install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:race → companion:smoke
+PASS  expo-race-gemini          install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:race → companion:smoke
 PASS  expo-payments             install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:smoke
 PASS  expo-payments-spending    install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:spending → companion:smoke
-PASS  expo-full                 install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:spending → companion:smoke
+PASS  expo-full                 install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:spending → companion:test:paysh → companion:test:race → companion:smoke
+PASS  expo-full-wallet          install → sdk-versions → typecheck → build → no-secrets → companion:install → companion:typecheck → companion:build → companion:test:spending → companion:test:paysh → companion:test:race → companion:smoke
 ```
 
 The expo `build` step is `expo export --platform android` (29 files: one Hermes bundle, about 2.7 MB, plus expo-router's assets). The companion's `test:spending` is the same 8/8 as N2, and its smoke test is N1 (17 checks across the four companion combinations).

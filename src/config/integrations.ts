@@ -9,11 +9,13 @@ import type { FrameworkId } from "./schema";
  * plus HTTP smoke tests of the Node and Python services; Expo apps bundle for
  * Android with no secrets inside, and their companion server is the verified
  * Node template; see its VERIFICATION.md). Those are listed in `verifiedOn`.
- * Wallet is verified on Next.js (scaffold v0.5.0) and Expo (v0.10.0, Android). Pay.sh is verified on all four (v0.9.0). See README → "Integration catalog".
+ * Wallet is verified on Next.js (scaffold v0.5.0) and Expo (v0.10.0, Android). Pay.sh is verified on all four (v0.9.0).
+ * The AI Race adapter is verified on all four (v0.11.0), and a composed Node starter passed the real
+ * race verifier's first layer (tests/integration/scaffold-adapter.test.ts). See README → "Integration catalog".
  */
 
 export type CompatStatus = "ok" | "server" | "unverified" | "na";
-export type IntegrationId = "gemini" | "payments" | "paysh" | "wallet" | "paidapi" | "spending";
+export type IntegrationId = "gemini" | "race" | "payments" | "paysh" | "wallet" | "paidapi" | "spending";
 export type Pkg = readonly [name: string, version: string];
 
 export interface EnvVarDef {
@@ -168,6 +170,7 @@ const LIMITS: EnvVarDef[] = [
   { key: "AGENT_BUDGET_USD", example: "1.00", note: "Total allowed spend" },
   { key: "MAX_PAYMENT_USD", example: "0.10", note: "Largest single payment" },
 ];
+const VERIFIER_TOKEN: EnvVarDef = { key: "AGENT_STUDIO_VERIFIER_TOKEN", example: "", note: "From your team page. Only the race verifier sends it" };
 const PAYSH_URL: EnvVarDef = { key: "PAYSH_SERVICE_URL", example: "", note: "Your deployed https:// address, for the Pay.sh listing" };
 
 export const INTEGRATIONS: IntegrationDef[] = [
@@ -193,6 +196,35 @@ export const INTEGRATIONS: IntegrationDef[] = [
     },
     packages: { next: [["@google/genai", "2.28.0"]], node: [["@google/genai", "2.28.0"]], python: [["google-genai", "2.29.0"]] },
     env: { next: [GEMINI_KEY, GEMINI_MODEL], expo: [GEMINI_KEY, GEMINI_MODEL], python: [GEMINI_KEY, GEMINI_MODEL], node: [GEMINI_KEY, GEMINI_MODEL] },
+  },
+  {
+    id: "race",
+    name: "AI Race Adapter",
+    short: "Race",
+    description: "Connect your app to the AI Race: the verifier tests each capability you build against your live app.",
+    tech: "ASRP/1 · GET /agent-studio/v1/health + POST /agent-studio/v1/tasks · one handler per task type",
+    external: { name: "AI Race verifier", description: "Agent Studio's verifier calls your public URL with fresh tasks during the race." },
+    compatibility: { next: "ok", expo: "server", python: "ok", node: "ok" },
+    reasons: { expo: "The verifier calls the companion server (the Node.js template), not the phone." },
+    worksWith: ["gemini"],
+    requires: [],
+    prerequisites: ["A team on Agent Studio, for the verifier token", "A public https:// URL when you race: deploy, or use a tunnel such as ngrok"],
+    implementationStatus: "provisional",
+    verifiedOn: ["next", "node", "python", "expo"],
+    files: {
+      next: [
+        "lib/race/protocol.ts", "lib/race/adapter.ts", "lib/race/handlers.ts", "lib/race/tools.ts",
+        "app/agent-studio/v1/health/route.ts", "app/agent-studio/v1/tasks/route.ts", "app/race/page.tsx", "scripts/test-race.ts", "scripts/race-try.ts",
+      ],
+      expo: ["app/race.tsx"],
+      python: [
+        "agent/race/__init__.py", "agent/race/protocol.py", "agent/race/adapter.py", "agent/race/handlers.py", "agent/race/tools.py",
+        "agent/routes/race.py", "agent/commands/race.py", "tests/test_race.py",
+      ],
+      node: ["src/race/protocol.ts", "src/race/adapter.ts", "src/race/handlers.ts", "src/race/tools.ts", "src/routes/race.ts", "scripts/test-race.ts", "scripts/race-try.ts"],
+    },
+    packages: { python: [["httpx", "0.28.1"]] },
+    env: { next: [VERIFIER_TOKEN], expo: [VERIFIER_TOKEN], python: [VERIFIER_TOKEN], node: [VERIFIER_TOKEN] },
   },
   {
     id: "payments",

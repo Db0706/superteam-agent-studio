@@ -1,32 +1,31 @@
 import type { TrackConfig, TrackId } from "./schema";
 
 /**
- * The four proposed hackathon tracks. Order here is display order.
- * Events choose which of these they run (see `events.ts`), so a track can be
- * dropped for one event without touching any component.
+ * The four starters, one per framework. Order here is display order. These are starting
+ * points for any track: the event's official tracks (Build and Policy) live in the database.
  */
 export const TRACKS: TrackConfig[] = [
   {
     id: "web",
     abbr: "N",
-    name: "Web Applications",
+    name: "AI Web Apps",
     tech: "NEXT.JS",
     short: "NEXT.JS",
     framework: "next",
     command: "npx next dev",
-    description: "Build AI-powered web applications and internet-native payment experiences.",
-    judgedOn: ["Product polish", "Payment experience", "Real user value"],
+    description: "Assistants, research tools and copilots in the browser, with streaming, tools and retrieval.",
+    strengths: ["Fast to demo", "Streaming AI UI", "Easy to deploy"],
   },
   {
     id: "mobile",
     abbr: "RN",
-    name: "Consumer Mobile",
+    name: "AI Mobile Apps",
     tech: "REACT NATIVE · EXPO · ANDROID",
     short: "EXPO",
     framework: "expo",
     command: "npx expo run:android",
-    description: "Build mobile applications with strong consumer adoption potential.",
-    judgedOn: ["Consumer appeal", "Onboarding", "Mobile payments"],
+    description: "AI features people carry with them: camera, voice and on-the-go assistants.",
+    strengths: ["Consumer reach", "Device features", "Offline-friendly"],
     note: "Standout apps may suit future Solana Mobile distribution. A possible pathway, not a guarantee.",
   },
   {
@@ -37,19 +36,19 @@ export const TRACKS: TrackConfig[] = [
     short: "PYTHON",
     framework: "python",
     command: "python -m agent",
-    description: "Build autonomous systems that discover and purchase digital services within defined budgets.",
-    judgedOn: ["Autonomy", "Budget safety", "Reliability"],
+    description: "Agents that plan, call tools, remember context and act within limits you set.",
+    strengths: ["Tool use", "Memory", "Guardrails"],
   },
   {
     id: "services",
     abbr: "TS",
-    name: "Services & Markets",
+    name: "AI Services & APIs",
     tech: "NODE.JS · TYPESCRIPT",
     short: "NODE.JS",
     framework: "node",
     command: "npm run dev",
-    description: "Build paid APIs, intelligent backend services, service markets and automated matching systems.",
-    judgedOn: ["API design", "Pricing model", "Composability"],
+    description: "Backends that other apps and agents call: model gateways, evaluators, matching and data services.",
+    strengths: ["API design", "Composability", "Reliability"],
   },
 ];
 
@@ -58,8 +57,8 @@ export const TRACK_MAP: Record<TrackId, TrackConfig> = Object.fromEntries(
 ) as Record<TrackId, TrackConfig>;
 
 export const TRACK_LABEL: Record<TrackId, string> = {
-  web: "Web Applications",
-  mobile: "Consumer Mobile",
+  web: "AI Web Apps",
+  mobile: "AI Mobile Apps",
   agents: "Autonomous Agents",
-  services: "Services & Markets",
+  services: "AI Services & APIs",
 };
