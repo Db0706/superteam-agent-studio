@@ -22,7 +22,16 @@ export const FIXTURE_VARIANTS = ["reference", "no-envelope", "fabricator", "no-m
 export type FixtureVariant = (typeof FIXTURE_VARIANTS)[number];
 export const isFixtureVariant = (v: string): v is FixtureVariant => (FIXTURE_VARIANTS as readonly string[]).includes(v);
 
+/** Where the fixture keeps conversation history. In-process by default (tests, local server). */
+export interface FixtureMemory {
+  get(key: string): Promise<string[]>;
+  set(key: string, history: string[]): Promise<void>;
+}
 const memories = new Map<string, string[]>();
+export const inProcessMemory: FixtureMemory = {
+  get: async (key) => memories.get(key) ?? [],
+  set: async (key, history) => void memories.set(key, history),
+};
 const SHARED = "__shared__";
 
 const reply = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -33,7 +42,7 @@ class UpstreamError extends Error {
   }
 }
 
-export async function handleFixture(req: Request, variant: FixtureVariant, path: string, expectedToken: string | null): Promise<Response> {
+export async function handleFixture(req: Request, variant: FixtureVariant, path: string, expectedToken: string | null, memory: FixtureMemory = inProcessMemory): Promise<Response> {
   if (expectedToken && req.headers.get("authorization") !== `Bearer ${expectedToken}`) return reply(401, { protocol: PROTOCOL, status: "error", error: { code: "unauthorized", message: "unknown caller" } });
   if (path === HEALTH_PATH) {
     if (variant === "offline") return reply(503, { error: "down" });
@@ -53,7 +62,7 @@ export async function handleFixture(req: Request, variant: FixtureVariant, path:
   const request = parsed.data;
   const error = (status: number, code: string, message: string) => reply(status, { protocol: PROTOCOL, nonce: request.nonce, status: "error", error: { code, message } });
   try {
-    const output = await solve(request, variant);
+    const output = await solve(request, variant, memory);
     if (output === "invalid") return error(400, "invalid_input", "the task is missing required input");
     if (variant === "no-envelope") return new Response(output.text ?? JSON.stringify(output.data), { status: 200, headers: { "content-type": "text/plain" } });
     return reply(200, { protocol: PROTOCOL, nonce: request.nonce, status: "ok", output, meta: { model: "fixture (no AI model)" } });
@@ -65,7 +74,7 @@ export async function handleFixture(req: Request, variant: FixtureVariant, path:
 
 type Output = { text?: string; data?: unknown; toolResults?: { tool: string; result: unknown }[] };
 
-async function solve(req: TaskRequest, variant: FixtureVariant): Promise<Output | "invalid"> {
+async function solve(req: TaskRequest, variant: FixtureVariant, memory: FixtureMemory): Promise<Output | "invalid"> {
   const { task } = req;
   const input = typeof task.input === "string" ? task.input : "";
   const tools = new Map((task.tools ?? []).map((t) => [t.name, t.url]));
@@ -139,9 +148,9 @@ async function solve(req: TaskRequest, variant: FixtureVariant): Promise<Output 
     }
     case "converse": {
       const key = variant === "leaky-memory" ? SHARED : (task.sessionId ?? "default");
-      const history = variant === "no-memory" ? [] : (memories.get(key) ?? []);
+      const history = variant === "no-memory" ? [] : await memory.get(key);
       history.push(input);
-      if (variant !== "no-memory") memories.set(key, history.slice(-50));
+      if (variant !== "no-memory") await memory.set(key, history.slice(-50));
       const all = history.join("\n");
       if (/capital of Japan/i.test(input)) return { text: "Tokyo." };
       if (/codename/i.test(input) && /\?/.test(input)) {

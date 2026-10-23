@@ -5,6 +5,9 @@ import { answerText, describeCall, okResponse, WORDS } from "./shared";
 /** Layer 5 (Memory and Context): recall within a session, isolation between sessions. */
 const memoryConfig = z.object({ checkIsolation: z.boolean().default(true), timeoutMs: z.number().int().min(2000).max(60000).default(25000) });
 
+const SERVERLESS_HINT =
+  " If it works locally but not deployed: on serverless hosting (such as Vercel) each turn can reach a different instance, so keep history in a store (the starter's lib/race/memory uses Upstash Redis when its env vars are set), not in a variable.";
+
 export async function runMemoryCase(ctx: VerifierContext, timeoutMs: number, checkIsolation: boolean, prefix = ""): Promise<CheckResult[]> {
   const sessionA = ctx.rng.id("sess");
   const sessionB = ctx.rng.id("sess");
@@ -27,7 +30,7 @@ export async function runMemoryCase(ctx: VerifierContext, timeoutMs: number, che
   }
   const recalled = results.slice(1).filter(Boolean).length;
   const checks = [
-    check(`${prefix}recall`, "Recalls facts from earlier turns in the same session", recalled === 2, failure ?? (recalled === 2 ? "Both facts were recalled." : `${recalled} of 2 earlier facts were recalled correctly.`), { codename, room }, 3),
+    check(`${prefix}recall`, "Recalls facts from earlier turns in the same session", recalled === 2, failure ?? (recalled === 2 ? "Both facts were recalled." : `${recalled} of 2 earlier facts were recalled correctly.${results[0] ? SERVERLESS_HINT : ""}`), { codename, room }, 3),
     check(`${prefix}context`, "Handles an unrelated turn without losing context", results[0] === true, results[0] ? "Answered the unrelated question." : "Did not answer the unrelated question correctly.", undefined, 1),
   ];
   if (checkIsolation) {
