@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
  */
 export const ADMIN_SECTIONS = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/readiness", label: "Readiness" },
   { href: "/admin/participants", label: "Participants" },
   { href: "/admin/tournaments", label: "Tournaments" },
   { href: "/admin/mentors", label: "Mentors" },
