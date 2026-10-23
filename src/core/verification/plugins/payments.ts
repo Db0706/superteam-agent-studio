@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { check, type CheckResult, type VerifierPlugin } from "../plugin";
+import { check, InfrastructureError, type CheckResult, type VerifierPlugin } from "../plugin";
 import { describeCall, okResponse } from "./shared";
 
 /**
@@ -8,6 +8,7 @@ import { describeCall, okResponse } from "./shared";
  * signature. The verifier reads the transaction from devnet RPC itself: an invented signature,
  * a simulation, a mainnet transfer or a replayed transaction never passes.
  */
+const DEFAULT_RPC = "https://api.devnet.solana.com";
 const USDC_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
 const MEMO_PROGRAMS = ["MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr", "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo"];
 
@@ -27,7 +28,7 @@ export const paymentPlugin: VerifierPlugin<z.infer<typeof paymentConfig>> = {
   description: "Asks the app to pay the organiser's address in devnet USDC with the attempt nonce as a memo, then confirms the settled transaction on devnet itself.",
   participantHint: "For a `run_workflow` task asking for a payment, send devnet USDC to the given address with the memo text given, and return { signature } in output.data.",
   configSchema: paymentConfig,
-  defaultConfig: { payTo: "11111111111111111111111111111111", minAmountUsdc: 0.01, rpcUrl: "https://api.devnet.solana.com", timeoutMs: 60000 },
+  defaultConfig: { payTo: "11111111111111111111111111111111", minAmountUsdc: 0.01, rpcUrl: DEFAULT_RPC, timeoutMs: 60000 },
   async run(ctx, config) {
     const memo = ctx.rng.id("agent-studio");
     const call = await ctx.callApp(
@@ -42,15 +43,10 @@ export const paymentPlugin: VerifierPlugin<z.infer<typeof paymentConfig>> = {
       return { checks };
     }
     checks.push(check("signature", "Returns a transaction signature", true, "Signature returned.", undefined, 1));
-    const rpc = await fetch(config.rpcUrl, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getTransaction", params: [signature, { encoding: "jsonParsed", commitment: "confirmed", maxSupportedTransactionVersion: 0 }] }),
-    }).then((r) => r.json() as Promise<{ result?: { meta?: { err: unknown; preTokenBalances?: TokenBal[]; postTokenBalances?: TokenBal[] }; blockTime?: number; transaction?: { message?: { instructions?: ParsedIx[] } } } }>);
-    const tx = rpc.result;
+    const tx = await fetchSettledTransaction(rpcUrlFor(config.rpcUrl), signature, config.timeoutMs);
     ctx.evidence("transaction", { signature, memo, found: !!tx });
     if (!tx) {
-      checks.push(check("settled", "Transaction is settled on devnet", false, "No confirmed devnet transaction with that signature.", undefined, 3));
+      checks.push(check("settled", "Transaction is settled on devnet", false, `No confirmed devnet transaction with that signature after ${Math.round(Math.min(RPC_TIMING.settleMs, config.timeoutMs) / 1000)} seconds. Check it was sent to devnet (not mainnet or a local validator).`, undefined, 3));
       return { checks };
     }
     const succeeded = tx.meta?.err === null;
@@ -62,6 +58,60 @@ export const paymentPlugin: VerifierPlugin<z.infer<typeof paymentConfig>> = {
     return { checks };
   },
 };
+
+/** The public devnet RPC is heavily rate-limited; an operator can point the default at their own. */
+function rpcUrlFor(configured: string): string {
+  return configured === DEFAULT_RPC && process.env.SOLANA_DEVNET_RPC_URL ? process.env.SOLANA_DEVNET_RPC_URL : configured;
+}
+
+export const RPC_TIMING = { pollMs: 2000, settleMs: 30_000, backoffMs: 1500 };
+
+interface DevnetTx {
+  meta?: { err: unknown; preTokenBalances?: TokenBal[]; postTokenBalances?: TokenBal[] };
+  blockTime?: number;
+  transaction?: { message?: { instructions?: ParsedIx[] } };
+}
+
+/**
+ * Looks the transaction up until it's confirmed. Apps often return the signature as soon as they
+ * send, before devnet confirms it, so a single lookup would fail correct payments. Returns null
+ * if no such transaction appears within the settle window (the team's problem). If the RPC itself
+ * keeps failing (rate limits, outages) it throws InfrastructureError: the attempt is retried and
+ * never recorded as the team's failure.
+ */
+export async function fetchSettledTransaction(rpcUrl: string, signature: string, timeoutMs: number): Promise<DevnetTx | null> {
+  const settleBy = Date.now() + Math.min(RPC_TIMING.settleMs, timeoutMs);
+  let rpcFailures = 0;
+  let lastProblem = "";
+  for (;;) {
+    try {
+      const res = await fetch(rpcUrl, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getTransaction", params: [signature, { encoding: "jsonParsed", commitment: "confirmed", maxSupportedTransactionVersion: 0 }] }),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (res.status === 429 || res.status >= 500) throw new Error(`devnet RPC returned ${res.status}`);
+      const body = (await res.json()) as { result?: DevnetTx | null; error?: { code: number; message: string } };
+      if (body.error) {
+        // -32602: malformed signature (the app's fault, nothing to wait for). Others are RPC trouble.
+        if (body.error.code === -32602) return null;
+        throw new Error(`devnet RPC error ${body.error.code}: ${body.error.message}`);
+      }
+      if (body.result) return body.result;
+      rpcFailures = 0;
+      if (Date.now() >= settleBy) return null;
+      await sleep(RPC_TIMING.pollMs);
+    } catch (err) {
+      rpcFailures += 1;
+      lastProblem = (err as Error).message;
+      if (rpcFailures >= 5) throw new InfrastructureError(`Could not read devnet: ${lastProblem}`);
+      await sleep(RPC_TIMING.backoffMs * rpcFailures);
+    }
+  }
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 interface TokenBal { owner?: string; mint: string; uiTokenAmount: { uiAmount: number | null } }
 
