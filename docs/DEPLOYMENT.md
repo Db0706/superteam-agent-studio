@@ -23,7 +23,7 @@ Three pieces: a **Supabase** project (Postgres, Auth, Realtime), the **Next.js a
 ## 3. Worker (Railway or similar)
 
 1. New service from the same repository. Build: `npm ci`. Start: `npm run worker`. Node 22.
-2. Variables: `DATABASE_URL` (session pooler or direct), `CHALLENGE_BASE_URL`, `RECEIPT_SIGNING_KEY`, `VERIFIER_SEED_SECRET`, `FIXTURE_SECRET` (the **same values** as Vercel: the app's challenge services and the worker must agree), `WORKER_CONCURRENCY=16`, `NODE_ENV=production`.
+2. Variables: `DATABASE_URL` (the **transaction pooler**, port 6543: the session pooler's client limit is too low for two workers; the worker only uses transaction-scoped locks, so transaction pooling is safe), `CHALLENGE_BASE_URL`, `RECEIPT_SIGNING_KEY`, `VERIFIER_SEED_SECRET`, `FIXTURE_SECRET` (the **same values** as Vercel: the app's challenge services and the worker must agree), `WORKER_CONCURRENCY=16`, `NODE_ENV=production`.
 3. Run **two** instances. The scheduler takes an advisory lock each tick and jobs are leased, so two workers never decide the same thing twice; if one dies, the other carries on.
 4. Check **Admin → Overview**: the worker panel shows a heartbeat within a few seconds.
 

@@ -8,7 +8,7 @@ Checked against the npm registry and PyPI on 2026-10-10. The x402 behaviour was 
 
 | Package | Pinned | Why this version |
 | --- | --- | --- |
-| `next` | 16.3.8 | `@x402/next@2.28.0` peer-requires `next >=16.2.6`. 16.4.0 came out the day before testing, so the previous patch is used. |
+| `next` | 16.4.2 | `@x402/next@2.28.0` peer-requires `next >=16.2.6`. 16.4.2 (2026-10-15) fixes critical advisories that affect 16.0.0 to 16.4.0 (unauthenticated RCE in image optimisation and `use cache`, a Server Actions DoS), so it is used despite being newer than two weeks. |
 | `react` / `react-dom` | 19.3.0 | latest |
 | `typescript` | 5.9.3 | latest 5.x. TypeScript 7.0 (the native port) exists but was not tested with Next. |
 | `@types/react`, `@types/react-dom` | 19.3.0 | |

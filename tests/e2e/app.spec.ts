@@ -23,30 +23,42 @@ function readZipEntry(zip: Buffer, path: string): Buffer {
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1440) < 1120;
 
-async function navTo(page: Page, label: string) {
-  if (isMobile(page)) await page.getByRole("button", { name: "Open menu" }).click();
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: label, exact: true }).click();
+/** Opens the header menu that holds `group` (desktop dropdown or the mobile menu). */
+async function openNav(page: Page, group: string) {
+  const button = isMobile(page) ? page.getByRole("button", { name: /Open menu|Close menu/ }) : page.getByRole("navigation", { name: "Main" }).getByRole("button", { name: new RegExp(group) });
+  // A tap before the page has hydrated does nothing, so retry until the menu is really open.
+  await expect(async () => {
+    if ((await button.getAttribute("aria-expanded")) !== "true") await button.click();
+    await expect(button).toHaveAttribute("aria-expanded", "true", { timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+}
+const navLink = (page: Page, label: string) => page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: new RegExp(`^${label}`) });
+
+async function navTo(page: Page, group: string, label: string) {
+  await openNav(page, group);
+  await navLink(page, label).click();
 }
 
 test.describe("navigation", () => {
   test("every page is reachable from the header, with active state and back/forward", async ({ page }) => {
     await page.goto("/");
-    for (const [label, path, heading] of [
-      ["AI Lab", "/playground", /What AI apps/],
-      ["Build", "/build", /Wire up your/],
-      ["Inspiration", "/inspiration", /Big ideas start somewhere/],
-      ["First 10 Minutes", "/start", /Your first 10 minutes/],
-      ["Home", "/", /Build the future of AI/],
+    for (const [group, label, path, heading] of [
+      ["Understand", "AI Capability Lab", "/playground", /What AI apps/],
+      ["Build", "Get a starter", "/build", /Wire up your/],
+      ["Understand", "Inspiration", "/inspiration", /Big ideas start somewhere/],
+      ["Brief", "First 10 minutes", "/start", /Your first 10 minutes/],
+      ["Compete", "Leaderboard", "/leaderboard", /Cambridge vs Oxford/],
+      ["Brief", "Event overview", "/", /Build the future of AI/],
     ] as const) {
-      await navTo(page, label);
+      await navTo(page, group, label);
       await expect(page).toHaveURL(new RegExp(`${path === "/" ? "/$" : path}`));
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
-      if (isMobile(page)) await page.getByRole("button", { name: "Open menu" }).click();
-      await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: label, exact: true })).toHaveAttribute("aria-current", "page");
-      if (isMobile(page)) await page.getByRole("button", { name: "Close menu" }).click();
+      await openNav(page, group);
+      await expect(navLink(page, label)).toHaveAttribute("aria-current", "page");
+      await page.keyboard.press("Escape");
     }
     await page.goBack();
-    await expect(page).toHaveURL(/\/start/);
+    await expect(page).toHaveURL(/\/leaderboard/);
     await page.goForward();
     await expect(page).toHaveURL(/\/$/);
   });
