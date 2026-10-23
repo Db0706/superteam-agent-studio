@@ -3,11 +3,22 @@
   "build": {
     "builder": "RAILPACK",
     "buildCommand": "echo 'Verification worker: no build step (runs TypeScript with tsx)'",
-    "watchPatterns": ["worker/**", "src/core/**", "src/server/**", "package.json", "package-lock.json", "railway.json"]
+    "watchPatterns": [
+      "worker/**",
+      "src/core/**",
+      "src/server/**",
+      "package.json",
+      "package-lock.json",
+      "railway.json"
+    ]
   },
   "deploy": {
     "startCommand": "npm run worker",
-    "numReplicas": 2,
-    "restartPolicyType": "ALWAYS"
+    "restartPolicyType": "ALWAYS",
+    "multiRegionConfig": {
+      "europe-west4-drams3a": {
+        "numReplicas": 2
+      }
+    }
   }
 }
