@@ -23,6 +23,24 @@ What to do when something breaks during a live race. Every control below is in *
 | Wrong layer timing published | Configuration mistake | Before scheduling: *Unpublish*, fix, publish again. After scheduling: rules are locked, so *Extend* (adds time to a layer, optionally shifting the rest) is the only timing change. |
 | The race has to stop | Anything serious | *Cancel* ends it for everyone with the reason shown. The event's official tracks and judging are unaffected. |
 
+## Backup worker
+
+If the Railway worker is down and doesn't come back on restart, start one on any laptop with the repo checked out (`npm ci` done) and the production secrets file:
+
+```bash
+set -a; . ./.env.production.local; set +a; DATABASE_URL="$DATABASE_URL_WORKER" CHALLENGE_BASE_URL=https://superteam-agent-studio.vercel.app NODE_ENV=production npm run worker
+```
+
+It's safe to run alongside Railway's: the scheduler takes a lock each tick and jobs are leased, so two workers never decide the same thing twice. Use the transaction pooler string if the session pooler reports "max clients reached".
+
+## Rehearsing on production
+
+`scripts/rehearse.mts` runs a points-race rehearsal on the deployed platform with fixture teams (hidden from participants, the leaderboard and the venue screen) and prints what each scored:
+
+```bash
+set -a; . ./.env.production.local; set +a; DATABASE_URL="$DATABASE_URL_WORKER" REHEARSAL_ORGANISER=<your email> REHEARSAL_SITE=https://superteam-agent-studio.vercel.app npx tsx scripts/rehearse.mts 30
+```
+
 ## Principles
 
 - **The database clock decides.** An attempt counts if its `submitted_at` (set by Postgres) is before the deadline, however long verification takes afterwards. Nobody is eliminated by a slow verifier.
