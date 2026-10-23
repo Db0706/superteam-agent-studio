@@ -5,10 +5,14 @@ They check the envelope, the token and the nonce, not your AI logic: the race ve
 
 import asyncio
 import unittest
+import json
 from typing import Any
+
+import httpx
 
 from agent.race import handlers as h
 from agent.race.adapter import handle_health, handle_task
+from agent.race.memory import Memory
 from agent.race.protocol import TaskError
 
 ENV = {"AGENT_STUDIO_VERIFIER_TOKEN": "test-token-0123456789"}
@@ -70,3 +74,34 @@ class RaceAdapterTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MemoryTest(unittest.TestCase):
+    def test_keeps_sessions_apart_in_process(self) -> None:
+        m = Memory({})
+        self.assertFalse(m.persistent)
+        asyncio.run(m.append("a", {"role": "user", "text": "codename is fox-12"}))
+        asyncio.run(m.append("b", {"role": "user", "text": "something else"}))
+        self.assertEqual(asyncio.run(m.history("a")), [{"role": "user", "text": "codename is fox-12"}])
+        self.assertEqual(asyncio.run(m.history("missing")), [])
+
+    def test_uses_upstash_when_configured(self) -> None:
+        calls: list[tuple[str, Any]] = []
+        store: list[str] = []
+
+        def handler(req: httpx.Request) -> httpx.Response:
+            self.assertEqual(req.headers["authorization"], "Bearer tok")
+            body = json.loads(req.content)
+            calls.append((str(req.url), body))
+            if str(req.url).endswith("/pipeline"):
+                store.extend(body[0][2:])
+                return httpx.Response(200, json=[])
+            return httpx.Response(200, json={"result": store})
+
+        m = Memory({"KV_REST_API_URL": "https://eu1.upstash.io/", "KV_REST_API_TOKEN": "tok"}, httpx.MockTransport(handler))
+        self.assertTrue(m.persistent)
+        asyncio.run(m.append("s1", {"role": "user", "text": "hi"}, {"role": "assistant", "text": "hello"}))
+        self.assertEqual(asyncio.run(m.history("s1")), [{"role": "user", "text": "hi"}, {"role": "assistant", "text": "hello"}])
+        self.assertEqual(calls[0][0], "https://eu1.upstash.io/pipeline")
+        self.assertEqual([c[0] for c in calls[0][1]], ["RPUSH", "LTRIM", "EXPIRE"])
+        self.assertEqual(calls[1][1], ["LRANGE", "race:memory:s1", 0, -1])

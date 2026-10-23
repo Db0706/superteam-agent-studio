@@ -14,6 +14,7 @@
     "src/race/adapter.ts",
     "src/race/handlers.ts",
     "src/race/tools.ts",
+    "src/race/memory.ts",
     "src/routes/race.ts",
     "scripts/test-race.ts",
     "scripts/race-try.ts"
@@ -40,7 +41,9 @@
       "required": false,
       "secret": false,
       "note": "Name shown in the health response."
-    }
+    },
+    { "key": "UPSTASH_REDIS_REST_URL", "example": "", "required": false, "secret": false, "note": "For the Memory layer on serverless hosting (Vercel): keeps conversation history between requests. Free Upstash Redis database; Vercel's Upstash integration sets KV_REST_API_URL instead, which also works." },
+    { "key": "UPSTASH_REDIS_REST_TOKEN", "example": "", "required": false, "secret": true, "note": "The REST token for that database (or KV_REST_API_TOKEN from Vercel's integration)." }
   ],
   "prerequisites": [
     "A team on Agent Studio (for the verifier token)",

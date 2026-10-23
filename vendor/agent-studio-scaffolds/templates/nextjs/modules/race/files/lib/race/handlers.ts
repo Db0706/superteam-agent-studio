@@ -37,6 +37,8 @@ export const handlers: Record<TaskType, Handler> = {
   answer_from_source: notYet("answer_from_source", "handlers.answer_from_source"),
 
   // Memory and Context: remember earlier turns for task.sessionId, and only for that session.
+  // Use `memory` from ./memory (history(sessionId) and append(sessionId, ...turns)): with Upstash
+  // Redis configured it survives serverless hosting, where a plain variable forgets between turns.
   converse: notYet("converse", "handlers.converse"),
 
   // Autonomous Workflow: plan and run several tool calls toward a goal, within task.limits.

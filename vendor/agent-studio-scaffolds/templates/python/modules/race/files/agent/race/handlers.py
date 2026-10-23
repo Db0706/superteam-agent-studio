@@ -47,6 +47,8 @@ HANDLERS: dict[TaskType, Handler] = {
     # External Knowledge: answer from task["source"] (search_source) and cite the document ids you used.
     "answer_from_source": not_yet("answer_from_source"),
     # Memory and Context: remember earlier turns for task["sessionId"], and only for that session.
+    # Use `memory` from .memory (history(session_id) and append(session_id, *turns)): with Upstash
+    # Redis configured it survives serverless hosting, where a plain variable forgets between turns.
     "converse": not_yet("converse"),
     # Autonomous Workflow: plan and run several tool calls toward a goal, within task["limits"].
     "run_workflow": not_yet("run_workflow"),

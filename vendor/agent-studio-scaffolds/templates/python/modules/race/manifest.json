@@ -15,6 +15,7 @@
     "agent/race/adapter.py",
     "agent/race/handlers.py",
     "agent/race/tools.py",
+    "agent/race/memory.py",
     "agent/routes/race.py",
     "agent/commands/race.py",
     "tests/test_race.py"
@@ -40,6 +41,20 @@
       "required": false,
       "secret": false,
       "note": "Name shown in the health response."
+    },
+    {
+      "key": "UPSTASH_REDIS_REST_URL",
+      "example": "",
+      "required": false,
+      "secret": false,
+      "note": "For the Memory layer on serverless hosting: keeps conversation history between requests. Free Upstash Redis database; Vercel's Upstash integration sets KV_REST_API_URL instead, which also works."
+    },
+    {
+      "key": "UPSTASH_REDIS_REST_TOKEN",
+      "example": "",
+      "required": false,
+      "secret": true,
+      "note": "The REST token for that database (or KV_REST_API_TOKEN from Vercel's integration)."
     }
   ],
   "prerequisites": [

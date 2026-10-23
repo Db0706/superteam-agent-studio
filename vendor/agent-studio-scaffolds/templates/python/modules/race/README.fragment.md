@@ -11,6 +11,8 @@
 3. Try it locally: `python -m agent race respond "What is 6 x 7?"` (with `python -m agent serve` running).
 4. Deploy (for example to Railway or Render, adding the same env var) and paste the public URL on your team page. Then press **Run verification** on the race page.
 
+**Memory on serverless hosting:** the Memory and Context layer checks that your agent remembers earlier turns of a conversation. On serverless hosts each request can reach a different instance, so history kept in a variable is lost between turns, even though it works locally. Use `memory` from `agent/race/memory.py` and set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` from a free Upstash Redis database (upstash.com). Without them, `memory` keeps history in the process, which is fine locally and on an always-on server (Railway, Render, Fly).
+
 **Tests:** `python -m unittest discover -s tests -v` includes `tests/test_race.py`, which checks the protocol handling offline. The race verifier checks your AI logic with fresh inputs on every attempt, so answers can't be hard-coded.
 
 **If it fails:** 401 means the token in your environment doesn't match your team page (rotate it there and copy again). "doesn't handle … yet" means that handler is still the placeholder. The full protocol is in the [verification guide](https://github.com/Db0706/superteam-agent-studio/blob/main/docs/VERIFICATION_SDK.md).
