@@ -16,6 +16,8 @@ export interface LayerRunView {
   deadlineAt: string;
   extendedSeconds: number;
   config: LayerConfig;
+  /** Leaderboard points for passing it, including any change made on the day. */
+  points: number;
 }
 
 export interface AttemptView {
@@ -70,14 +72,18 @@ export async function loadRaceState(tournamentId: string, viewer: { userId: stri
   const supabase = await createSupabaseServer();
   const { data: t } = await supabase.from("tournaments").select("id, name, description, status, starts_at, current_version, simulation").eq("id", tournamentId).maybeSingle();
   if (!t || t.current_version === null) return null;
-  const [{ data: version }, { data: runs }, { data: participants }, { data: feed }, { data: now }] = await Promise.all([
+  const [{ data: version }, { data: runs }, { data: participants }, { data: feed }, { data: now }, { data: pointOverrides }] = await Promise.all([
     supabase.from("tournament_versions").select("config").eq("tournament_id", t.id).eq("version", t.current_version).maybeSingle(),
     supabase.from("layer_runs").select("id, layer_key, position, state, opens_at, deadline_at, extended_seconds, version").eq("tournament_id", t.id).order("position"),
     supabase.from("tournament_participants").select("id, team_id, user_id, state, eliminated_layer_key").eq("tournament_id", t.id),
     supabase.from("activity_events").select("id, kind, payload, created_at").eq("tournament_id", t.id).eq("is_public", true).order("id", { ascending: false }).limit(25),
     supabase.rpc("server_now"),
+    supabase.from("layer_points").select("layer_key, points").eq("tournament_id", t.id),
   ]);
   const config = tournamentConfigSchema.parse(version?.config);
+  // Organisers can change a layer's points during the race; the override wins over the config.
+  const pointsOverride = new Map((pointOverrides ?? []).map((p) => [p.layer_key as string, p.points as number]));
+  const pointsFor = (key: string, fallback: number) => pointsOverride.get(key) ?? fallback;
   const layerByKey = new Map(config.layers.map((l) => [l.key, l]));
   const layers: LayerRunView[] = runs?.length
     ? runs.map((r) => ({
@@ -89,9 +95,10 @@ export async function loadRaceState(tournamentId: string, viewer: { userId: stri
         deadlineAt: r.deadline_at,
         extendedSeconds: r.extended_seconds,
         config: layerSchema.parse(layerByKey.get(r.layer_key)),
+        points: pointsFor(r.layer_key, layerByKey.get(r.layer_key)?.points ?? 0),
       }))
     : // Published but not scheduled yet: show the plan with times relative to an unknown start.
-      config.layers.map((l, i) => ({ id: `planned-${l.key}`, key: l.key, position: i, state: "locked", opensAt: "", deadlineAt: "", extendedSeconds: 0, config: l }));
+      config.layers.map((l, i) => ({ id: `planned-${l.key}`, key: l.key, position: i, state: "locked", opensAt: "", deadlineAt: "", extendedSeconds: 0, config: l, points: pointsFor(l.key, l.points) }));
 
   const list = participants ?? [];
   const mine = viewer ? list.find((p) => p.user_id === viewer.userId || (viewer.teamId && p.team_id === viewer.teamId)) : undefined;

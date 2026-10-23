@@ -28,6 +28,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 20 },
     verifier: { plugin: "ai.respond", config: { cases: 2, timeoutMs: 20000 }, visibleCriteria: ["Health endpoint answers", "Envelope with echoed nonce", "Correct answers to fresh questions"] },
     weight: 1,
+    points: 100,
+    category: "challenge",
     achievement: { title: "First Intelligence" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -48,6 +50,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 20 },
     verifier: { plugin: "ai.structured", config: { cases: 3, includeMalformed: true, timeoutMs: 25000 }, visibleCriteria: ["JSON matches the schema", "Correct values on held-out inputs", "Malformed requests rejected"] },
     weight: 1,
+    points: 100,
+    category: "challenge",
     achievement: { title: "Structured" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -68,6 +72,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 30 },
     verifier: { plugin: "tools.invoke", config: { timeoutMs: 45000 }, visibleCriteria: ["Real tool calls recorded by the tool service", "Answer computed from tool results", "No invented tool results"] },
     weight: 1,
+    points: 200,
+    category: "challenge",
     achievement: { title: "Tool User" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -88,6 +94,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 30 },
     verifier: { plugin: "knowledge.source", config: { questions: 2, includeUnanswerable: true, timeoutMs: 45000 }, visibleCriteria: ["Answers from the source", "Cites the right document", "Abstains when the source has no answer"] },
     weight: 1,
+    points: 200,
+    category: "challenge",
     achievement: { title: "Grounded" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -108,6 +116,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 30 },
     verifier: { plugin: "memory.multiturn", config: { checkIsolation: true, timeoutMs: 25000 }, visibleCriteria: ["Recalls earlier facts", "Handles unrelated turns", "Sessions are isolated"] },
     weight: 1,
+    points: 200,
+    category: "challenge",
     achievement: { title: "Remembers" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -129,6 +139,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 45 },
     verifier: { plugin: "reliability.faults", config: { invalidInput: true, recoverableOutage: true, unrecoverableOutage: true, slowUpstream: true, appTimeoutMs: 5000 }, visibleCriteria: ["Invalid input rejected", "Recovers from transient failures", "Reports outages", "Times out cleanly"] },
     weight: 1,
+    points: 300,
+    category: "challenge",
     achievement: { title: "Resilient" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -149,6 +161,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 45 },
     verifier: { plugin: "workflow.purchase", config: { maxToolCalls: 12, timeoutMs: 60000 }, visibleCriteria: ["Steps happen in dependency order", "Spending limit respected", "Accurate final report", "Tool-call limit respected"] },
     weight: 1,
+    points: 300,
+    category: "challenge",
     achievement: { title: "Autonomous" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -169,6 +183,8 @@ export const LAYER_TEMPLATES: LayerTemplate[] = [
     retries: { maxAttempts: null, cooldownSeconds: 60 },
     verifier: { plugin: "mission.final", config: { timeoutMs: 45000 }, visibleCriteria: ["Structured output", "Tool calling through a transient outage", "Multi-turn memory", "Outage reporting"] },
     weight: 2,
+    points: 400,
+    category: "challenge",
     achievement: { title: "Mission Complete" },
     feedback: { showCheckNames: true, showDetails: true },
   },
@@ -204,5 +220,120 @@ export function rehearsalConfig(cfg: TournamentConfig, speed: number): Tournamen
       timing: { offsetSeconds: Math.round(l.timing.offsetSeconds / factor), durationSeconds: Math.max(60, Math.round(l.timing.durationSeconds / factor)) },
       retries: { ...l.retries, cooldownSeconds: Math.min(l.retries.cooldownSeconds, 5) },
     })),
+  };
+}
+
+const stage = (s: Pick<LayerTemplate, "key" | "title" | "description" | "objective" | "instructions" | "capabilities" | "verifier" | "points"> & Partial<LayerTemplate>): LayerTemplate => ({
+  difficulty: "intro",
+  prerequisites: [],
+  resources: [{ label: "Verification protocol (ASRP/1)", url: SDK_DOCS }],
+  hints: [],
+  outcome: "checkpoint",
+  advancement: { kind: "all_passing" },
+  passingScore: 100,
+  retries: { maxAttempts: null, cooldownSeconds: 30 },
+  weight: 1,
+  category: "build_stage",
+  feedback: { showCheckNames: true, showDetails: true },
+  ...s,
+});
+
+/**
+ * Build stages: milestones of a team's own product, each confirmed by the platform itself. In a
+ * points race they stay open for the whole build sprint and can be done in any order. Points are
+ * samples until the organisers set them.
+ */
+export const BUILD_STAGES: LayerTemplate[] = [
+  stage({
+    key: "app-live",
+    title: "App live",
+    description: "Your app is deployed and connected to the race.",
+    objective: "Deploy to a public https:// URL with the race adapter and paste the URL on your team page.",
+    instructions: "Add the **AI Race adapter** module from the Builder (or implement `GET /agent-studio/v1/health` yourself), deploy, and paste the URL on your team page. Press **Run verification** to confirm.",
+    capabilities: ["Deployment"],
+    verifier: { plugin: "app.live", config: {}, visibleCriteria: ["App answers the health check at its public URL"] },
+    points: 50,
+  }),
+  stage({
+    key: "idea-locked",
+    title: "Idea locked in",
+    description: "Your project has a name and a problem it solves.",
+    objective: "Save a submission draft with a title and a problem statement.",
+    instructions: "On the **Submit** page, give your project a title and describe the problem it solves (at least a couple of sentences), then save the draft. Press **Run verification** here to confirm.",
+    capabilities: ["Product"],
+    verifier: { plugin: "platform.idea", config: { minProblemChars: 60 }, visibleCriteria: ["Draft has a title", "Problem statement saved"] },
+    points: 50,
+  }),
+  stage({
+    key: "ai-feature",
+    title: "AI feature working",
+    description: "Your app answers with a real model.",
+    objective: "Handle `respond` tasks through the race adapter with your AI model.",
+    instructions: "Write the `respond` handler in your race adapter so it answers `task.input` with your model, in `output.text`. The verifier asks fresh questions with checkable answers.",
+    capabilities: ["AI model call"],
+    verifier: { plugin: "ai.respond", config: { cases: 2, timeoutMs: 20000 }, visibleCriteria: ["Health endpoint answers", "Envelope with echoed nonce", "Correct answers to fresh questions"] },
+    points: 100,
+    difficulty: "core",
+  }),
+  stage({
+    key: "agent-tools",
+    title: "Agent uses tools",
+    description: "Your agent calls real tools and uses what they return.",
+    objective: "Handle `use_tools` tasks by calling the tools in the task.",
+    instructions: "Write the `use_tools` handler: decide which of `task.tools` to call, call them with `task.challengeToken`, and use their results in your answer. The tool service records every call, so invented results fail.",
+    capabilities: ["Tool calling"],
+    verifier: { plugin: "tools.invoke", config: { timeoutMs: 45000 }, visibleCriteria: ["Real tool calls recorded by the tool service", "Answer computed from tool results", "No invented tool results"] },
+    points: 150,
+    difficulty: "core",
+  }),
+  stage({
+    key: "onchain-payment",
+    title: "On-chain payment",
+    description: "Your agent makes a real payment on Solana devnet.",
+    objective: "Pay the requested devnet USDC amount with the requested memo and return the transaction signature.",
+    instructions: "Handle the `run_workflow` task: pay the amount in the instructions to the address given, with the memo given, on **Solana devnet** (test money only), and return `{ \"signature\": \"…\" }` in `output.data`. The verifier confirms the transaction on chain. The Payments module in the Builder has a working client.",
+    capabilities: ["Payments", "Solana devnet"],
+    verifier: { plugin: "payments.devnet_settlement", config: { minAmountUsdc: 0.01, timeoutMs: 60000 }, visibleCriteria: ["Payment settled on devnet", "Right amount, address and memo"] },
+    points: 150,
+    difficulty: "advanced",
+  }),
+  stage({
+    key: "submitted",
+    title: "Submitted",
+    description: "Your project is in for judging.",
+    objective: "Make a final submission to an official track.",
+    instructions: "Complete every required field on the **Submit** page and press **Submit**. You'll get a receipt code. Then press **Run verification** here.",
+    capabilities: ["Product"],
+    verifier: { plugin: "platform.submitted", config: { track: "any" }, visibleCriteria: ["Final submission received"] },
+    points: 100,
+  }),
+];
+
+/**
+ * A points race: nobody is eliminated. Challenges open one after another in timed windows; build
+ * stages stay open for the whole sprint. Every pass adds the layer's points to the live
+ * leaderboard. Challenges come first so each closes and finalises as its window ends.
+ */
+export function pointsRaceTemplate(opts: { name?: string; sprintSeconds?: number; challengeIntervalSeconds?: number; challenges?: number } = {}): TournamentConfig {
+  const sprint = opts.sprintSeconds ?? 7 * 3600;
+  // "AI feature working" and "Agent uses tools" are build stages, so those two challenges aren't repeated.
+  const pool = LAYER_TEMPLATES.filter((l) => l.key !== "first-intelligence" && l.key !== "tool-calling");
+  const count = Math.max(0, Math.min(opts.challenges ?? pool.length, pool.length));
+  const interval = Math.max(60, Math.min(opts.challengeIntervalSeconds ?? 45 * 60, Math.floor(sprint / Math.max(1, count))));
+  const windows = evenWindows(count, interval);
+  return {
+    schema: TOURNAMENT_SCHEMA,
+    name: opts.name ?? "The AI Race",
+    description:
+      "Score points two ways: build stages of your own product (open all sprint, any order) and timed challenges. Every pass is verified automatically against your live app and adds to the live leaderboard. Nobody is eliminated. Points shown are samples until the organisers confirm them.",
+    mode: "checkpoint",
+    participation: "team",
+    timezone: "Europe/London",
+    tieBreak: ["score_desc", "first_pass_at_asc", "attempts_asc"],
+    countsTowardsJudging: false,
+    layers: [
+      ...pool.slice(0, count).map((l, i) => ({ ...l, outcome: "checkpoint" as const, prerequisites: [], timing: windows[i] })),
+      ...BUILD_STAGES.map((l) => ({ ...l, timing: { offsetSeconds: 0, durationSeconds: sprint } })),
+    ],
   };
 }

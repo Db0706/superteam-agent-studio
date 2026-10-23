@@ -66,9 +66,14 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
     };
   }, [state.tournament.id, reload]);
 
-  const current = useMemo(() => pickCurrentLayer(state.layers), [state.layers]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const current = useMemo(() => state.layers.find((l) => l.id === selectedId) ?? pickCurrentLayer(state.layers), [state.layers, selectedId]);
   const t = state.tournament;
   const me = state.me;
+  const scoring = state.layers.some((l) => l.points > 0);
+  const myPoints = scoring
+    ? state.layers.reduce((sum, l) => sum + (me?.attempts.some((a) => a.layerRunId === l.id && a.status === "passed") || me?.decisions.some((d) => d.layerRunId === l.id && (d.decision === "qualified" || d.decision === "checkpoint_passed")) ? l.points : 0), 0)
+    : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,7 +85,18 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
             {t.simulation && " · REHEARSAL (SIMULATION)"}
           </span>
           <h1 className="display-l">{t.name}</h1>
-          <p className="m-0 max-w-[640px] text-[15px] leading-normal text-ink-2">{MODE_COPY[t.mode]}</p>
+          <p className="m-0 max-w-[640px] text-[15px] leading-normal text-ink-2">
+            {scoring && t.mode === "checkpoint" ? "Points race: every verified pass adds its points to the live leaderboard. Nobody is eliminated." : MODE_COPY[t.mode]}
+            {scoring && (
+              <>
+                {" "}
+                <Link href="/leaderboard">See the leaderboard ▸</Link>
+              </>
+            )}
+          </p>
+          {myPoints !== null && me?.participantId && (
+            <span className="font-mono text-[12px] font-semibold text-signal-ink">YOUR TEAM: {myPoints} POINTS</span>
+          )}
         </div>
         {current && <BigClock layer={current} now={now} timezone={timezone} />}
       </header>
@@ -94,7 +110,7 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
         </div>
         <aside className="flex flex-col gap-4">
           <Standings standings={state.standings} />
-          <Timeline layers={state.layers} attempts={me?.attempts ?? []} decisions={me?.decisions ?? []} now={now} timezone={timezone} currentId={current?.id} />
+          <Timeline layers={state.layers} attempts={me?.attempts ?? []} decisions={me?.decisions ?? []} now={now} timezone={timezone} currentId={current?.id} onSelect={setSelectedId} />
           <Feed activity={state.activity} layers={state.layers} />
         </aside>
       </div>
@@ -104,6 +120,7 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
 
 function pickCurrentLayer(layers: LayerRunView[]): LayerRunView | null {
   return (
+    layers.find((l) => l.state === "open" && l.config.category !== "build_stage") ??
     layers.find((l) => l.state === "open") ??
     layers.find((l) => l.state === "closing" || l.state === "finalising") ??
     layers.find((l) => l.state === "scheduled" || l.state === "locked") ??
@@ -256,7 +273,10 @@ function LayerPanel({ layer, state, now, timezone, onSubmitted }: { layer: Layer
                       : null;
 
   return (
-    <Module label={`LAYER ${layer.position + 1} OF ${state.layers.length} · ${layer.config.difficulty.toUpperCase()}`} right={passed ? <><Led color={COLORS.ok} /> PASSED</> : layer.state.toUpperCase()}>
+    <Module
+      label={`${layer.config.category === "build_stage" ? "BUILD STAGE" : `LAYER ${layer.position + 1} OF ${state.layers.length}`} · ${layer.config.difficulty.toUpperCase()}${layer.points ? ` · ${layer.points} PTS` : ""}`}
+      right={passed ? <><Led color={COLORS.ok} /> PASSED</> : layer.state.toUpperCase()}
+    >
       <div className="flex flex-col gap-4 p-4">
         <div className="flex flex-col gap-1.5">
           <h2 className="section-h">{layer.config.title}</h2>
@@ -390,26 +410,45 @@ function Standings({ standings }: { standings: RaceState["standings"] }) {
   );
 }
 
-function Timeline({ layers, attempts, decisions, now, timezone, currentId }: { layers: LayerRunView[]; attempts: AttemptView[]; decisions: { layerRunId: string; decision: string }[]; now: number; timezone: string; currentId?: string }) {
+function Timeline({ layers, attempts, decisions, now, timezone, currentId, onSelect }: { layers: LayerRunView[]; attempts: AttemptView[]; decisions: { layerRunId: string; decision: string }[]; now: number; timezone: string; currentId?: string; onSelect: (id: string) => void }) {
+  const groups = layers.some((l) => l.config.category === "build_stage")
+    ? ([["CHALLENGES", layers.filter((l) => l.config.category !== "build_stage")], ["BUILD STAGES", layers.filter((l) => l.config.category === "build_stage")]] as const)
+    : ([["ALL LAYERS", layers]] as const);
   return (
-    <Module label="ALL LAYERS">
-      <ol className="m-0 flex list-none flex-col p-0">
-        {layers.map((l) => {
-          const d = decisions.find((x) => x.layerRunId === l.id)?.decision;
-          const passed = attempts.some((a) => a.layerRunId === l.id && a.status === "passed");
-          const mark = d === "eliminated" ? "OUT" : d === "checkpoint_missed" ? "MISSED" : passed ? "PASSED" : l.state === "open" ? "OPEN" : l.state === "closed" ? "CLOSED" : l.opensAt ? formatTime(l.opensAt, timezone) : "";
-          const color = d === "eliminated" ? COLORS.fault : passed ? COLORS.okText : l.state === "open" ? COLORS.signalInk : COLORS.muted;
-          return (
-            <li key={l.id} className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-2 border-b border-hairline px-4 py-2.5 last:border-b-0" style={l.id === currentId ? { background: COLORS.strip } : undefined}>
-              <span className="font-mono text-[10px] text-muted">{String(l.position + 1).padStart(2, "0")}</span>
-              <span className="truncate text-[13.5px] font-semibold">{l.config.title}</span>
-              <span className="font-mono text-[10px] font-medium" style={{ color }}>
-                {mark}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+    <Module label="LAYERS" right="TAP ONE TO OPEN IT">
+      {groups.map(([title, list]) => (
+        <div key={title}>
+          {groups.length > 1 && <div className="border-b border-hairline bg-strip px-4 py-1.5 font-mono text-[10px] text-muted">{title}</div>}
+          <ol className="m-0 flex list-none flex-col p-0">
+            {list.map((l) => {
+              const d = decisions.find((x) => x.layerRunId === l.id)?.decision;
+              const passed = attempts.some((a) => a.layerRunId === l.id && a.status === "passed");
+              const mark = d === "eliminated" ? "OUT" : d === "checkpoint_missed" ? "MISSED" : passed ? "PASSED" : l.state === "open" ? "OPEN" : l.state === "closed" ? "CLOSED" : l.opensAt ? formatTime(l.opensAt, timezone) : "";
+              const color = d === "eliminated" ? COLORS.fault : passed ? COLORS.okText : l.state === "open" ? COLORS.signalInk : COLORS.muted;
+              return (
+                <li key={l.id} className="border-b border-hairline last:border-b-0">
+                  <button
+                    type="button"
+                    onClick={() => onSelect(l.id)}
+                    aria-current={l.id === currentId ? "true" : undefined}
+                    className="grid w-full grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-2 border-0 bg-transparent px-4 py-2.5 text-left hover:bg-strip"
+                    style={l.id === currentId ? { background: COLORS.strip } : undefined}
+                  >
+                    <span className="font-mono text-[10px] text-muted">{String(l.position + 1).padStart(2, "0")}</span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate text-[13.5px] font-semibold">{l.config.title}</span>
+                      {l.points > 0 && <span className="font-mono text-[10px] text-muted">{l.points} PTS</span>}
+                    </span>
+                    <span className="font-mono text-[10px] font-medium" style={{ color }}>
+                      {mark}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      ))}
       <span className="sr-only">Server time {new Date(now).toISOString()}</span>
     </Module>
   );

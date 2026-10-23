@@ -74,6 +74,13 @@ export interface VerifierContext {
   raw(method: "GET" | "POST", path: string, body: string | undefined, timeoutMs: number): Promise<{ status: number | null; body: string; failure: string | null }>;
   /** Record organiser-only evidence. */
   evidence(key: string, value: unknown): void;
+  /** The platform's own records about this team (for build-stage checks). Null for rehearsal fixtures. */
+  team(): Promise<TeamRecord | null>;
+}
+
+export interface TeamRecord {
+  name: string;
+  submissions: { track: string; status: string; title: string; fields: Record<string, unknown> }[];
 }
 
 export interface VerifierOutcome {

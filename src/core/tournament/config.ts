@@ -76,6 +76,10 @@ export const layerSchema = z.object({
   verifier: verifierRefSchema,
   /** Weight of this layer in the overall standings. */
   weight: z.number().min(0).max(100).default(1),
+  /** Leaderboard points for passing this layer (first pass counts, as soon as it's verified). */
+  points: z.number().int().min(0).max(10_000).default(0),
+  /** Where it shows on the leaderboard: a stage of the team's own product, or a race challenge. */
+  category: z.enum(["challenge", "build_stage"]).default("challenge"),
   achievement: z.object({ title: z.string().min(1).max(60) }).optional(),
   feedback: z.object({ showCheckNames: z.boolean().default(true), showDetails: z.boolean().default(true) }).default({ showCheckNames: true, showDetails: true }),
 });

@@ -5,6 +5,7 @@ import { humanPlugin } from "./plugins/human";
 import { memoryPlugin } from "./plugins/memory";
 import { missionPlugin } from "./plugins/mission";
 import { paymentPlugin } from "./plugins/payments";
+import { appLivePlugin, ideaPlugin, submittedPlugin } from "./plugins/platform";
 import { reliabilityPlugin } from "./plugins/reliability";
 import { knowledgePlugin, toolsPlugin } from "./plugins/tools";
 import { workflowPlugin } from "./plugins/workflow";
@@ -22,6 +23,9 @@ export const VERIFIERS: VerifierPlugin<never>[] = [
   httpPlugin,
   paymentPlugin,
   humanPlugin,
+  appLivePlugin,
+  ideaPlugin,
+  submittedPlugin,
 ] as unknown as VerifierPlugin<never>[];
 
 export function getVerifier(id: string): VerifierPlugin<unknown> | undefined {

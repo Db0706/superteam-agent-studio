@@ -40,18 +40,22 @@ export async function assignJudge(judgeId: string, submissionId: string): Promis
 }
 
 /** Gives every submission in a track `perSubmission` judges, balancing load. Returns how many were added. */
-export async function autoAssign(t: "build" | "policy", perSubmission: number): Promise<ActionResult<number>> {
+export async function autoAssign(t: "build" | "policy", perSubmission: number, finalistsOnly = false): Promise<ActionResult<number>> {
   if (!track.safeParse(t).success || !(perSubmission >= 1 && perSubmission <= 10)) return { ok: false, error: "Pick between 1 and 10 judges." };
   const id = await eventId();
   const s = await createSupabaseServer();
-  const [{ data: subs }, { data: judges }, { data: existing }] = await Promise.all([
-    s.from("submissions").select("id").eq("event_id", id).eq("track", t).order("submitted_at"),
+  const [{ data: subs }, { data: judges }, { data: existing }, { data: finalists }] = await Promise.all([
+    s.from("submissions").select("id, team_id").eq("event_id", id).eq("track", t).order("submitted_at"),
     s.from("event_roles").select("user_id").eq("event_id", id).eq("role", "judge"),
     s.from("judge_assignments").select("submission_id, judge_id").eq("event_id", id),
+    s.from("finalists").select("team_id").eq("event_id", id),
   ]);
   if (!judges?.length) return { ok: false, error: "Add judges on the Participants page first." };
+  if (finalistsOnly && !finalists?.length) return { ok: false, error: "Confirm the finalists on the Points & finalists page first." };
+  const finalistTeams = new Set((finalists ?? []).map((f) => f.team_id));
+  const pool = (subs ?? []).filter((x) => !finalistsOnly || finalistTeams.has(x.team_id));
   const plan = planAssignments(
-    (subs ?? []).map((x) => x.id),
+    pool.map((x) => x.id),
     judges.map((j) => j.user_id),
     (existing ?? []).map((e) => ({ submissionId: e.submission_id, judgeId: e.judge_id })),
     perSubmission,

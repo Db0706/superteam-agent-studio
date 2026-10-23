@@ -10,7 +10,7 @@ export const labelCls = "flex flex-col gap-1 text-[13px] font-semibold";
 
 export function CreateTournamentForm() {
   const [state, action, pending] = useActionState(createTournament, null);
-  const [start, setStart] = useState<"template" | "blank">("template");
+  const [start, setStart] = useState<"points" | "template" | "blank">("points");
   return (
     <Module label="NEW TOURNAMENT">
       <form action={action} className="flex flex-col gap-3 p-4">
@@ -21,25 +21,43 @@ export function CreateTournamentForm() {
         <fieldset className="m-0 flex flex-col gap-1.5 border-0 p-0 text-[14px]">
           <legend className="mb-1 text-[13px] font-semibold">Start from</legend>
           <label className="flex items-center gap-2">
+            <input type="radio" name="start" value="points" checked={start === "points"} onChange={() => setStart("points")} /> Points race: build stages and challenges, live leaderboard, no eliminations
+          </label>
+          <label className="flex items-center gap-2">
             <input type="radio" name="start" value="template" checked={start === "template"} onChange={() => setStart("template")} /> The eight AI Race layers (editable)
           </label>
           <label className="flex items-center gap-2">
             <input type="radio" name="start" value="blank" checked={start === "blank"} onChange={() => setStart("blank")} /> A single layer to build from
           </label>
         </fieldset>
-        <div className="grid grid-cols-2 gap-2">
-          <label className={labelCls}>
-            Layers
-            <input name="layers" type="number" min={1} max={8} defaultValue={8} disabled={start === "blank"} className={field} />
-          </label>
-          <label className={labelCls}>
-            Minutes per layer
-            <input name="interval" type="number" min={1} max={1440} defaultValue={30} className={field} />
-          </label>
-        </div>
-        <label className={labelCls}>
+        {start === "points" ? (
+          <div className="grid grid-cols-2 gap-2">
+            <label className={labelCls}>
+              Build sprint (hours)
+              <input name="sprintHours" type="number" min={1} max={24} step="0.5" defaultValue={7} className={field} />
+            </label>
+            <label className={labelCls}>
+              Minutes per challenge
+              <input name="interval" type="number" min={1} max={1440} defaultValue={45} className={field} />
+            </label>
+            <input type="hidden" name="layers" value="6" />
+            <input type="hidden" name="mode" value="checkpoint" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <label className={labelCls}>
+              Layers
+              <input name="layers" type="number" min={1} max={8} defaultValue={8} disabled={start === "blank"} className={field} />
+            </label>
+            <label className={labelCls}>
+              Minutes per layer
+              <input name="interval" type="number" min={1} max={1440} defaultValue={30} className={field} />
+            </label>
+          </div>
+        )}
+        <label className={labelCls} hidden={start === "points"}>
           Mode
-          <select name="mode" defaultValue="survival" className={field}>
+          <select name="mode" defaultValue="survival" disabled={start === "points"} className={field}>
             <option value="survival">Survival: fail a layer, leave the race</option>
             <option value="ranked">Ranked: top teams advance each layer</option>
             <option value="checkpoint">Checkpoint: achievements, no eliminations</option>

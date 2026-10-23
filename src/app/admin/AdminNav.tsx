@@ -15,6 +15,7 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/tournaments", label: "Tournaments" },
   { href: "/admin/mentors", label: "Mentors" },
   { href: "/admin/submissions", label: "Submissions" },
+  { href: "/admin/points", label: "Points & finalists" },
   { href: "/admin/judging", label: "Judging" },
   { href: "/admin/announcements", label: "Announcements" },
   { href: "/admin/audit", label: "Audit log" },

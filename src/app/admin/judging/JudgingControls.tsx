@@ -88,6 +88,7 @@ export function RubricEditor({ track, label, name: initialName, criteria: initia
 
 export function AutoAssign({ track, judges }: { track: "build" | "policy"; judges: number }) {
   const [n, setN] = useState(Math.min(3, Math.max(1, judges)));
+  const [finalistsOnly, setFinalistsOnly] = useState(true);
   const { pending, run, note } = useRun();
   return (
     <div className="flex flex-wrap items-center gap-2 text-[13px]">
@@ -95,7 +96,10 @@ export function AutoAssign({ track, judges }: { track: "build" | "policy"; judge
         Judges per submission
         <input type="number" min={1} max={Math.max(1, judges)} value={n} onChange={(e) => setN(Number(e.target.value))} className={`${input} h-9 w-16`} />
       </label>
-      <button type="button" disabled={pending || !judges} onClick={() => run(() => autoAssign(track, n), (d) => `Added ${d as number} assignment${d === 1 ? "" : "s"}.`)} className="btn-secondary !h-9 !px-3 !text-[12.5px]">
+      <label className="flex items-center gap-1.5">
+        <input type="checkbox" checked={finalistsOnly} onChange={(e) => setFinalistsOnly(e.target.checked)} /> Finalists only
+      </label>
+      <button type="button" disabled={pending || !judges} onClick={() => run(() => autoAssign(track, n, finalistsOnly), (d) => `Added ${d as number} assignment${d === 1 ? "" : "s"}.`)} className="btn-secondary !h-9 !px-3 !text-[12.5px]">
         Assign evenly
       </button>
       {note}

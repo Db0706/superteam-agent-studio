@@ -8,6 +8,7 @@ import { SITE } from "@/config/site";
 export const NAV = [
   { href: "/", label: "Home" },
   { href: "/race", label: "AI Race" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/playground", label: "AI Lab" },
   { href: "/build", label: "Build" },
   { href: "/inspiration", label: "Inspiration" },

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { COLORS, Led, Module } from "@/components/system";
 import { evenWindows, parseTournamentConfig, tournamentSpanSeconds, type LayerConfig, type TournamentConfig } from "@/core/tournament/config";
-import { LAYER_TEMPLATES } from "@/core/tournament/templates";
+import { BUILD_STAGES, LAYER_TEMPLATES } from "@/core/tournament/templates";
 import { validateVerifierConfig } from "@/core/verification/catalogue";
 import { addFixtureTeam, createRehearsal, publish, saveDraft, schedule, unpublish } from "@/app/admin/tournaments/actions";
 import { field, labelCls } from "./ListActions";
@@ -78,10 +78,14 @@ export function Builder(props: BuilderProps) {
     return key;
   };
   const addLayer = (templateKey: string) => {
-    const t = LAYER_TEMPLATES.find((x) => x.key === templateKey) ?? LAYER_TEMPLATES[0];
-    const last = config.layers.at(-1);
-    const offset = last ? last.timing.offsetSeconds + last.timing.durationSeconds : 0;
-    const layer: LayerConfig = { ...structuredClone(t), key: uniqueKey(templateKey === "blank" ? "layer" : t.key), title: templateKey === "blank" ? "New layer" : t.title, prerequisites: [], timing: { offsetSeconds: offset, durationSeconds: last?.timing.durationSeconds ?? 1800 } };
+    const stage = BUILD_STAGES.find((x) => x.key === templateKey);
+    const t = stage ?? LAYER_TEMPLATES.find((x) => x.key === templateKey) ?? LAYER_TEMPLATES[0];
+    const challenges = config.layers.filter((l) => l.category !== "build_stage");
+    const last = challenges.at(-1);
+    const span = Math.max(1800, ...config.layers.map((l) => l.timing.offsetSeconds + l.timing.durationSeconds));
+    // Build stages stay open for the whole race; challenges go after the last challenge.
+    const timing = stage ? { offsetSeconds: 0, durationSeconds: span } : { offsetSeconds: last ? last.timing.offsetSeconds + last.timing.durationSeconds : 0, durationSeconds: last?.timing.durationSeconds ?? 1800 };
+    const layer: LayerConfig = { ...structuredClone(t), key: uniqueKey(templateKey === "blank" ? "layer" : t.key), title: templateKey === "blank" ? "New layer" : t.title, prerequisites: [], timing };
     update({ ...config, layers: [...config.layers, layer] });
     setSelected(config.layers.length);
   };
@@ -215,21 +219,35 @@ export function Builder(props: BuilderProps) {
                   Add a layer
                   <select value="" onChange={(e) => e.target.value && addLayer(e.target.value)} className={field}>
                     <option value="">Choose a template…</option>
-                    {LAYER_TEMPLATES.map((t) => (
-                      <option key={t.key} value={t.key}>
-                        {t.title}
-                      </option>
-                    ))}
+                    <optgroup label="Challenges">
+                      {LAYER_TEMPLATES.map((t) => (
+                        <option key={t.key} value={t.key}>
+                          {t.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Build stages (open all race)">
+                      {BUILD_STAGES.map((t) => (
+                        <option key={t.key} value={t.key}>
+                          {t.title}
+                        </option>
+                      ))}
+                    </optgroup>
                     <option value="blank">Blank layer</option>
                   </select>
                 </label>
                 <div className="flex flex-wrap items-end gap-2">
                   <label className={labelCls}>
-                    Space all layers every
+                    Space challenges every
                     <input type="number" min={1} value={spacing.minutes} onChange={(e) => setSpacing({ minutes: Math.max(1, Number(e.target.value)) })} className={`${field} w-24`} />
                   </label>
                   <span className="pb-2.5 text-[13px]">minutes</span>
-                  <button type="button" onClick={() => { const w = evenWindows(config.layers.length, spacing.minutes * 60); update({ ...config, layers: config.layers.map((l, i) => ({ ...l, timing: w[i] })) }); }} className="btn-secondary !h-10 !px-3 !text-[13px]">
+                  <button type="button" onClick={() => {
+                      // Only challenges are spaced out; build stages keep their all-race window.
+                      const idx = config.layers.map((l, i) => (l.category === "build_stage" ? -1 : i)).filter((i) => i >= 0);
+                      const w = evenWindows(idx.length, spacing.minutes * 60);
+                      update({ ...config, layers: config.layers.map((l, i) => (idx.includes(i) ? { ...l, timing: w[idx.indexOf(i)] } : l)) });
+                    }} className="btn-secondary !h-10 !px-3 !text-[13px]">
                     Apply
                   </button>
                 </div>

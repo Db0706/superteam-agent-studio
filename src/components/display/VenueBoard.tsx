@@ -138,11 +138,19 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
         </section>
 
         <section className="flex min-w-0 flex-col gap-[2.4vh]">
-          <div className="grid grid-cols-3 gap-[1vw]">
-            <Stat label="STILL RACING" value={competing.length + finished.length} color={PAPER} />
-            <Stat label="OUT" value={out.length} color={FAULT} />
-            <Stat label="VERIFIED" value={state.verifications.passed} color={OK} />
-          </div>
+          {state.leaderboard ? (
+            <div className="grid grid-cols-2 gap-[1vw]">
+              {(["cambridge", "oxford"] as const).map((u) => (
+                <Stat key={u} label={`${u.toUpperCase()} · AVG PER TEAM`} value={state.leaderboard!.sides[u].average} color={(state.leaderboard!.sides.cambridge.average === state.leaderboard!.sides.oxford.average) ? PAPER : (state.leaderboard!.sides[u].average > state.leaderboard!.sides[u === "cambridge" ? "oxford" : "cambridge"].average ? OK : PAPER)} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-[1vw]">
+              <Stat label="STILL RACING" value={competing.length + finished.length} color={PAPER} />
+              <Stat label="OUT" value={out.length} color={FAULT} />
+              <Stat label="VERIFIED" value={state.verifications.passed} color={OK} />
+            </div>
+          )}
           {state.winners.length > 0 && (
             <div className="flex flex-col gap-[1vh] rounded-[4px] px-[1vw] py-[1.4vh]" style={{ border: `2px solid ${OK}` }}>
               <span className="font-mono text-[clamp(11px,0.9vw,15px)] tracking-[0.08em]" style={{ color: OK }}>
@@ -162,7 +170,29 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
               </ul>
             </div>
           )}
-          <div className="flex min-h-0 flex-1 flex-col gap-[1vh]">
+          {state.leaderboard && (
+            <div className="flex min-h-0 flex-1 flex-col gap-[1vh]">
+              <span className="font-mono text-[clamp(11px,0.9vw,15px)] tracking-[0.08em]" style={{ color: DIM }}>
+                LEADERBOARD
+              </span>
+              <ol className="m-0 flex list-none flex-col gap-[0.8vh] overflow-hidden p-0">
+                {state.leaderboard.teams.slice(0, 8).map((t) => (
+                  <li key={t.teamId} className="grid grid-cols-[3vw_minmax(0,1fr)_auto] items-baseline gap-[1vw] text-[clamp(14px,1.4vw,26px)] font-semibold">
+                    <span className="wide" style={{ color: DIM }}>{t.rank}</span>
+                    <span className="truncate">
+                      {t.name}{" "}
+                      <span className="font-mono text-[clamp(10px,0.8vw,14px)] font-normal" style={{ color: DIM }}>
+                        {t.university.toUpperCase()}
+                        {t.finalistRank ? " · FINALIST" : ""}
+                      </span>
+                    </span>
+                    <span className="wide font-mono">{t.points}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+          <div className={state.leaderboard ? "hidden" : "flex min-h-0 flex-1 flex-col gap-[1vh]"}>
             <span className="font-mono text-[clamp(11px,0.9vw,15px)] tracking-[0.08em]" style={{ color: DIM }}>
               TEAMS
             </span>

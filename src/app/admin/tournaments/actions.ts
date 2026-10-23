@@ -5,7 +5,7 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { canonicalJson, parseTournamentConfig, TOURNAMENT_SCHEMA, type TournamentConfig } from "@/core/tournament/config";
-import { aiRaceTemplate, rehearsalConfig } from "@/core/tournament/templates";
+import { aiRaceTemplate, pointsRaceTemplate, rehearsalConfig } from "@/core/tournament/templates";
 import { validateVerifierConfig } from "@/core/verification/catalogue";
 import { FIXTURE_VARIANTS } from "@/server/fixtures/reference-app";
 import { createSupabaseServer } from "@/lib/supabase/server";
@@ -34,13 +34,20 @@ export async function createTournament(_: unknown, form: FormData): Promise<Acti
   const f = z
     .object({
       name: z.string().trim().min(1, "Name the tournament.").max(100),
-      start: z.enum(["template", "blank"]),
+      start: z.enum(["points", "template", "blank"]),
+      sprintHours: z.coerce.number().min(1).max(24).optional(),
       layers: z.coerce.number().int().min(1).max(8),
       interval: z.coerce.number().int().min(1).max(24 * 60),
       mode: z.enum(["survival", "ranked", "checkpoint", "hybrid"]),
     })
     .safeParse(Object.fromEntries(form));
   if (!f.success) return { ok: false, error: f.error.issues[0].message };
+  if (f.data.start === "points") {
+    const cfg = pointsRaceTemplate({ name: f.data.name, sprintSeconds: Math.round((f.data.sprintHours ?? 7) * 3600), challengeIntervalSeconds: f.data.interval * 60 });
+    const r = await callRpc<string>("create_tournament", { p_event: event.id, p_name: f.data.name, p_config: cfg });
+    if (!r.ok) return r;
+    redirect(`/admin/tournaments/${r.data}`);
+  }
   const base = aiRaceTemplate({ name: f.data.name, layers: f.data.start === "template" ? f.data.layers : 1, intervalSeconds: f.data.interval * 60, mode: f.data.mode });
   const config: TournamentConfig = f.data.start === "blank" ? { ...base, description: "", layers: base.layers.slice(0, 1) } : base;
   const r = await callRpc<string>("create_tournament", { p_event: event.id, p_name: f.data.name, p_config: config });

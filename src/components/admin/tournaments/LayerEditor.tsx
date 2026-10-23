@@ -147,6 +147,19 @@ export function LayerEditor({
         )}
         <div className="grid gap-3 min-[700px]:grid-cols-2">
           <label className={labelCls}>
+            Leaderboard points for passing
+            <input type="number" min={0} max={10000} step={1} value={layer.points} onChange={(e) => set("points", Math.max(0, Math.min(10000, Math.round(Number(e.target.value)))))} className={field} />
+          </label>
+          <label className={labelCls}>
+            Shown on the leaderboard as
+            <select value={layer.category} onChange={(e) => set("category", e.target.value as typeof layer.category)} className={field}>
+              <option value="challenge">A challenge</option>
+              <option value="build_stage">A build stage of the team&apos;s product</option>
+            </select>
+          </label>
+        </div>
+        <div className="grid gap-3 min-[700px]:grid-cols-2">
+          <label className={labelCls}>
             Weight in overall standings
             <input type="number" min={0} max={100} step="any" value={layer.weight} onChange={(e) => set("weight", Math.max(0, Number(e.target.value)))} className={field} />
           </label>
