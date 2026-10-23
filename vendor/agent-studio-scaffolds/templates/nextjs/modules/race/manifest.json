@@ -11,6 +11,7 @@
     "lib/race/adapter.ts",
     "lib/race/handlers.ts",
     "lib/race/tools.ts",
+    "lib/race/memory.ts",
     "app/agent-studio/v1/health/route.ts",
     "app/agent-studio/v1/tasks/route.ts",
     "app/race/page.tsx",
@@ -25,7 +26,9 @@
   },
   "env": [
     { "key": "AGENT_STUDIO_VERIFIER_TOKEN", "example": "", "required": true, "secret": true, "note": "From your team page on Agent Studio. Only the race verifier sends it." },
-    { "key": "AGENT_STUDIO_APP_NAME", "example": "my-race-app", "required": false, "secret": false, "note": "Name shown in the health response." }
+    { "key": "AGENT_STUDIO_APP_NAME", "example": "my-race-app", "required": false, "secret": false, "note": "Name shown in the health response." },
+    { "key": "UPSTASH_REDIS_REST_URL", "example": "", "required": false, "secret": false, "note": "For the Memory layer on serverless hosting (Vercel): keeps conversation history between requests. Free Upstash Redis database; Vercel's Upstash integration sets KV_REST_API_URL instead, which also works." },
+    { "key": "UPSTASH_REDIS_REST_TOKEN", "example": "", "required": false, "secret": true, "note": "The REST token for that database (or KV_REST_API_TOKEN from Vercel's integration)." }
   ],
   "prerequisites": ["A team on Agent Studio (for the verifier token)", "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"],
   "readme": "README.fragment.md"

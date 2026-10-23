@@ -171,6 +171,8 @@ const LIMITS: EnvVarDef[] = [
   { key: "MAX_PAYMENT_USD", example: "0.10", note: "Largest single payment" },
 ];
 const VERIFIER_TOKEN: EnvVarDef = { key: "AGENT_STUDIO_VERIFIER_TOKEN", example: "", note: "From your team page. Only the race verifier sends it" };
+const UPSTASH_URL: EnvVarDef = { key: "UPSTASH_REDIS_REST_URL", example: "", note: "Optional: keeps race memory between requests on serverless hosting (Vercel's Upstash integration sets KV_REST_API_URL instead)" };
+const UPSTASH_TOKEN: EnvVarDef = { key: "UPSTASH_REDIS_REST_TOKEN", example: "", note: "Optional: the token for that Upstash Redis database" };
 const PAYSH_URL: EnvVarDef = { key: "PAYSH_SERVICE_URL", example: "", note: "Your deployed https:// address, for the Pay.sh listing" };
 
 export const INTEGRATIONS: IntegrationDef[] = [
@@ -213,18 +215,18 @@ export const INTEGRATIONS: IntegrationDef[] = [
     verifiedOn: ["next", "node", "python", "expo"],
     files: {
       next: [
-        "lib/race/protocol.ts", "lib/race/adapter.ts", "lib/race/handlers.ts", "lib/race/tools.ts",
+        "lib/race/protocol.ts", "lib/race/adapter.ts", "lib/race/handlers.ts", "lib/race/tools.ts", "lib/race/memory.ts",
         "app/agent-studio/v1/health/route.ts", "app/agent-studio/v1/tasks/route.ts", "app/race/page.tsx", "scripts/test-race.ts", "scripts/race-try.ts",
       ],
       expo: ["app/race.tsx"],
       python: [
-        "agent/race/__init__.py", "agent/race/protocol.py", "agent/race/adapter.py", "agent/race/handlers.py", "agent/race/tools.py",
+        "agent/race/__init__.py", "agent/race/protocol.py", "agent/race/adapter.py", "agent/race/handlers.py", "agent/race/tools.py", "agent/race/memory.py",
         "agent/routes/race.py", "agent/commands/race.py", "tests/test_race.py",
       ],
-      node: ["src/race/protocol.ts", "src/race/adapter.ts", "src/race/handlers.ts", "src/race/tools.ts", "src/routes/race.ts", "scripts/test-race.ts", "scripts/race-try.ts"],
+      node: ["src/race/protocol.ts", "src/race/adapter.ts", "src/race/handlers.ts", "src/race/tools.ts", "src/race/memory.ts", "src/routes/race.ts", "scripts/test-race.ts", "scripts/race-try.ts"],
     },
     packages: { python: [["httpx", "0.28.1"]] },
-    env: { next: [VERIFIER_TOKEN], expo: [VERIFIER_TOKEN], python: [VERIFIER_TOKEN], node: [VERIFIER_TOKEN] },
+    env: { next: [VERIFIER_TOKEN, UPSTASH_URL, UPSTASH_TOKEN], expo: [VERIFIER_TOKEN, UPSTASH_URL, UPSTASH_TOKEN], python: [VERIFIER_TOKEN, UPSTASH_URL, UPSTASH_TOKEN], node: [VERIFIER_TOKEN, UPSTASH_URL, UPSTASH_TOKEN] },
   },
   {
     id: "payments",

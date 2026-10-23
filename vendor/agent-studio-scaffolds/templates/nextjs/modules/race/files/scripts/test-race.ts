@@ -5,6 +5,7 @@ import { test } from "node:test";
 import { handleHealth, handleTask } from "../lib/race/adapter";
 import { handlers } from "../lib/race/handlers";
 import { TaskError } from "../lib/race/protocol";
+import { createMemory } from "../lib/race/memory";
 
 const env = { AGENT_STUDIO_VERIFIER_TOKEN: "test-token-0123456789" };
 const auth = `Bearer ${env.AGENT_STUDIO_VERIFIER_TOKEN}`;
@@ -58,4 +59,32 @@ test("unbuilt task types say so instead of guessing", async () => {
   const r = await handleTask(auth, request({ type: "converse", input: "hi", sessionId: "s" }), env);
   assert.equal(r.status, 500);
   assert.match((r.body.error as { message: string }).message, /doesn't handle "converse" tasks yet/);
+});
+
+test("memory keeps sessions apart (in-process fallback)", async () => {
+  const m = createMemory({});
+  assert.equal(m.persistent, false);
+  await m.append("a", { role: "user", text: "codename is fox-12" });
+  await m.append("b", { role: "user", text: "something else" });
+  assert.deepEqual(await m.history("a"), [{ role: "user", text: "codename is fox-12" }]);
+  assert.deepEqual(await m.history("missing"), []);
+});
+
+test("memory uses Upstash Redis when its env vars are set", async () => {
+  const calls: { url: string; body: unknown }[] = [];
+  const store: string[] = [];
+  const fakeFetch = (async (url: string, init: { body: string; headers: Record<string, string> }) => {
+    assert.equal(init.headers.authorization, "Bearer tok");
+    const body = JSON.parse(init.body);
+    calls.push({ url, body });
+    if (url.endsWith("/pipeline")) store.push(...body[0].slice(2));
+    return new Response(JSON.stringify(url.endsWith("/pipeline") ? [] : { result: store }));
+  }) as unknown as typeof fetch;
+  const m = createMemory({ KV_REST_API_URL: "https://eu1.upstash.io/", KV_REST_API_TOKEN: "tok" }, fakeFetch);
+  assert.equal(m.persistent, true);
+  await m.append("s1", { role: "user", text: "hi" }, { role: "assistant", text: "hello" });
+  assert.deepEqual(await m.history("s1"), [{ role: "user", text: "hi" }, { role: "assistant", text: "hello" }]);
+  assert.equal(calls[0].url, "https://eu1.upstash.io/pipeline");
+  assert.deepEqual((calls[0].body as unknown[][]).map((c) => c[0]), ["RPUSH", "LTRIM", "EXPIRE"]);
+  assert.deepEqual(calls[1].body, ["LRANGE", "race:memory:s1", 0, -1]);
 });

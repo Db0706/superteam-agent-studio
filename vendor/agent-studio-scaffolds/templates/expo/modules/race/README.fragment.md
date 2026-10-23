@@ -11,4 +11,6 @@
 3. Try it: in `companion-server/`, run `npm run race:try -- respond "What is 6 x 7?"`.
 4. Deploy the companion server (Railway, Render, Fly…) or run a tunnel, and paste its public https:// URL on your team page. Then press **Run verification** on the race page.
 
+**Memory on serverless hosting:** the Memory and Context layer checks that your companion server remembers earlier turns. If you deploy it to a serverless host (such as Vercel), history kept in a variable is lost between turns. Use `memory` from `companion-server/src/race/memory.ts` and set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` from a free Upstash Redis database (on Vercel, Storage → Upstash for Redis adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which also work). On an always-on server (Railway, Render, Fly) the in-process fallback is fine.
+
 **Tests:** in `companion-server/`, `npm run test:race` checks the protocol handling offline. The race verifier checks your AI logic with fresh inputs on every attempt.
