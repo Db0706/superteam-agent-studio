@@ -63,12 +63,17 @@ console.log(`Rehearsal ${id}: ${cfg.layers.length} layers, about ${Math.ceil(spa
 
 for (;;) {
   await new Promise((r) => setTimeout(r, 10_000));
-  const [t] = await sql<{ status: string }[]>`select status from public.tournaments where id = ${id}`;
-  const [{ queued, errors }] = await sql<{ queued: number; errors: number }[]>`
-    select count(*) filter (where status in ('queued', 'running'))::int as queued, count(*) filter (where status = 'error')::int as errors
-    from public.verification_attempts where tournament_id = ${id}`;
-  console.log(`  ${new Date().toISOString().slice(11, 19)} ${t.status} · ${queued} verifying · ${errors} errors`);
-  if (t.status === "completed" || t.status === "cancelled") break;
+  try {
+    const [t] = await sql<{ status: string }[]>`select status from public.tournaments where id = ${id}`;
+    const [{ queued, errors }] = await sql<{ queued: number; errors: number }[]>`
+      select count(*) filter (where status in ('queued', 'running'))::int as queued, count(*) filter (where status = 'error')::int as errors
+      from public.verification_attempts where tournament_id = ${id}`;
+    console.log(`  ${new Date().toISOString().slice(11, 19)} ${t.status} · ${queued} verifying · ${errors} errors`);
+    if (t.status === "completed" || t.status === "cancelled") break;
+  } catch (e) {
+    // A dropped connection doesn't stop the rehearsal (it runs on the worker); keep watching.
+    console.log(`  ${new Date().toISOString().slice(11, 19)} database unreachable (${(e as Error).message}), retrying`);
+  }
 }
 
 const rows = await sql<{ name: string; layer: string; points: number; passed: boolean }[]>`
