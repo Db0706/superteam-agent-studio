@@ -26,6 +26,8 @@
 
 **Code:** `agent/payments/server.py` (charge for an endpoint with `@paid_route(...)`, built on the [`x402`](https://pypi.org/project/x402/) package's FastAPI middleware), `agent/payments/client.py` (an `httpx` client that pays automatically), `agent/payments/config.py` (devnet-only settings).
 
+**Paying an address directly (the AI Race's on-chain payment stage):** `agent/payments/transfer.py` has `await pay_usdc(load_agent_keypair(), to=..., amount_usdc=..., memo=...)`. It sends devnet USDC from the agent wallet to any address, with an optional memo, creates the recipient's USDC account if needed, and waits until devnet confirms. It returns the signature. Pass the spending module's tracker as `guard=` to keep it within your budget. The agent wallet needs devnet SOL for fees (faucet.solana.com) and devnet USDC (faucet.circle.com); if it doesn't, the error says which.
+
 **Charge for your own endpoint** in any file in `agent/routes/`:
 
 ```python

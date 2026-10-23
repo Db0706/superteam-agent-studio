@@ -246,18 +246,18 @@ export const INTEGRATIONS: IntegrationDef[] = [
     implementationStatus: "provisional",
     verifiedOn: ["next", "node", "python", "expo"],
     files: {
-      next: ["lib/payments/config.ts", "lib/payments/server.ts", "lib/payments/client.ts", "scripts/keygen.ts", "scripts/wallets.ts"],
+      next: ["lib/payments/config.ts", "lib/payments/server.ts", "lib/payments/client.ts", "lib/payments/transfer.ts", "scripts/keygen.ts", "scripts/wallets.ts", "scripts/test-transfer.ts"],
       expo: ["lib/payments/client.ts"],
       python: [
         "agent/payments/__init__.py", "agent/payments/config.py", "agent/payments/server.py", "agent/payments/client.py",
-        "agent/commands/keygen.py", "agent/commands/wallets.py",
+        "agent/payments/transfer.py", "agent/commands/keygen.py", "agent/commands/wallets.py", "tests/test_transfer.py",
       ],
-      node: ["src/lib/payments/config.ts", "src/lib/payments/server.ts", "src/lib/payments/client.ts", "scripts/keygen.ts", "scripts/wallets.ts"],
+      node: ["src/lib/payments/config.ts", "src/lib/payments/server.ts", "src/lib/payments/client.ts", "src/lib/payments/transfer.ts", "scripts/keygen.ts", "scripts/wallets.ts", "scripts/test-transfer.ts"],
     },
     packages: {
       // @solana/kit must stay on 5.x: @x402/svm's @solana-program/* deps peer-require kit ^5.
-      next: [["@x402/core", "2.28.0"], ["@x402/next", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"]],
-      node: [["@x402/core", "2.28.0"], ["@x402/express", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"]],
+      next: [["@x402/core", "2.28.0"], ["@x402/next", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"], ["@solana-program/token", "0.9.0"]],
+      node: [["@x402/core", "2.28.0"], ["@x402/express", "2.28.0"], ["@x402/fetch", "2.28.0"], ["@x402/svm", "2.28.0"], ["@solana/kit", "5.5.1"], ["@solana-program/token", "0.9.0"]],
       // solana 0.39 needs Python >= 3.11 and solders 0.28+ conflicts with solana 0.38, so both stay pinned.
       python: [["x402[httpx,svm]", "2.25.0"], ["solana", "0.38.0"], ["solders", "0.27.1"], ["httpx", "0.28.1"]],
     },
