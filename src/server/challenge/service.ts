@@ -13,6 +13,10 @@ import type { Sql } from "../db";
  * here, is the trusted evidence the verifier checks.
  */
 
+// Per-instance counters for the slow-call log: requests in flight here, and when this instance started.
+let inFlight = 0;
+const instanceStarted = Date.now();
+
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 
 export async function handleChallengeRequest(req: Request, sql: Sql, pathAfterChallenge: string): Promise<Response> {
@@ -36,6 +40,7 @@ export async function handleChallengeRequest(req: Request, sql: Sql, pathAfterCh
   // the transaction (including the per-session lock). Load rehearsals read these from the logs.
   const t0 = performance.now();
   let tIn = 0;
+  const concurrent = ++inFlight;
   const result = await sql.begin(async (tx) => {
     tIn = performance.now();
     const [session] = await tx<{ id: string; facts: SessionFacts; behaviour: SessionBehaviour; expires_at: Date }[]>`
@@ -51,9 +56,11 @@ export async function handleChallengeRequest(req: Request, sql: Sql, pathAfterCh
       insert into public.tool_invocations (session_id, tool, input, output, status)
       values (${session.id}, ${tool}, ${tx.json(input as never)}, ${tx.json(answer.body as never)}, ${answer.status})`;
     return { answer };
-  });
+  }).finally(() => inFlight--);
   const t1 = performance.now();
-  if (t1 - t0 > 500) console.warn(JSON.stringify({ msg: "challenge.slow", tool, acquireMs: Math.round(tIn - t0), txMs: Math.round(t1 - tIn), totalMs: Math.round(t1 - t0) }));
+  if (t1 - t0 > 500) {
+    console.warn(JSON.stringify({ msg: "challenge.slow", tool, acquireMs: Math.round(tIn - t0), txMs: Math.round(t1 - tIn), totalMs: Math.round(t1 - t0), inFlight: concurrent, instanceAgeS: Math.round((Date.now() - instanceStarted) / 1000), pool: Number(process.env.DATABASE_POOL_SIZE ?? 10) }));
+  }
   if (!result) return json(401, { error: "unknown or expired challenge token" });
   if (result.answer.delayMs) await new Promise((r) => setTimeout(r, Math.min(result.answer.delayMs, 30_000)));
   return json(result.answer.status, result.answer.body);
