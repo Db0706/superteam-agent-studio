@@ -4,7 +4,7 @@ import { Arrow, ConfirmationTag, COLORS, Led, Module, SectionHeading } from "@/c
 import { eventFromDb, FALLBACK_EVENT, type FactStatus, type PublicEvent } from "@/config/active-event";
 import { TRACKS } from "@/config/tracks";
 import type { Confirmation } from "@/config/schema";
-import { LAYER_TEMPLATES } from "@/core/tournament/templates";
+import { pointsRaceTemplate } from "@/core/tournament/templates";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { listRaceTournaments, pickFeatured } from "@/server/dal/race";
@@ -35,15 +35,19 @@ function Hero() {
         <p className="m-0 max-w-[540px] text-[clamp(16px,1.4vw,19px)] leading-normal text-ink-2 [text-wrap:pretty]">
           Agent Studio is where teams build AI applications, agents and policy, prove each capability works against live checks, and race them in front of the room.
         </p>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/race" className="btn-primary">
-            JOIN THE AI RACE <Arrow />
+        {/* The same four steps, in the same order, as the header menus. */}
+        <div className="grid max-w-[520px] grid-cols-2 gap-2">
+          <Link href="/start" className="btn-primary justify-between !px-4 max-[480px]:!px-3 max-[480px]:!text-[12.5px]">
+            1 · START HERE <Arrow />
           </Link>
-          <Link href="/build" className="btn-secondary">
-            GET A STARTER
+          <Link href="/playground" className="btn-secondary justify-start !px-4 max-[480px]:!px-3 max-[480px]:!text-[12.5px]">
+            2 · UNDERSTAND
           </Link>
-          <Link href="/playground" className="btn-secondary">
-            AI CAPABILITY LAB
+          <Link href="/build" className="btn-secondary justify-start !px-4 max-[480px]:!px-3 max-[480px]:!text-[12.5px]">
+            3 · BUILD
+          </Link>
+          <Link href="/race" className="btn-secondary justify-start !px-4 max-[480px]:!px-3 max-[480px]:!text-[12.5px]">
+            4 · COMPETE
           </Link>
         </div>
         <ul className="m-0 flex list-none flex-wrap gap-[18px] p-0 font-mono text-[10.5px] text-muted">
@@ -57,24 +61,31 @@ function Hero() {
   );
 }
 
-/** The default race template, shown as it is. Organisers configure the real race per event. */
+/** The points race as the template defines it (sample points). Organisers set the real race per event. */
+const POINTS_RACE = pointsRaceTemplate();
+
 function RaceLadder() {
+  const groups = [
+    { label: "BUILD STAGES · OPEN ALL DAY, ANY ORDER", layers: POINTS_RACE.layers.filter((l) => l.category === "build_stage") },
+    { label: "CHALLENGES · ONE AT A TIME", layers: POINTS_RACE.layers.filter((l) => l.category !== "build_stage") },
+  ];
   return (
-    <Module label="THE AI RACE · DEFAULT LAYERS" right={<ConfirmationTag status="SAMPLE" />}>
-      <ol className="m-0 flex list-none flex-col p-0">
-        {LAYER_TEMPLATES.map((l, i) => (
-          <li key={l.key} className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-2 border-b border-hairline px-3.5 py-2.5 last:border-b-0">
-            <span className="font-mono text-[10.5px] text-muted">L{String(i + 1).padStart(2, "0")}</span>
-            <span className="flex min-w-0 flex-col">
-              <b className="truncate text-[14px]">{l.title}</b>
-              <span className="truncate text-[12px] text-muted">{l.capabilities.join(" · ")}</span>
-            </span>
-            <span className="font-mono text-[9.5px] text-muted">{l.verifier.plugin.toUpperCase()}</span>
-          </li>
-        ))}
-      </ol>
-      <p className="m-0 border-t border-hairline px-3.5 py-2.5 text-[12px] leading-[1.45] text-muted">
-        Each layer is checked automatically against your running app. Organisers set the real layers, timings and rules for each event.
+    <Module label="THE AI RACE · POINTS FORMAT" right={<ConfirmationTag status="SAMPLE" />}>
+      {groups.map((g) => (
+        <div key={g.label}>
+          <div className="border-b border-hairline bg-strip px-3.5 py-1.5 font-mono text-[10px] tracking-[0.04em] text-muted">{g.label}</div>
+          <ol className="m-0 flex list-none flex-col p-0">
+            {g.layers.map((l) => (
+              <li key={l.key} className="flex items-center justify-between gap-3 border-b border-hairline px-3.5 py-2">
+                <b className="truncate text-[14px]">{l.title}</b>
+                <span className="font-mono text-[11px] text-muted">{l.points} PTS</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+      <p className="m-0 px-3.5 py-2.5 text-[12px] leading-[1.45] text-muted">
+        Every stage is checked automatically against your running app, and points land as soon as it passes. Cambridge vs Oxford on the live leaderboard.
       </p>
     </Module>
   );
@@ -309,9 +320,10 @@ function Starters() {
 }
 
 const JOURNEY = [
-  { n: "01 · EXPLORE", where: "AI CAPABILITY LAB", title: "See what it takes", desc: "Each AI capability, the starter code for it and how the race checks it.", href: "/playground", primary: false },
-  { n: "02 · IDEATE", where: "INSPIRATION", title: "Find your angle", desc: "Spin up a real problem in research, health, policy or campus life.", href: "/inspiration", primary: false },
-  { n: "03 · BUILD", where: "BUILDER", title: "Get a starter", desc: "Pick a framework and capabilities. See exactly what your starter contains.", href: "/build", primary: true },
+  { n: "01 · BRIEF", where: "FIRST 10 MINUTES", title: "Start here", desc: "From nothing to a running app, step by step, for your framework.", href: "/start", primary: true },
+  { n: "02 · UNDERSTAND", where: "AI LAB", title: "See what it takes", desc: "Each AI capability, the starter code for it and how the race checks it.", href: "/playground", primary: false },
+  { n: "03 · BUILD", where: "BUILDER", title: "Get a starter", desc: "Pick a framework and capabilities. See exactly what your starter contains.", href: "/build", primary: false },
+  { n: "04 · COMPETE", where: "AI RACE", title: "Race and score", desc: "Verify your app layer by layer, score points and climb the leaderboard.", href: "/race", primary: false },
 ];
 
 function Journey() {
@@ -320,7 +332,7 @@ function Journey() {
       <SectionHeading
         eyebrow="05 · GETTING STARTED"
         id="journey-h"
-        title="Explore. Ideate. Build."
+        title="Brief. Understand. Build. Compete."
         aside={
           <span className="text-[13px] text-muted">
             Know what you want? <Link href="/build">Skip straight to the builder ▸</Link>
@@ -328,10 +340,10 @@ function Journey() {
         }
       />
       <div className="diagram-dots rounded-[4px] border border-ink p-[clamp(14px,2.4vw,28px)]">
-        <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,250px),1fr))] gap-7 p-0">
+        <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-7 p-0">
           {JOURNEY.map((j, i) => (
             <li key={j.n} className="relative min-w-0">
-              {i < 2 && <span aria-hidden="true" className="absolute left-full top-1/2 hidden h-0.5 w-7 -translate-y-1/2 bg-ink min-[1120px]:block" />}
+              {i < JOURNEY.length - 1 && <span aria-hidden="true" className="absolute left-full top-1/2 hidden h-0.5 w-7 -translate-y-1/2 bg-ink min-[1120px]:block" />}
               <Link
                 href={j.href}
                 className="flex min-h-[170px] w-full flex-col gap-2.5 rounded-[4px] border-[1.5px] border-ink p-4 text-left transition-colors hover:!border-signal hover:!no-underline"

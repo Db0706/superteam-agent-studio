@@ -79,19 +79,12 @@ test.describe("navigation", () => {
 });
 
 test.describe("dashboard", () => {
-  test("CTAs lead to the right pages", async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("main").getByRole("link", { name: "GET A STARTER", exact: true }).click();
-    await expect(page).toHaveURL(/\/build/);
-    await page.goto("/");
-    await page.getByRole("main").getByRole("link", { name: "AI CAPABILITY LAB", exact: true }).click();
-    await expect(page).toHaveURL(/\/playground/);
-  });
-
-  test("race CTA opens the AI Race", async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("main").getByRole("link", { name: /JOIN THE AI RACE/ }).click();
-    await expect(page).toHaveURL(/\/race/);
+  test("hero buttons follow the four steps and lead to the right pages", async ({ page }) => {
+    for (const [label, path] of [["1 · START HERE", /\/start/], ["2 · UNDERSTAND", /\/playground/], ["3 · BUILD", /\/build/], ["4 · COMPETE", /\/race/]] as const) {
+      await page.goto("/");
+      await page.getByRole("main").getByRole("link", { name: new RegExp(`^${label}`) }).first().click();
+      await expect(page).toHaveURL(path);
+    }
   });
 
   test("track card preselects the framework in the builder", async ({ page }) => {

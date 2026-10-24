@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Sign in" };
 /** Only same-site paths are allowed as the post-login destination. */
 function safeNext(raw: string | string[] | undefined): string {
   const v = Array.isArray(raw) ? raw[0] : raw;
-  return v && v.startsWith("/") && !v.startsWith("//") ? v : "/race";
+  return v && v.startsWith("/") && !v.startsWith("//") ? v : "/";
 }
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
