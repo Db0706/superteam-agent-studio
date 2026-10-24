@@ -48,8 +48,8 @@ export async function handleChallengeRequest(req: Request, sql: Sql, pathAfterCh
     if (prior.length >= 200) return { answer: { status: 429, body: { error: "too many calls in this session" }, delayMs: 0 } };
     const answer = answerTool(tool, input, session.facts, session.behaviour, prior);
     await tx`
-      insert into public.tool_invocations (session_id, tool, input, output, status)
-      values (${session.id}, ${tool}, ${tx.json(input as never)}, ${tx.json(answer.body as never)}, ${answer.status})`;
+      insert into public.tool_invocations (session_id, tool, input, output, status, service_wait_ms)
+      values (${session.id}, ${tool}, ${tx.json(input as never)}, ${tx.json(answer.body as never)}, ${answer.status}, ${Math.round(tIn - t0)})`;
     return { answer };
   });
   const t1 = performance.now();

@@ -166,6 +166,12 @@ export async function runAttempt(sql: Sql, env: EngineEnv, attemptId: string): P
   const outcome = await plugin.run(ctx, pluginConfig as never);
   const checks: CheckResult[] = outcome.checks;
   const score = scoreChecks(checks);
+  // A fail is only the team's if our own tool service kept up. If it stalled (connection
+  // queueing under load), retry the attempt instead; it never counts against them.
+  if (!outcome.reviewReason && !(checks.length > 0 && score >= layer.passingScore)) {
+    const waitMs = await slowestToolWait(sql, sessions);
+    if (waitMs > TOOL_SERVICE_SLOW_MS) throw new InfrastructureError(`the race's tool service was slow during this attempt (a call waited ${waitMs} ms); retrying`);
+  }
   evidence.checks = checks;
   evidence.finishedAt = new Date().toISOString();
   evidence.sessions = sessions;
@@ -204,4 +210,15 @@ export function toFeedback(checks: CheckResult[], layer: Pick<LayerConfig, "feed
       passed: c.passed,
       message: layer.feedback.showDetails ? c.message : c.passed ? "Passed." : "Did not pass.",
     }));
+}
+
+/** A tool call that waited longer than this on the platform's side makes a failed attempt ours. */
+export const TOOL_SERVICE_SLOW_MS = 1500;
+
+/** The longest platform-side wait of any tool call in these sessions (this run of the attempt only). */
+export async function slowestToolWait(sql: Sql, sessionIds: string[]): Promise<number> {
+  if (sessionIds.length === 0) return 0;
+  const [r] = await sql<{ ms: number | null }[]>`
+    select max(service_wait_ms)::int as ms from public.tool_invocations where session_id = any(${sessionIds}::uuid[])`;
+  return r?.ms ?? 0;
 }
