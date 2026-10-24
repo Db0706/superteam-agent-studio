@@ -337,3 +337,62 @@ export function pointsRaceTemplate(opts: { name?: string; sprintSeconds?: number
     ],
   };
 }
+
+/** The four optional bonus challenges for a hackathon: one per difficulty, built on existing checks. */
+const BONUS_CHALLENGES: { from: string; key: string; title: string; description: string; points: number }[] = [
+  { from: "structured-outputs", key: "quick-draw", title: "Quick Draw", description: "Bonus challenge (intro): turn messy text into clean structured data.", points: 100 },
+  { from: "external-knowledge", key: "look-it-up", title: "Look It Up", description: "Bonus challenge (core): answer only from the source you're given, and say so when it has no answer.", points: 150 },
+  { from: "memory-context", key: "remember-me", title: "Remember Me", description: "Bonus challenge (advanced): hold a conversation and recall what was said earlier.", points: 175 },
+  { from: "autonomous-workflow", key: "shop-run", title: "Shop Run", description: "Bonus challenge (expert): an agent that plans and places orders with tools, within a budget.", points: 225 },
+];
+
+export interface HackathonOptions {
+  name?: string;
+  /** Total length of the hackathon (the build sprint). */
+  sprintSeconds?: number;
+  /** The six build stages of the team's own product, open all sprint. */
+  buildStages?: boolean;
+  /** The four optional bonus challenges, open together at the start. */
+  bonusChallenges?: boolean;
+  /** How long the bonus challenges stay open, from the start. */
+  challengeWindowSeconds?: number;
+  /** The organiser's devnet address for the on-chain payment build stage. */
+  payTo?: string;
+}
+
+/**
+ * The simple hackathon format: a timed build sprint where points come from build stages of the
+ * team's product, plus bonus points from optional challenges open during the first part of the
+ * sprint. Either part can be switched off. Nobody is eliminated.
+ */
+export function hackathonTemplate(opts: HackathonOptions = {}): TournamentConfig {
+  const sprint = opts.sprintSeconds ?? 7 * 3600;
+  const withStages = opts.buildStages ?? true;
+  const withChallenges = opts.bonusChallenges ?? true;
+  const window = Math.max(60, Math.min(opts.challengeWindowSeconds ?? 2 * 3600, sprint));
+  const challenges = withChallenges
+    ? BONUS_CHALLENGES.map((c) => {
+        const base = LAYER_TEMPLATES.find((l) => l.key === c.from)!;
+        return { ...base, key: c.key, title: c.title, description: c.description, points: c.points, category: "challenge" as const, outcome: "checkpoint" as const, prerequisites: [], achievement: undefined, timing: { offsetSeconds: 0, durationSeconds: window } };
+      })
+    : [];
+  const stages = withStages
+    ? BUILD_STAGES.map((l) => {
+        const layer = { ...l, timing: { offsetSeconds: 0, durationSeconds: sprint } };
+        if (l.key === "onchain-payment" && opts.payTo) layer.verifier = { ...l.verifier, config: { ...l.verifier.config, payTo: opts.payTo } };
+        return layer;
+      })
+    : [];
+  const parts = [withStages && "points for the build stages of your own product (open all day, any order)", withChallenges && `bonus points from optional challenges open for the first ${Math.round(window / 360) / 10} hours`].filter(Boolean);
+  return {
+    schema: TOURNAMENT_SCHEMA,
+    name: opts.name ?? "The AI Race",
+    description: `Score ${parts.join(", plus ")}. Every pass is checked automatically against your live app and adds to the live leaderboard. Nobody is eliminated.`,
+    mode: "checkpoint",
+    participation: "team",
+    timezone: "Europe/London",
+    tieBreak: ["score_desc", "first_pass_at_asc", "attempts_asc"],
+    countsTowardsJudging: false,
+    layers: [...challenges, ...stages],
+  };
+}

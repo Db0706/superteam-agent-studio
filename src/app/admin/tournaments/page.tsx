@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Module } from "@/components/system";
 import { Gate } from "@/components/platform/Gate";
 import { CreateTournamentForm, RowActions } from "@/components/admin/tournaments/ListActions";
+import { HackathonSetup } from "@/components/admin/tournaments/HackathonSetup";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import type { EventSummary } from "@/server/dal/viewer";
 
@@ -28,6 +29,8 @@ async function List({ event }: { event: EventSummary }) {
     .order("created_at", { ascending: false });
   const rows = data ?? [];
   return (
+    <div className="flex flex-col gap-4">
+    <HackathonSetup defaultName={event.name} />
     <div className="grid items-start gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_380px]">
       <Module label="TOURNAMENTS" right={`${rows.length}`}>
         {rows.length ? (
@@ -53,10 +56,18 @@ async function List({ event }: { event: EventSummary }) {
             })}
           </ul>
         ) : (
-          <p className="m-0 p-4 text-[14px] text-ink-2">No tournaments yet. Create one from the AI Race template or start blank.</p>
+          <p className="m-0 p-4 text-[14px] text-ink-2">No races yet. Set up the hackathon above.</p>
         )}
       </Module>
-      <CreateTournamentForm />
+      <details className="group">
+        <summary className="cursor-pointer list-none rounded-[3px] border border-hairline bg-white px-4 py-3 text-[13.5px] font-semibold">
+          Advanced setup <span className="font-normal text-muted">(other race formats, every setting)</span>
+        </summary>
+        <div className="mt-2">
+          <CreateTournamentForm />
+        </div>
+      </details>
+    </div>
     </div>
   );
 }
