@@ -109,7 +109,7 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
           {current ? <LayerPanel layer={current} state={state} now={now} timezone={timezone} onSubmitted={reload} /> : <NoLayer status={t.status} />}
         </div>
         <aside className="flex flex-col gap-4">
-          <Standings standings={state.standings} />
+          <Standings standings={state.standings} mode={state.tournament.mode} />
           <Timeline layers={state.layers} attempts={me?.attempts ?? []} decisions={me?.decisions ?? []} now={now} timezone={timezone} currentId={current?.id} onSelect={setSelectedId} />
           <Feed activity={state.activity} layers={state.layers} />
         </aside>
@@ -206,12 +206,12 @@ function YourStatus({ state, onJoined }: { state: RaceState; onJoined: () => voi
     }
     return (
       <Notice tone="info">
-        {state.tournament.participation === "team" ? (
+        {state.tournament.participation === "team" && !me.hasTeam ? (
           <>
             You need a team to enter. <Link href="/team">Create or join one</Link>.
           </>
         ) : (
-          "Registration for this race is closed."
+          "Entries for this race have closed: an elimination round has already been decided. You can keep building and still submit to the event tracks."
         )}
       </Notice>
     );
@@ -387,7 +387,25 @@ function AttemptResult({ attempt }: { attempt: AttemptView }) {
   );
 }
 
-function Standings({ standings }: { standings: RaceState["standings"] }) {
+function Standings({ standings, mode }: { standings: RaceState["standings"]; mode: RaceState["tournament"]["mode"] }) {
+  // Nobody is eliminated in a points race, so qualified/out would only confuse.
+  if (mode === "checkpoint") {
+    return (
+      <Module label="THE FIELD" right={`${standings.total} ENTERED`}>
+        <div className="flex items-end justify-between gap-3 p-4">
+          <div className="flex flex-col gap-1">
+            <span className="mono-label">TEAMS RACING</span>
+            <span className="wide text-[30px] leading-none" style={{ color: COLORS.signal }}>
+              {standings.total}
+            </span>
+          </div>
+          <Link href="/leaderboard" className="font-mono text-[11px]">
+            LEADERBOARD ▸
+          </Link>
+        </div>
+      </Module>
+    );
+  }
   return (
     <Module label="THE FIELD" right={`${standings.total} ENTERED`}>
       <dl className="m-0 grid grid-cols-3 p-4">
