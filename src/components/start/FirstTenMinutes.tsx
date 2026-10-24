@@ -70,7 +70,7 @@ export function FirstTenMinutes() {
         })}
       </div>
 
-      <div className="grid items-start gap-4 min-[1120px]:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 min-[1120px]:grid-cols-[minmax(0,1fr)_360px]">
         <ol className="m-0 flex list-none flex-col gap-4 p-0" aria-label={`Steps for ${FRAMEWORKS[fw].name}`}>
           {guide.steps.map((s, i) => (
             <li key={s.id}>

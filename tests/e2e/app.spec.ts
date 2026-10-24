@@ -64,10 +64,16 @@ test.describe("navigation", () => {
   });
 
   test("no page scrolls horizontally", async ({ page }) => {
-    for (const path of ["/", "/playground", "/build", "/inspiration", "/start"]) {
-      await page.goto(path);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-      expect(overflow, path).toBeLessThanOrEqual(0);
+    // The project's own viewport, plus 360px (the narrowest common phone) on mobile.
+    const widths = isMobile(page) ? [page.viewportSize()!.width, 360] : [page.viewportSize()!.width];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: page.viewportSize()!.height });
+      for (const path of ["/", "/playground", "/build", "/inspiration", "/start"]) {
+        await page.goto(path);
+        // clientWidth, not innerWidth: mobile browsers zoom out to fit wide content, so innerWidth grows with it.
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        expect(overflow, `${path} at ${width}px`).toBeLessThanOrEqual(0);
+      }
     }
   });
 });
