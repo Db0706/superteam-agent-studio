@@ -117,6 +117,10 @@ describe("mentor support", () => {
     const id = await rpc<string>(alice.client, "request_mentor", { p_event: eventId, p_category: "ai", p_description: "Model keeps timing out", p_location: "Table 4" });
     expect(await rpcError(bob.client, "update_mentor_request", { p_id: id, p_action: "claim", p_note: "" })).toMatch(/mentor/i);
     await rpc(mentor.client, "update_mentor_request", { p_id: id, p_action: "claim", p_note: "On my way" });
+    // The student sees who is coming; nobody else learns anything from it.
+    const [{ display_name }] = await h.sql<{ display_name: string }[]>`select display_name from public.profiles where id = ${mentor.id}`;
+    expect(await rpc(alice.client, "my_request_mentors", { p_event: eventId })).toEqual([{ request_id: id, mentor_name: display_name.split(" ")[0].charAt(0).toUpperCase() + display_name.split(" ")[0].slice(1) }]);
+    expect(await rpc(bob.client, "my_request_mentors", { p_event: eventId })).toEqual([]);
     await rpc(mentor.client, "update_mentor_request", { p_id: id, p_action: "resolve", p_note: "Added a timeout and retry" });
     const [r] = await h.sql`select status, claimed_by, resolved_at, jsonb_array_length(notes) as n from public.mentor_requests where id = ${id}`;
     expect(r.status).toBe("resolved");

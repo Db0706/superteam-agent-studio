@@ -35,7 +35,8 @@ async function Mentor({ viewer, event }: { viewer: Viewer; event: EventSummary }
     .eq("event_id", event.id)
     .order("created_at", { ascending: true })
     .limit(300);
-  const { data: now } = await s.rpc("server_now");
+  const [{ data: now }, { data: mentorNames }] = await Promise.all([s.rpc("server_now"), s.rpc("my_request_mentors", { p_event: event.id })]);
+  const mentorFor = new Map(((mentorNames ?? []) as { request_id: string; mentor_name: string }[]).map((m) => [m.request_id, m.mentor_name]));
   const nowMs = Date.parse(String(now));
   const teamIds = [...new Set((rows ?? []).map((r) => r.team_id).filter(Boolean))] as string[];
   const { data: teams } = teamIds.length ? await s.from("teams").select("id, name").in("id", teamIds) : { data: [] };
@@ -57,6 +58,11 @@ async function Mentor({ viewer, event }: { viewer: Viewer; event: EventSummary }
           {r.status.toUpperCase()} · {ago(r.created_at)} AGO
         </span>
       </div>
+      {r.requester_id === viewer.userId && r.status === "claimed" && mentorFor.get(r.id) && (
+        <p className="m-0 text-[14px] font-semibold" style={{ color: COLORS.signalInk }}>
+          {mentorFor.get(r.id)} is on the way.
+        </p>
+      )}
       <p className="m-0 whitespace-pre-line text-[13.5px] leading-[1.5] text-ink-2">{r.description}</p>
       {(r.notes as { text: string; at: string }[]).length > 0 && (
         <ul className="m-0 flex flex-col gap-0.5 pl-5 text-[12.5px] text-muted">
