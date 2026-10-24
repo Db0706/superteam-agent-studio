@@ -161,6 +161,22 @@ async function Readiness({ event }: { event: EventSummary }) {
     items.push({ label, state: n > 0 ? "ok" : "todo", detail: n > 0 ? `${n} assigned.` : `No ${label.toLowerCase()} yet. Give the role on Participants.`, href: "/admin/participants" });
   }
 
+  // Judging criteria: winners can't be published for a track until its rubric is confirmed.
+  const [{ data: tracks }, { data: rubrics }] = await Promise.all([
+    s.from("event_tracks").select("track, name").eq("event_id", e),
+    s.from("judging_rubrics").select("track, status").eq("event_id", e),
+  ]);
+  const unconfirmed = (tracks ?? []).filter((t) => rubrics?.find((x) => x.track === t.track)?.status !== "confirmed");
+  items.push({
+    label: "Judging criteria confirmed",
+    state: unconfirmed.length === 0 ? "ok" : "todo",
+    detail:
+      unconfirmed.length === 0
+        ? "Every track's criteria are confirmed."
+        : `${unconfirmed.map((t) => t.name).join(" and ")} still ${unconfirmed.length === 1 ? "has" : "have"} sample criteria. Judges see a warning and winners can't be published until you confirm them.`,
+    href: "/admin/judging",
+  });
+
   const todo = items.filter((i) => i.state === "todo").length;
   const warn = items.filter((i) => i.state === "warn").length;
 
