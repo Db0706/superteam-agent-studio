@@ -20,6 +20,8 @@ Three pieces: a **Supabase** project (Postgres, Auth, Realtime), the **Next.js a
 3. `CHALLENGE_BASE_URL` and `NEXT_PUBLIC_SITE_URL` are the production origin. Participants' apps call `/api/race/challenge/*` during the race, so that path must stay public (no Vercel password protection on production).
 4. Deploy, then check: the landing page shows the event from the database, `/race` loads, signing in sends a code.
 
+Functions run in **Dublin (`dub1`)**, set in `vercel.json`, next to the Supabase database in eu-west-1. Vercel's default (Washington DC) put every database query across the Atlantic: in a 60-team load rehearsal each call to the race's tool service took about 3 seconds at peak, enough to time out correct apps on the outage checks. If the database ever moves region, move this with it.
+
 ## 3. Worker (Railway or similar)
 
 1. New service from this repository. `railway.json` sets everything: no build step, start command `npm run worker`, two replicas in Europe (Amsterdam, near the Supabase database in Ireland), always restart.

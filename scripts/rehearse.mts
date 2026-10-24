@@ -9,6 +9,10 @@
  * needs FIXTURE_PAYER_KEY (a funded throwaway devnet wallet), and each passing fixture pays
  * 0.01 devnet USDC to that address.
  *
+ * REHEARSAL_TEAMS=<n> (default 5) runs n fixture teams, cycling through the five behaviours, as
+ * a load test at event scale. The summary then groups teams by behaviour, flags any team whose
+ * score differs from others with the same behaviour, and reports verification times.
+ *
  * It acts as the organiser through the same database functions the admin pages use, then watches
  * until the rehearsal finishes and prints what each fixture team scored. The worker must be running.
  */
@@ -48,13 +52,18 @@ if (!parsed.ok) throw new Error(JSON.stringify(parsed.issues));
 const cfg = parsed.config;
 const hash = createHash("sha256").update(canonicalJson(cfg)).digest("hex");
 
-const FIXTURES = [
+const BEHAVIOURS = [
   ["Fixture Atlas", "reference"],
   ["Fixture Borealis", "no-memory"],
   ["Fixture Cirrus", "fragile"],
   ["Fixture Ghost", "offline"],
   ["Fixture Dune", "fabricator"],
 ] as const;
+const teamCount = Math.max(1, Number(process.env.REHEARSAL_TEAMS ?? BEHAVIOURS.length));
+const FIXTURES = Array.from({ length: teamCount }, (_, i) => {
+  const [name, variant] = BEHAVIOURS[i % BEHAVIOURS.length];
+  return [teamCount > BEHAVIOURS.length ? `${name} ${Math.floor(i / BEHAVIOURS.length) + 1}` : name, variant] as const;
+});
 
 const id = await asOrganiser(async (tx) => {
   // As in Builder > Create rehearsal: a draft, duplicated as a simulation, then the draft archived.
@@ -93,9 +102,29 @@ const rows = await sql<{ name: string; layer: string; points: number; passed: bo
   cross join lateral jsonb_array_elements(v.config -> 'layers') l
   where tp.tournament_id = ${id} and l ->> 'key' = r.layer_key
   order by tp.display_name, r.position`;
+const totals = new Map<string, { total: number; passed: string }>();
 for (const [name] of FIXTURES) {
   const mine = rows.filter((r) => r.name === name);
-  const total = mine.filter((r) => r.passed).reduce((a, r) => a + r.points, 0);
-  console.log(`${name}: ${total} points · passed ${mine.filter((r) => r.passed).map((r) => r.layer).join(", ") || "nothing"}`);
+  totals.set(name, { total: mine.filter((r) => r.passed).reduce((a, r) => a + r.points, 0), passed: mine.filter((r) => r.passed).map((r) => r.layer).join(", ") || "nothing" });
+}
+if (teamCount <= BEHAVIOURS.length) {
+  for (const [name] of FIXTURES) console.log(`${name}: ${totals.get(name)!.total} points · passed ${totals.get(name)!.passed}`);
+} else {
+  // Same behaviour must mean the same result: anything else is load-related.
+  for (const [base, variant] of BEHAVIOURS) {
+    const group = FIXTURES.filter(([, v]) => v === variant).map(([n]) => ({ n, ...totals.get(n)! }));
+    const counts = new Map<number, number>();
+    for (const g of group) counts.set(g.total, (counts.get(g.total) ?? 0) + 1);
+    const usual = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    const odd = group.filter((g) => g.total !== usual);
+    console.log(`${base} (${variant}) ×${group.length}: ${usual} points${odd.length ? ` · DIFFERENT: ${odd.map((g) => `${g.n} ${g.total}`).join(", ")}` : " · all identical"}`);
+  }
+  const [t] = await sql<{ n: number; errors: number; p50: number; p95: number; max: number }[]>`
+    select count(*)::int as n, count(*) filter (where status = 'error')::int as errors,
+      round(percentile_cont(0.5) within group (order by extract(epoch from finished_at - submitted_at)))::int as p50,
+      round(percentile_cont(0.95) within group (order by extract(epoch from finished_at - submitted_at)))::int as p95,
+      round(max(extract(epoch from finished_at - submitted_at)))::int as max
+    from public.verification_attempts where tournament_id = ${id} and finished_at is not null`;
+  console.log(`Verifications: ${t.n} · errors ${t.errors} · submitted→verified p50 ${t.p50}s, p95 ${t.p95}s, max ${t.max}s`);
 }
 await sql.end();
