@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { COLORS, Led, Module } from "@/components/system";
 import { Gate } from "@/components/platform/Gate";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { EXPECTED_SCHEMA_VERSION } from "@/config/db-schema";
 import { pointsRaceTemplate } from "@/core/tournament/templates";
 import type { EventSummary } from "@/server/dal/viewer";
 import { AutoRefresh } from "../AutoRefresh";
@@ -54,6 +55,20 @@ async function Readiness({ event }: { event: EventSummary }) {
   ]);
   const nowMs = Date.parse(String(nowRes.data));
   const items: Item[] = [];
+
+  // Database schema: a merged migration that wasn't applied would otherwise fail quietly.
+  const { data: dbVersion, error: versionError } = await s.rpc("schema_version", { p_event: e });
+  const dbv = versionError ? null : String(dbVersion ?? "");
+  items.push({
+    label: "Database up to date",
+    state: dbv === EXPECTED_SCHEMA_VERSION ? "ok" : dbv && dbv > EXPECTED_SCHEMA_VERSION ? "warn" : "todo",
+    detail:
+      dbv === EXPECTED_SCHEMA_VERSION
+        ? `Migrations applied up to ${dbv}.`
+        : dbv && dbv > EXPECTED_SCHEMA_VERSION
+          ? `The database (${dbv}) is ahead of this deployment (${EXPECTED_SCHEMA_VERSION}). Deploy the latest code.`
+          : `The deployed code needs migration ${EXPECTED_SCHEMA_VERSION}${dbv ? `, the database is at ${dbv}` : " and the database can't report its version yet"}. From the repo: ~/.local/bin/supabase db push`,
+  });
 
   // Worker
   const live = (heartbeats.data ?? []).filter((h) => nowMs - Date.parse(h.last_seen) < 30_000).length;
