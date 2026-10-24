@@ -191,6 +191,9 @@ async function Readiness({ event }: { event: EventSummary }) {
             <strong className="text-ink">Sign-in emails.</strong> Supabase&apos;s built-in email sends only a few codes an hour. Set up custom SMTP (Postmark) in Supabase → Authentication → Emails, then sign in with a fresh address to check a code arrives.
           </li>
           <li>
+            <strong className="text-ink">Sign-in rate limit.</strong> Supabase allows 30 sign-ins per 5 minutes per IP address by default, and the whole venue shares one Wi-Fi IP. In Supabase → Authentication → Rate limits, raise sign-ups and sign-ins to at least 300, and token verifications to match.
+          </li>
+          <li>
             <strong className="text-ink">Venue screen.</strong> Open <Link href="/display">/display</Link> full screen on the projector and check it reads from the back of the room.
           </li>
           <li>
