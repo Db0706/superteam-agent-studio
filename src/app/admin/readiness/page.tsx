@@ -27,8 +27,9 @@ interface Item {
   href?: string;
 }
 
-// Layers the fixture apps can't pass by design: they aren't real teams, and payment needs real funds.
-const NOT_REHEARSABLE = new Set(["platform.idea", "platform.submitted", "payments.devnet_settlement"]);
+// Layers the fixture apps can't pass by design: they aren't real teams. (Payment is rehearsed only
+// when the rehearsal includes it, with a funded fixture wallet.)
+const NOT_REHEARSABLE = new Set(["platform.idea", "platform.submitted"]);
 const SAMPLE_POINTS = new Map(pointsRaceTemplate({ sprintSeconds: 3600, challengeIntervalSeconds: 600 }).layers.map((l) => [l.key, l.points]));
 
 interface LayerCfg {

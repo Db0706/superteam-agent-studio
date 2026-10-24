@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getSql } from "@/server/db";
+import { devnetPayerFromEnv } from "@/server/fixtures/devnet-payer";
 import { type FixtureMemory, handleFixture, isFixtureVariant } from "@/server/fixtures/reference-app";
 
 // Serverless: successive turns can reach different instances, so history lives in the database
@@ -23,7 +24,7 @@ async function handle(request: NextRequest, ctx: RouteContext<"/api/race/fixture
   if (process.env.FIXTURES_ENABLED !== "true") return Response.json({ error: "fixtures are disabled" }, { status: 404 });
   const { variant, path } = await ctx.params;
   if (!isFixtureVariant(variant)) return Response.json({ error: "unknown fixture" }, { status: 404 });
-  return handleFixture(request, variant, `/${path.join("/")}`, null, dbMemory);
+  return handleFixture(request, variant, `/${path.join("/")}`, null, dbMemory, devnetPayerFromEnv());
 }
 
 export const GET = handle;

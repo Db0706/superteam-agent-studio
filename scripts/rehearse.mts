@@ -5,6 +5,10 @@
  *
  *   DATABASE_URL=… REHEARSAL_ORGANISER=you@example.com REHEARSAL_SITE=https://… npx tsx scripts/rehearse.mts [speed=30]
  *
+ * With REHEARSAL_PAY_TO=<devnet address> the on-chain payment stage is rehearsed too: the site
+ * needs FIXTURE_PAYER_KEY (a funded throwaway devnet wallet), and each passing fixture pays
+ * 0.01 devnet USDC to that address.
+ *
  * It acts as the organiser through the same database functions the admin pages use, then watches
  * until the rehearsal finishes and prints what each fixture team scored. The worker must be running.
  */
@@ -33,9 +37,12 @@ const asOrganiser = <T,>(fn: (tx: typeof sql) => Promise<T>) =>
     return fn(tx as unknown as typeof sql);
   }) as Promise<T>;
 
-// The payment stage needs the organiser's devnet address and a real payment, so it isn't rehearsed.
+// The payment stage needs a receiving address and a funded fixture wallet, so it's opt-in.
+const payTo = process.env.REHEARSAL_PAY_TO ?? "";
 const base = pointsRaceTemplate({ name: "Points race", sprintSeconds: 7 * 3600, challengeIntervalSeconds: 45 * 60 });
-base.layers = base.layers.filter((l) => l.key !== "onchain-payment");
+if (payTo) {
+  for (const l of base.layers) if (l.key === "onchain-payment") l.verifier.config = { ...l.verifier.config, payTo };
+} else base.layers = base.layers.filter((l) => l.key !== "onchain-payment");
 const parsed = parseTournamentConfig(rehearsalConfig(base, speed));
 if (!parsed.ok) throw new Error(JSON.stringify(parsed.issues));
 const cfg = parsed.config;
@@ -46,6 +53,7 @@ const FIXTURES = [
   ["Fixture Borealis", "no-memory"],
   ["Fixture Cirrus", "fragile"],
   ["Fixture Ghost", "offline"],
+  ["Fixture Dune", "fabricator"],
 ] as const;
 
 const id = await asOrganiser(async (tx) => {
