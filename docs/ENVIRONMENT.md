@@ -33,6 +33,7 @@ In production (`NODE_ENV=production`) the three secrets must be set and at least
 | --- | --- | --- |
 | `WORKER_CONCURRENCY` | no | Verification jobs run at once per worker (default 8, max 64). The load test ran 75 teams per layer through 8 slots in under a second against fixture apps; real apps are slower, so 16 is a sensible event-day value. Run two workers for redundancy: the scheduler is protected by an advisory lock and jobs by leases. |
 | `SOLANA_DEVNET_RPC_URL` | no | Devnet RPC for the on-chain payment stage, used when the race keeps the default `https://api.devnet.solana.com`. The public endpoint is heavily rate-limited; with many teams paying at once, a free devnet key from a provider such as Helius or QuickNode is safer. Rate limits never fail a team (the attempt is retried and ends as an error at worst), but they slow verification. |
+| `FIXTURE_PAYER_KEY` | no (app) | Rehearsals only: a **throwaway** devnet wallet (JSON byte array) the reference fixture pays from on the on-chain payment stage, so `scripts/rehearse.mts` with `REHEARSAL_PAY_TO` exercises fixture → devnet → worker → payment verifier. Fund it with devnet SOL and USDC only. Without it, that stage is left out of rehearsals. |
 
 ## Development and tests only
 

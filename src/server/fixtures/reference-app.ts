@@ -1,4 +1,5 @@
 import { HEALTH_PATH, PROTOCOL, TASKS_PATH, taskRequestSchema, type TaskRequest } from "@/core/verification/protocol";
+import type { DevnetPayer } from "./devnet-payer";
 
 /**
  * Fixture apps for rehearsals and automated tests. NOT AI: they solve the built-in layers
@@ -42,7 +43,7 @@ class UpstreamError extends Error {
   }
 }
 
-export async function handleFixture(req: Request, variant: FixtureVariant, path: string, expectedToken: string | null, memory: FixtureMemory = inProcessMemory): Promise<Response> {
+export async function handleFixture(req: Request, variant: FixtureVariant, path: string, expectedToken: string | null, memory: FixtureMemory = inProcessMemory, payer: DevnetPayer | null = null): Promise<Response> {
   if (expectedToken && req.headers.get("authorization") !== `Bearer ${expectedToken}`) return reply(401, { protocol: PROTOCOL, status: "error", error: { code: "unauthorized", message: "unknown caller" } });
   if (path === HEALTH_PATH) {
     if (variant === "offline") return reply(503, { error: "down" });
@@ -62,7 +63,7 @@ export async function handleFixture(req: Request, variant: FixtureVariant, path:
   const request = parsed.data;
   const error = (status: number, code: string, message: string) => reply(status, { protocol: PROTOCOL, nonce: request.nonce, status: "error", error: { code, message } });
   try {
-    const output = await solve(request, variant, memory);
+    const output = await solve(request, variant, memory, payer);
     if (output === "invalid") return error(400, "invalid_input", "the task is missing required input");
     if (variant === "no-envelope") return new Response(output.text ?? JSON.stringify(output.data), { status: 200, headers: { "content-type": "text/plain" } });
     return reply(200, { protocol: PROTOCOL, nonce: request.nonce, status: "ok", output, meta: { model: "fixture (no AI model)" } });
@@ -74,7 +75,7 @@ export async function handleFixture(req: Request, variant: FixtureVariant, path:
 
 type Output = { text?: string; data?: unknown; toolResults?: { tool: string; result: unknown }[] };
 
-async function solve(req: TaskRequest, variant: FixtureVariant, memory: FixtureMemory): Promise<Output | "invalid"> {
+async function solve(req: TaskRequest, variant: FixtureVariant, memory: FixtureMemory, payer: DevnetPayer | null): Promise<Output | "invalid"> {
   const { task } = req;
   const input = typeof task.input === "string" ? task.input : "";
   const tools = new Map((task.tools ?? []).map((t) => [t.name, t.url]));
@@ -164,6 +165,14 @@ async function solve(req: TaskRequest, variant: FixtureVariant, memory: FixtureM
       return { text: "Noted." };
     }
     case "run_workflow": {
+      // The on-chain payment stage: "Pay 0.01 devnet USDC to <address> with the memo "<memo>"."
+      const pay = /^Pay ([\d.]+) devnet USDC to ([1-9A-HJ-NP-Za-km-z]{32,44}) with the memo "([^"]+)"/.exec(input);
+      if (pay) {
+        // The fabricator invents a signature; the verifier must find no such transaction.
+        if (variant === "fabricator") return { data: { signature: "5".repeat(88) } };
+        if (!payer) throw new UpstreamError("upstream_unavailable", "This fixture has no devnet wallet (FIXTURE_PAYER_KEY is not set).");
+        return { data: { signature: await payer(pay[2], Number(pay[1]), pay[3]) } };
+      }
       const m = /We need (\d+) × (\S+) and (\d+) × (\S+)\. .*\$(\d+)/.exec(input);
       if (!m) return "invalid";
       const budget = Number(m[5]);
