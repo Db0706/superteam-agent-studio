@@ -5,8 +5,8 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 /** Magic-link landing: verifies the emailed token and starts the session, then goes on. */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
-  const nextRaw = searchParams.get("next") ?? "/race";
-  const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/race";
+  const nextRaw = searchParams.get("next") ?? "/";
+  const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
   const supabase = await createSupabaseServer();
   const tokenHash = searchParams.get("token_hash");
   const code = searchParams.get("code");
