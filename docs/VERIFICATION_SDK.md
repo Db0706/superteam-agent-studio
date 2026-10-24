@@ -90,10 +90,23 @@ The data behind the tools is fresh for every attempt and only the tools know it,
 | Structured Outputs | `extract` | `output.data` matches `task.schema` exactly, with correct values; malformed request → 400 `invalid_input` |
 | Tool Calling | `use_tools` | The tool service recorded the calls; the answer uses their results; no invented results |
 | External Knowledge | `answer_from_source` | Answers come from the source and cite `sourceIds`; `answer: null` when the source has no answer |
-| Memory and Context | `converse` | Later turns recall earlier facts; another `sessionId` can't see them |
+| Memory and Context | `converse` | Later turns recall earlier facts; another `sessionId` can't see them. On serverless hosting (Vercel) keep history in a store such as Upstash Redis, not a variable: each turn can reach a different instance |
 | Reliability | `use_tools` | 400 on invalid input; recovers from transient 503s; 503 `upstream_unavailable` when a tool stays down; 504 `upstream_timeout` within `limits.timeoutMs` |
 | Autonomous Workflow | `run_workflow` | `check_inventory` → `create_quote` → `place_order` in order, never over `limits.maxSpendUsd`, accurate `output.data.orders` |
 | Final Mission | all of the above | Everything at once |
+
+In a **points race** there are also build stages, open for the whole sprint in any order:
+
+| Build stage | Task types | Passes when |
+| --- | --- | --- |
+| App live | (health only) | `GET /agent-studio/v1/health` answers at your public URL with your verifier token |
+| Idea locked in | none: read from the platform | Your team's Submit draft has a title and a problem statement |
+| AI feature working | `respond` | Correct answers to fresh questions, in the envelope with the echoed nonce |
+| Agent uses tools | `use_tools` | Real tool calls recorded by the tool service, answer computed from their results |
+| On-chain payment | `run_workflow` | A real devnet USDC transfer of at least the amount, to the address, with the memo from the task; return `{ "signature" }`. The starters' `payUsdc` does this; the wallet needs devnet SOL and USDC |
+| Submitted | none: read from the platform | Your team has made a final submission on the Submit page |
+
+If the platform's own tool service is slow during an attempt that fails, the attempt is retried automatically: it never counts against you.
 
 Organisers can change, remove or replace layers; the race page always shows the current layer's instructions and what must work.
 
