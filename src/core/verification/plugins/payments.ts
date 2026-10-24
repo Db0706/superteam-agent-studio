@@ -13,7 +13,10 @@ const USDC_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
 const MEMO_PROGRAMS = ["MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr", "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo"];
 
 const paymentConfig = z.object({
-  payTo: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, "A Solana address"),
+  payTo: z
+    .string({ error: "Enter your devnet receiving address (a Solana address)." })
+    .regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, "That isn't a Solana address.")
+    .refine((a) => !/^1+$/.test(a), "Enter your own devnet receiving address: 111… is a placeholder, not a wallet."),
   minAmountUsdc: z.number().min(0.000001).max(1000).default(0.01),
   rpcUrl: z.url().default("https://api.devnet.solana.com"),
   timeoutMs: z.number().int().min(5000).max(120000).default(60000),

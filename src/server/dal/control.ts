@@ -4,8 +4,8 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 /** Everything the organiser's control room shows. Organisers' RLS covers all of it. */
 export interface ControlState {
   serverNow: string;
-  tournament: { id: string; name: string; status: string; simulation: boolean; eliminationsSuspended: boolean; startsAt: string | null; version: number | null };
-  layers: { id: string; key: string; position: number; state: string; opensAt: string; deadlineAt: string; extendedSeconds: number }[];
+  tournament: { id: string; name: string; status: string; simulation: boolean; eliminationsSuspended: boolean; startsAt: string | null; version: number | null; mode: string };
+  layers: { id: string; key: string; title: string; position: number; state: string; opensAt: string; deadlineAt: string; extendedSeconds: number }[];
   participants: { id: string; name: string; state: string; eliminatedLayerKey: string | null; fixture: boolean }[];
   attempts: { id: string; participantId: string; layerRunId: string; attemptNo: number; status: string; score: number | null; submittedAt: string; finishedAt: string | null; reviewNote: string | null }[];
   decisions: { id: string; layerRunId: string; participantId: string; decision: string; reason: string; score: number | null; rank: number | null; overriddenAt: string | null; overrideReason: string | null }[];
@@ -28,13 +28,19 @@ export async function loadControlState(id: string): Promise<ControlState | null>
     s.from("activity_events").select("payload, created_at").eq("tournament_id", id).eq("kind", "layer.waiting").order("id", { ascending: false }).limit(1),
     s.rpc("server_now"),
   ]);
+  // Titles and format from the published config (the control room shows names, not keys).
+  const { data: v } = t.current_version
+    ? await s.from("tournament_versions").select("config").eq("tournament_id", id).eq("version", t.current_version).maybeSingle()
+    : { data: null };
+  const cfg = (v?.config ?? {}) as { mode?: string; layers?: { key: string; title?: string }[] };
+  const titles = new Map((cfg.layers ?? []).map((l) => [l.key, l.title ?? l.key]));
   const lastWait = wait?.[0];
   const waitingLayer = lastWait ? (lastWait.payload as { layer: string; waitingOn: { name: string; why: string }[] }) : null;
   const stillWaiting = waitingLayer && runs?.some((r) => r.layer_key === waitingLayer.layer && r.state === "finalising");
   return {
     serverNow: typeof now === "string" ? now : new Date().toISOString(),
-    tournament: { id: t.id, name: t.name, status: t.status, simulation: t.simulation, eliminationsSuspended: t.eliminations_suspended, startsAt: t.starts_at, version: t.current_version },
-    layers: (runs ?? []).map((r) => ({ id: r.id, key: r.layer_key, position: r.position, state: r.state, opensAt: r.opens_at, deadlineAt: r.deadline_at, extendedSeconds: r.extended_seconds })),
+    tournament: { id: t.id, name: t.name, status: t.status, simulation: t.simulation, eliminationsSuspended: t.eliminations_suspended, startsAt: t.starts_at, version: t.current_version, mode: cfg.mode ?? "survival" },
+    layers: (runs ?? []).map((r) => ({ id: r.id, key: r.layer_key, title: titles.get(r.layer_key) ?? r.layer_key, position: r.position, state: r.state, opensAt: r.opens_at, deadlineAt: r.deadline_at, extendedSeconds: r.extended_seconds })),
     participants: (ps ?? []).map((p) => ({ id: p.id, name: p.display_name, state: p.state, eliminatedLayerKey: p.eliminated_layer_key, fixture: !!p.fixture_endpoint })),
     attempts: (atts ?? []).map((a) => ({ id: a.id, participantId: a.participant_id, layerRunId: a.layer_run_id, attemptNo: a.attempt_no, status: a.status, score: a.score === null ? null : Number(a.score), submittedAt: a.submitted_at, finishedAt: a.finished_at, reviewNote: a.review_note })),
     decisions: (ds ?? []).map((d) => ({ id: d.id, layerRunId: d.layer_run_id, participantId: d.participant_id, decision: d.decision, reason: d.reason, score: d.score === null ? null : Number(d.score), rank: d.rank, overriddenAt: d.overridden_at, overrideReason: d.override_reason })),

@@ -2,6 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { refresh } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { canonicalJson, parseTournamentConfig, TOURNAMENT_SCHEMA, type TournamentConfig } from "@/core/tournament/config";
@@ -113,7 +114,11 @@ export async function createRehearsal(id: string, speed: number): Promise<Action
 
 export async function addFixtureTeam(id: string, variant: string, name: string): Promise<ActionResult<string>> {
   if (!(FIXTURE_VARIANTS as readonly string[]).includes(variant)) return { ok: false, error: "Unknown fixture." };
-  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/+$/, "");
+  // The site the organiser is using is the one the worker can reach; the env var is a fallback.
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const fromRequest = host ? `${h.get("x-forwarded-proto") ?? (/^(localhost|127\.0\.0\.1)(:|$)/.test(host) ? "http" : "https")}://${host}` : "";
+  const site = (fromRequest || process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "");
   if (!site) return { ok: false, error: "Set NEXT_PUBLIC_SITE_URL so fixture apps have a public address." };
   const r = await callRpc<string>("add_fixture_participant", { p_id: id, p_name: name.slice(0, 60) || `Fixture ${variant}`, p_endpoint: `${site}/api/race/fixtures/${variant}` });
   if (r.ok) refresh();

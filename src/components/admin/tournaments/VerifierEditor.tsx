@@ -8,7 +8,18 @@ import { field, labelCls } from "./ListActions";
 
 type JsonProp = { type?: string | string[]; enum?: unknown[]; minimum?: number; maximum?: number; default?: unknown; description?: string };
 
-const human = (key: string) => key.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()).replace(/Ms$/, " (ms)");
+// Plain labels for the settings organisers actually touch; the rest are generated from the name.
+const LABELS: Record<string, string> = {
+  payTo: "Your devnet receiving address (Solana)",
+  minAmountUsdc: "Amount teams must pay (devnet USDC)",
+  rpcUrl: "Devnet RPC address (leave as it is)",
+  timeoutMs: "How long to wait for the team's app (milliseconds)",
+  appTimeoutMs: "Tool time limit given to the app (milliseconds)",
+  minProblemChars: "Minimum length of the problem statement (characters)",
+  cases: "Number of test questions",
+  questions: "Number of test questions",
+};
+const human = (key: string) => LABELS[key] ?? key.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()).replace(/ Ms$/, " (ms)");
 
 /**
  * Verifier picker and settings. Simple settings (numbers, switches, text, choices) get a form
@@ -47,7 +58,7 @@ export function VerifierEditor({ value, onChange, readOnly }: { value: VerifierR
         >
           {VERIFIERS.map((v) => (
             <option key={v.id} value={v.id}>
-              {v.name} ({v.id})
+              {v.name}
             </option>
           ))}
         </select>

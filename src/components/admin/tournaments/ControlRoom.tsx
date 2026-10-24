@@ -46,6 +46,8 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
   }, [s.tournament.id, reload]);
 
   const t = s.tournament;
+  // Points races (checkpoint) never eliminate, so elimination counts and controls are hidden.
+  const pointsRace = t.mode === "checkpoint";
   const names = useMemo(() => new Map(s.participants.map((p) => [p.id, p.name])), [s.participants]);
   const layerById = useMemo(() => new Map(s.layers.map((l) => [l.id, l])), [s.layers]);
   const current = s.layers.find((l) => l.state === "open") ?? s.layers.find((l) => l.state !== "closed");
@@ -79,7 +81,11 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
       <div className="grid gap-3 min-[900px]:grid-cols-5">
         <Stat label="Current layer" value={current ? `${current.position + 1}/${s.layers.length}` : "None"} sub={current ? `${current.state.toUpperCase()} · ${current.state === "open" ? formatRemaining(Date.parse(current.deadlineAt) - now) + " LEFT" : current.state === "scheduled" ? "OPENS IN " + formatRemaining(Date.parse(current.opensAt) - now) : ""}` : ""} />
         <Stat label="Racing" value={String(s.participants.filter((p) => p.state === "active" || p.state === "qualified" || p.state === "registered").length)} sub={`${s.participants.filter((p) => p.state === "completed").length} finished`} />
-        <Stat label="Out" value={String(s.participants.filter((p) => p.state === "eliminated").length)} sub={`of ${s.participants.length} entered`} tone={COLORS.fault} />
+        {pointsRace ? (
+          <Stat label="Passes" value={String(s.attempts.filter((a) => a.status === "passed").length)} sub="verified so far" tone={COLORS.okText} />
+        ) : (
+          <Stat label="Out" value={String(s.participants.filter((p) => p.state === "eliminated").length)} sub={`of ${s.participants.length} entered`} tone={COLORS.fault} />
+        )}
         <Stat label="Verification queue" value={String(s.queue.queued + s.queue.leased)} sub={`${s.queue.leased} running · ${s.queue.dead} failed jobs`} tone={s.queue.dead ? COLORS.fault : undefined} />
         <Stat label="Worker" value={workerAge === null ? "None" : workerAge < 30 ? "OK" : "Silent"} sub={workerAge === null ? "No heartbeat" : `seen ${workerAge}s ago`} tone={workerAge === null || workerAge >= 30 ? COLORS.fault : COLORS.okText} />
       </div>
@@ -98,7 +104,7 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
             ) : (
               <Confirm label="Pause race" tone="warn" onConfirm={(r) => control("pause", t.id, r)} after={reload} help="Stops new attempts and the clock until you resume." />
             )}
-            {t.eliminationsSuspended ? (
+            {pointsRace ? null : t.eliminationsSuspended ? (
               <Confirm label="Resume eliminations" tone="secondary" onConfirm={(r) => control("unsuspend", t.id, r)} after={reload} />
             ) : (
               <Confirm label="Suspend eliminations" tone="secondary" onConfirm={(r) => control("suspend", t.id, r)} after={reload} help="Layers still finalise, but nobody is eliminated while suspended." />
@@ -117,7 +123,7 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
                 <th className="px-4 py-2 font-medium">LAYER</th>
                 <th className="px-4 py-2 font-medium">STATE</th>
                 <th className="px-4 py-2 font-medium">WINDOW</th>
-                <th className="px-4 py-2 font-medium">PASSED · OUT</th>
+                <th className="px-4 py-2 font-medium">{pointsRace ? "PASSED" : "PASSED · OUT"}</th>
                 <th className="px-4 py-2 font-medium" />
               </tr>
             </thead>
@@ -127,7 +133,7 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
                 return (
                   <tr key={l.id} className="border-t border-hairline align-top">
                     <td className="px-4 py-2 font-mono text-[11px]">{l.position + 1}</td>
-                    <td className="px-4 py-2 font-semibold">{l.key}</td>
+                    <td className="px-4 py-2 font-semibold">{l.title}</td>
                     <td className="px-4 py-2 font-mono text-[11px]" style={{ color: l.state === "open" ? COLORS.signalInk : l.state === "finalising" ? COLORS.warnText : COLORS.muted }}>
                       {l.state.toUpperCase()}
                     </td>
@@ -136,7 +142,7 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
                       {l.extendedSeconds > 0 && <span className="text-muted"> (+{Math.round(l.extendedSeconds / 60)}m)</span>}
                     </td>
                     <td className="px-4 py-2 font-mono text-[11px]">
-                      {ds.length ? `${ds.filter((d) => d.decision === "qualified" || d.decision === "checkpoint_passed").length} · ${ds.filter((d) => d.decision === "eliminated").length}` : ""}
+                      {ds.length ? (pointsRace ? String(ds.filter((d) => d.decision === "qualified" || d.decision === "checkpoint_passed").length) : `${ds.filter((d) => d.decision === "qualified" || d.decision === "checkpoint_passed").length} · ${ds.filter((d) => d.decision === "eliminated").length}`) : ""}
                     </td>
                     <td className="px-4 py-2">{["scheduled", "open", "closing"].includes(l.state) && !ended && <ExtendForm layerRunId={l.id} after={reload} />}</td>
                   </tr>
@@ -156,7 +162,7 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
               <li key={a.id} className="flex flex-col gap-2 border-b border-hairline px-4 py-3 last:border-b-0">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-[14px] font-semibold">
-                    {names.get(a.participantId)} · {layerById.get(a.layerRunId)?.key} · attempt {a.attemptNo}
+                    {names.get(a.participantId)} · {layerById.get(a.layerRunId)?.title} · attempt {a.attemptNo}
                   </span>
                   <span className="font-mono text-[10.5px]" style={{ color: a.status === "error" ? COLORS.fault : COLORS.warnText }}>
                     {a.status === "error" ? "VERIFICATION ERROR" : "NEEDS REVIEW"} · SUBMITTED {formatZoned(a.submittedAt, timezone).split(" ").pop()}
@@ -334,10 +340,10 @@ function Participants({ s, timezone, after, ended }: { s: ControlState; timezone
                   {ds.map((d) => (
                     <div key={d.id} className="flex flex-wrap items-center justify-between gap-2 text-[12.5px]">
                       <span>
-                        <b>{s.layers.find((l) => l.id === d.layerRunId)?.key}</b>: {d.decision.replace("_", " ")} {d.rank ? `(rank ${d.rank})` : ""} · {d.reason}
+                        <b>{s.layers.find((l) => l.id === d.layerRunId)?.title}</b>: {d.decision.replace("_", " ")} {d.rank ? `(rank ${d.rank})` : ""} · {d.reason}
                         {d.overriddenAt && <span className="text-warn-text"> · overridden: {d.overrideReason}</span>}
                       </span>
-                      {!ended && (
+                      {!ended && !(s.tournament.mode === "checkpoint" && d.decision !== "eliminated") && (
                         <Confirm
                           label={d.decision === "eliminated" ? "Override to qualified" : "Override to eliminated"}
                           tone="secondary"
@@ -378,7 +384,7 @@ function Attempts({ s, names, layerById, timezone, after }: { s: ControlState; n
           <option value="all">All layers</option>
           {s.layers.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.position + 1}. {l.key}
+              {l.position + 1}. {l.title}
             </option>
           ))}
         </select>
@@ -401,7 +407,7 @@ function Attempts({ s, names, layerById, timezone, after }: { s: ControlState; n
               <tr key={a.id} className="border-t border-hairline align-top">
                 <td className="whitespace-nowrap px-4 py-1.5 font-mono text-[11px]">{formatZoned(a.submittedAt, timezone).split(" ").pop()}</td>
                 <td className="px-4 py-1.5">{names.get(a.participantId)}</td>
-                <td className="px-4 py-1.5 font-mono text-[11px]">{layerById.get(a.layerRunId)?.key}</td>
+                <td className="px-4 py-1.5 text-[12.5px]">{layerById.get(a.layerRunId)?.title}</td>
                 <td className="px-4 py-1.5">{a.attemptNo}</td>
                 <td className="px-4 py-1.5 font-mono text-[11px]" style={{ color: a.status === "passed" ? COLORS.okText : a.status === "failed" || a.status === "error" ? COLORS.fault : COLORS.muted }}>
                   {a.status.toUpperCase()}
