@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { aiRaceTemplate } from "@/core/tournament/templates";
 import { verifyReceipt, type ReceiptPayload } from "@/core/verification/receipts";
 import { finaliseLayer } from "@/server/engine/scheduler";
+import { slowestToolWait, TOOL_SERVICE_SLOW_MS } from "@/server/engine/verify";
 import { configHash, drainJobs, endLayer, eventSlug, rpc, rpcError, runTick, signedInUser, startHarness, validated, type Harness } from "./harness";
 
 /**
@@ -195,6 +196,23 @@ describe("AI Race, end to end", () => {
     expect(feed?.every((e) => e.is_public)).toBe(true);
     const { data: attempts } = await h.anon.from("verification_attempts").select("id").limit(1);
     expect(attempts ?? []).toEqual([]);
+  });
+
+  it("records how long each tool call waited, and only this run's sessions decide a retry", async () => {
+    const [{ missing, total }] = await h.sql<{ missing: number; total: number }[]>`
+      select count(*) filter (where service_wait_ms is null)::int as missing, count(*)::int as total
+      from public.tool_invocations i join public.challenge_sessions c on c.id = i.session_id
+      join public.verification_attempts a on a.id = c.attempt_id where a.tournament_id = ${tournamentId}`;
+    expect(total).toBeGreaterThan(0);
+    expect(missing).toBe(0);
+    const [slow, fast] = await h.sql<{ id: string }[]>`
+      select c.id from public.challenge_sessions c join public.verification_attempts a on a.id = c.attempt_id
+      where a.tournament_id = ${tournamentId} and exists (select 1 from public.tool_invocations i where i.session_id = c.id) limit 2`;
+    await h.sql`update public.tool_invocations set service_wait_ms = 5600 where session_id = ${slow.id}`;
+    await h.sql`update public.tool_invocations set service_wait_ms = 20 where session_id = ${fast.id}`;
+    expect(await slowestToolWait(h.sql, [slow.id, fast.id])).toBeGreaterThan(TOOL_SERVICE_SLOW_MS);
+    expect(await slowestToolWait(h.sql, [fast.id])).toBeLessThan(TOOL_SERVICE_SLOW_MS);
+    expect(await slowestToolWait(h.sql, [])).toBe(0);
   });
 
   it("is safe to re-run finalisation and to run schedulers concurrently", async () => {
