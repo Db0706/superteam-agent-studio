@@ -32,7 +32,12 @@ export async function handleChallengeRequest(req: Request, sql: Sql, pathAfterCh
     return json(400, { error: "input must be JSON" });
   }
 
+  // Slow calls are logged with where the time went: waiting for a connection and BEGIN, or inside
+  // the transaction (including the per-session lock). Load rehearsals read these from the logs.
+  const t0 = performance.now();
+  let tIn = 0;
   const result = await sql.begin(async (tx) => {
+    tIn = performance.now();
     const [session] = await tx<{ id: string; facts: SessionFacts; behaviour: SessionBehaviour; expires_at: Date }[]>`
       select id, facts, behaviour, expires_at from public.challenge_sessions where token = ${token}`;
     if (!session || session.expires_at.getTime() < Date.now()) return null;
@@ -47,6 +52,8 @@ export async function handleChallengeRequest(req: Request, sql: Sql, pathAfterCh
       values (${session.id}, ${tool}, ${tx.json(input as never)}, ${tx.json(answer.body as never)}, ${answer.status})`;
     return { answer };
   });
+  const t1 = performance.now();
+  if (t1 - t0 > 500) console.warn(JSON.stringify({ msg: "challenge.slow", tool, acquireMs: Math.round(tIn - t0), txMs: Math.round(t1 - tIn), totalMs: Math.round(t1 - t0) }));
   if (!result) return json(401, { error: "unknown or expired challenge token" });
   if (result.answer.delayMs) await new Promise((r) => setTimeout(r, Math.min(result.answer.delayMs, 30_000)));
   return json(result.answer.status, result.answer.body);
