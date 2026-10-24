@@ -88,6 +88,19 @@ describe("points race", () => {
     expect((await board(organiser)).Kings.points).toBe(300);
   });
 
+  it("lets a team formed after the start enter the race and score", async () => {
+    await h.sql`insert into public.registrations (event_id, email, full_name, ticket, status, university) values (${eventId}, ${`exeter@${h.domain}`}, 'Exeter', 'hackathon', 'approved', 'University of Oxford')`;
+    const u = await signedInUser(h, "exeter");
+    const teamId = await rpc<string>(u.client, "create_team", { p_event: eventId, p_name: "Exeter", p_track: "build" });
+    await rpc(u.client, "update_project", { p_team: teamId, p_name: "Exeter", p_repo: null, p_demo: null, p_endpoint: `${h.host.url}/api/race/fixtures/reference` });
+    const [t] = await h.sql<{ status: string }[]>`select status from public.tournaments where id = ${tournamentId}`;
+    expect(t.status).toBe("running");
+    await rpc(u.client, "join_tournament", { p_id: tournamentId });
+    await rpc(u.client, "submit_attempt", { p_id: tournamentId, p_layer_key: "app-live" });
+    await drainJobs(h);
+    expect((await board(u.client)).Exeter.points).toBe(50);
+  });
+
   it("works out each team's university and is public", async () => {
     const b = await board(h.anon);
     expect(b.Kings.university).toBe("cambridge");

@@ -115,6 +115,13 @@ describe("AI Race, end to end", () => {
         where r.tournament_id = ${tournamentId} and r.layer_key = ${layer.key}`;
       expect(decisions.length, `${layer.key} decided for every competing team`).toBe(names.length);
       for (const d of decisions) if (d.decision === "eliminated") eliminatedAt[d.name.toLowerCase()] = layer.key;
+      if (layer.key === config.layers[0].key) {
+        // An elimination round has been decided: a team formed now must not skip that cut.
+        await h.sql`insert into public.registrations (event_id, email, full_name, ticket, status) values (${eventId}, ${`latecomer@${h.domain}`}, 'Latecomer', 'hackathon', 'approved')`;
+        const late = await signedInUser(h, "latecomer");
+        await rpc(late.client, "create_team", { p_event: eventId, p_name: "Latecomer", p_track: "build" });
+        expect(await rpcError(late.client, "join_tournament", { p_id: tournamentId })).toMatch(/Entries for this race are closed/);
+      }
     }
 
     expect(eliminatedAt).toEqual({

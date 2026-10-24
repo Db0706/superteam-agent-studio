@@ -1,5 +1,6 @@
 import "server-only";
 import { layerSchema, tournamentConfigSchema, type LayerConfig, type TournamentConfig } from "@/core/tournament/config";
+import { entryOpen } from "@/core/tournament/entry";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
 /**
@@ -41,6 +42,7 @@ export interface RaceState {
     state: string | null;
     eliminatedLayerKey: string | null;
     canJoin: boolean;
+    hasTeam: boolean;
     hasEndpoint: boolean;
     attempts: AttemptView[];
     decisions: { layerRunId: string; decision: string; reason: string }[];
@@ -134,7 +136,8 @@ export async function loadRaceState(tournamentId: string, viewer: { userId: stri
       participantId: mine?.id ?? null,
       state: mine?.state ?? null,
       eliminatedLayerKey: mine?.eliminated_layer_key ?? null,
-      canJoin: !mine && ["published", "scheduled"].includes(t.status) && (config.participation === "individual" || !!viewer.teamId),
+      canJoin: !mine && entryOpen(t.status, config, layers) && (config.participation === "individual" || !!viewer.teamId),
+      hasTeam: !!viewer.teamId,
       hasEndpoint,
       attempts,
       decisions,
