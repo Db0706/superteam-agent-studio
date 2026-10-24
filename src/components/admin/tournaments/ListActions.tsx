@@ -90,7 +90,10 @@ export function RowActions({ id, name, status }: { id: string; name: string; sta
         Duplicate
       </button>
       {!["scheduled", "running", "paused", "finalising"].includes(status) && (
-        <button type="button" disabled={pending} onClick={() => start(async () => { const r = await archive(id); if (!r.ok) setError(r.error); })} className="h-9 border-0 bg-transparent px-2 font-mono text-[11px] text-muted hover:text-fault">
+        <button type="button" disabled={pending} onClick={() => {
+            if (!window.confirm(`Archive "${name}"? It disappears from this list and can't be brought back here.`)) return;
+            start(async () => { const r = await archive(id); if (!r.ok) setError(r.error); });
+          }} className="h-9 border-0 bg-transparent px-2 font-mono text-[11px] text-muted hover:text-fault">
           ARCHIVE
         </button>
       )}

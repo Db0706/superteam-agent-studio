@@ -284,7 +284,10 @@ export function Builder(props: BuilderProps) {
                     Publish
                   </button>
                   {props.status === "published" && (
-                    <button type="button" disabled={pending} onClick={() => run(() => unpublish(props.id) as never, "Unpublished: back to draft.")} className="btn-secondary !h-10 !px-4 !text-[13px]">
+                    <button type="button" disabled={pending} onClick={() => {
+                      if (!window.confirm("Unpublish? Registration closes and the race goes back to a draft. Teams who already entered stay entered.")) return;
+                      run(() => unpublish(props.id) as never, "Unpublished: back to draft.");
+                    }} className="btn-secondary !h-10 !px-4 !text-[13px]">
                       Unpublish
                     </button>
                   )}
@@ -298,7 +301,10 @@ export function Builder(props: BuilderProps) {
                     <button
                       type="button"
                       disabled={pending || !startLocal || dirty}
-                      onClick={() => run(() => schedule(props.id, zonedLocalToIso(startLocal, config.timezone)) as never, "Scheduled. The worker opens each layer on time.")}
+                      onClick={() => {
+                        if (!window.confirm(`Schedule the race to start at ${startLocal.replace("T", " ")} (${config.timezone})?\n\nThis locks the rules: after this you can only pause, extend or cancel from the control room.`)) return;
+                        run(() => schedule(props.id, zonedLocalToIso(startLocal, config.timezone)) as never, "Scheduled. The worker opens each layer on time.");
+                      }}
                       className="btn-primary !h-10 !px-4 !text-[13px]"
                     >
                       Schedule
@@ -364,6 +370,11 @@ function RehearsalPanel({ id }: { id: string }) {
         {result && (
           <p className="m-0" style={{ color: result.ok ? COLORS.okText : COLORS.fault }}>
             {result.text} {result.href && <Link href={result.href}>Open it ▸</Link>}
+            {result.ok && (
+              <span className="mt-1 block text-[12.5px] text-ink-2">
+                Next, in the rehearsal: add fixture teams (at least one &quot;reference&quot;), press Publish, then pick a start time and Schedule. Watch it in its control room.
+              </span>
+            )}
           </p>
         )}
       </div>
