@@ -189,6 +189,7 @@ export function ChallengePanel({ teamId, challengeId, wallet }: { teamId: string
           <input name="wallet" defaultValue={wallet ?? ""} placeholder="Your devnet wallet's public address" className={`${input} font-mono text-[13px]`} autoComplete="off" />
         </label>
         <p className="m-0">Only transactions signed by this wallet count. Register it before the challenges open so the organisers can fund it and set up your puzzle.</p>
+        {wallet && <p className="m-0 rounded-[3px] border border-[#E8C46B] bg-[#FFF4DB] px-3 py-2 font-semibold text-[#5C3D00]">Don&apos;t change this wallet once your puzzle is set up: the puzzle is tied to it. Lost the key? Ask an organiser.</p>}
         <details className="text-[12.5px]">
           <summary className="cursor-pointer font-semibold text-ink">How do I make a devnet wallet?</summary>
           <ul className="m-0 mt-1.5 flex list-disc flex-col gap-1 pl-5">
