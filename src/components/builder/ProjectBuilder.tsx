@@ -200,8 +200,16 @@ function Capabilities({ b }: { b: Builder }) {
                   <span className="absolute top-[3px] h-3.5 w-3.5 rounded-[2px] bg-white" style={{ left: on ? 19 : 3, transition: "left .12s ease" }} />
                 </span>
                 <span className="flex min-w-0 flex-col gap-1">
-                  <span className="text-[14px] font-bold">{it.name}</span>
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="text-[14px] font-bold">{it.name}</span>
+                    {it.id === "race" && <span className="rounded-[2px] bg-signal px-1.5 py-[2px] font-mono text-[10px] font-semibold tracking-[0.04em] text-white">NEEDED FOR BUILD TRACK</span>}
+                  </span>
                   <span className="text-[13px] leading-[1.4] text-ink-2">{it.description}</span>
+                  {it.id === "race" && (
+                    <span className="text-[12.5px] font-semibold leading-[1.4] text-signal">
+                      Build Track teams: switch this on. Most build points (450 of 600) are checked through it. Policy Track only? You can leave it off.
+                    </span>
+                  )}
                   {showTech && <span className="font-mono text-[10.5px] leading-normal text-muted">{it.tech}</span>}
                   {reason && (
                     <span id={`reason-${it.id}`} className="text-[12.5px] leading-[1.4]" style={{ color: STATUS_TEXT[st] }}>
@@ -272,6 +280,16 @@ function Output({ b, ref }: { b: Builder; ref: React.Ref<HTMLElement> }) {
                     ? `Builds a real project from agent-studio-scaffolds v${SCAFFOLD.version}, downloaded as a ZIP.`
                     : `Preview only. ${zip.reason}`}
             </span>
+            {!b.cfg.integrations.includes("race") && (
+              <div role="note" className="notice-amber flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  <b>Build Track?</b> Switch on the <b>AI Race Adapter</b> in C first, or the platform can&apos;t check your app and you&apos;ll miss most build points.
+                </span>
+                <button type="button" onClick={() => b.toggle("race")} className="btn-secondary !h-9 !px-3 !text-[12.5px]">
+                  Switch it on
+                </button>
+              </div>
+            )}
             {warnings.length > 0 && (
               <ul className="notice-amber m-0 flex list-none flex-col gap-1">
                 {warnings.map((w) => (
