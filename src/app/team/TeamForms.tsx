@@ -58,18 +58,29 @@ export function JoinOrCreate() {
 
 /** For people not on the imported list: the event code shown in the room makes them a participant. */
 export function EventCodeForm() {
-  const [state, action, pending] = useActionState(joinWithCode, null);
+  // Submitted by hand, not via `action`: React resets an action form afterwards, wiping a wrong code.
+  const [state, setState] = useState<ActionResult<null> | null>(null);
+  const [pending, start] = useTransition();
+  const [code, setCode] = useState("");
+  const [university, setUniversity] = useState("");
   return (
-    <form action={action} className="flex flex-col gap-3">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const form = new FormData(e.currentTarget);
+        start(async () => setState(await joinWithCode(null, form)));
+      }}
+      className="flex flex-col gap-3"
+    >
       <label className={label}>
         Event code (on the screen in the room)
-        <input name="code" required className={`${input} max-w-[260px] font-mono uppercase`} autoComplete="off" />
+        <input name="code" required value={code} onChange={(e) => setCode(e.target.value)} className={`${input} max-w-[260px] font-mono uppercase`} autoComplete="off" />
       </label>
       <fieldset className="m-0 flex flex-col gap-1.5 border-0 p-0">
         <legend className="mb-1.5 text-[13px] font-semibold">Your university</legend>
         {[["cambridge", "Cambridge"], ["oxford", "Oxford"], ["other", "Other"]].map(([value, name]) => (
           <label key={value} className="flex items-center gap-2 text-[14px]">
-            <input type="radio" name="university" value={value} required /> {name}
+            <input type="radio" name="university" value={value} required checked={university === value} onChange={() => setUniversity(value)} /> {name}
           </label>
         ))}
       </fieldset>
