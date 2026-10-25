@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { COLORS, Led, Module } from "@/components/system";
 import type { ActionResult } from "@/server/actions/rpc";
-import { createInvite, createTeam, joinTeam, leaveTeam, revealToken, rotateToken, saveProject, saveWallet, testConnection } from "./actions";
+import { createInvite, createTeam, joinTeam, joinWithCode, leaveTeam, revealToken, rotateToken, saveProject, saveWallet, testConnection } from "./actions";
 
 const input = "h-11 rounded-[3px] border border-[#CFCFC8] bg-white px-3 text-[15px] font-normal";
 const label = "flex flex-col gap-1.5 text-[13px] font-semibold";
@@ -53,6 +53,31 @@ export function JoinOrCreate() {
         </form>
       </Module>
     </div>
+  );
+}
+
+/** For people not on the imported list: the event code shown in the room makes them a participant. */
+export function EventCodeForm() {
+  const [state, action, pending] = useActionState(joinWithCode, null);
+  return (
+    <form action={action} className="flex flex-col gap-3">
+      <label className={label}>
+        Event code (on the screen in the room)
+        <input name="code" required className={`${input} max-w-[260px] font-mono uppercase`} autoComplete="off" />
+      </label>
+      <fieldset className="m-0 flex flex-col gap-1.5 border-0 p-0">
+        <legend className="mb-1.5 text-[13px] font-semibold">Your university</legend>
+        {[["cambridge", "Cambridge"], ["oxford", "Oxford"], ["other", "Other"]].map(([value, name]) => (
+          <label key={value} className="flex items-center gap-2 text-[14px]">
+            <input type="radio" name="university" value={value} required /> {name}
+          </label>
+        ))}
+      </fieldset>
+      <button type="submit" disabled={pending} className="btn-primary self-start !h-11 !px-5 !text-[14px]">
+        {pending ? "Joining…" : "Join the hackathon ▸"}
+      </button>
+      <Result state={state} />
+    </form>
   );
 }
 

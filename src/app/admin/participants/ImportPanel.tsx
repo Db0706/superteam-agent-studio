@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { COLORS, Module } from "@/components/system";
 import { parseLumaCsv, type ParseReport } from "@/core/registrations/luma";
-import { importRegistrations, setCheckIn, setRole } from "./actions";
+import { importRegistrations, setCheckIn, setJoinCode, setRole } from "./actions";
 
 export function ImportPanel() {
   const [report, setReport] = useState<ParseReport | null>(null);
@@ -133,5 +133,34 @@ export function CheckInButton({ id, checkedIn }: { id: string; checkedIn: boolea
     >
       {checkedIn ? "CHECKED IN ✓" : "CHECK IN"}
     </button>
+  );
+}
+
+export function JoinCodePanel({ code }: { code: string | null }) {
+  const [state, action, pending] = useActionState(setJoinCode, null);
+  return (
+    <Module label="EVENT CODE" right={code ? "ON" : "OFF"}>
+      <form action={action} className="flex flex-col gap-3 p-4 text-[13px]">
+        <p className="m-0 text-[13.5px] leading-normal text-ink-2">
+          No guest list? Show this code on the screen in the room. Anyone who signs in and enters it on their Team page becomes a participant (they pick Cambridge, Oxford or Other). Clear it once everyone is in.
+        </p>
+        {code && <code className="self-start rounded-[3px] bg-ink px-4 py-2 font-mono text-[22px] tracking-[0.12em] text-[#EDEDE8]">{code}</code>}
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex min-w-[200px] flex-col gap-1 font-semibold">
+            {code ? "Change code" : "Code (4 to 20 letters or numbers)"}
+            <input name="code" placeholder="e.g. OXBRIDGE26" className="h-10 rounded-[3px] border border-[#CFCFC8] bg-white px-3 font-mono font-normal uppercase" autoComplete="off" />
+          </label>
+          <button type="submit" disabled={pending} className="btn-primary !h-10 !px-4 !text-[13px]">
+            Save code
+          </button>
+          {code && (
+            <button name="clear" value="1" type="submit" disabled={pending} className="btn-secondary !h-10 !px-4 !text-[13px]">
+              Turn off
+            </button>
+          )}
+        </div>
+        {state && !state.ok && <p role="alert" className="m-0 text-fault">{state.error}</p>}
+      </form>
+    </Module>
   );
 }

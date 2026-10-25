@@ -45,13 +45,14 @@ async function Readiness({ event }: { event: EventSummary }) {
   const head = { count: "exact" as const, head: true };
   const count = async (q: PromiseLike<{ count: number | null }>) => (await q).count ?? 0;
 
-  const [hackathon, roles, heartbeats, races, rehearsals, nowRes] = await Promise.all([
+  const [hackathon, roles, heartbeats, races, rehearsals, nowRes, joinCode] = await Promise.all([
     count(s.from("registrations").select("id", head).eq("event_id", e).eq("ticket", "hackathon")),
     s.from("event_roles").select("role").eq("event_id", e),
     s.from("worker_heartbeats").select("worker_id, last_seen").order("last_seen", { ascending: false }).limit(10),
     s.from("tournaments").select("id, name, status, current_version, draft_config, starts_at").eq("event_id", e).eq("simulation", false).is("archived_at", null).order("created_at", { ascending: false }),
     s.from("tournaments").select("id, name, status, current_version, completed_at").eq("event_id", e).eq("simulation", true).eq("status", "completed").order("completed_at", { ascending: false }).limit(1),
     s.rpc("server_now"),
+    s.rpc("event_join_code", { p_event: e }),
   ]);
   const nowMs = Date.parse(String(nowRes.data));
   const items: Item[] = [];
@@ -151,9 +152,9 @@ async function Readiness({ event }: { event: EventSummary }) {
   // People
   const r = (roles.data ?? []).map((x) => x.role as string);
   items.push({
-    label: "Registrations imported",
-    state: hackathon > 0 ? "ok" : "todo",
-    detail: hackathon > 0 ? `${hackathon} hackathon registration${hackathon === 1 ? "" : "s"}.` : "Import the approved list from Luma (CSV export).",
+    label: "Participants can join",
+    state: hackathon > 0 || joinCode.data ? "ok" : "todo",
+    detail: [hackathon > 0 && `${hackathon} hackathon registration${hackathon === 1 ? "" : "s"}.`, joinCode.data && `Event code ${joinCode.data} is on.`].filter(Boolean).join(" ") || "Set an event code (or import a Luma CSV) on Participants.",
     href: "/admin/participants",
   });
   for (const [role, label] of [["mentor", "Mentors"], ["judge", "Judges"]] as const) {

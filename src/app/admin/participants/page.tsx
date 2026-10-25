@@ -3,7 +3,7 @@ import { Module } from "@/components/system";
 import { Gate } from "@/components/platform/Gate";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import type { EventSummary } from "@/server/dal/viewer";
-import { CheckInButton, ImportPanel, RoleForm } from "./ImportPanel";
+import { CheckInButton, ImportPanel, JoinCodePanel, RoleForm } from "./ImportPanel";
 
 export const metadata = { title: "Participants" };
 
@@ -21,12 +21,13 @@ async function Participants({ event, q }: { event: EventSummary; q: string }) {
   const s = await createSupabaseServer();
   let regQuery = s.from("registrations").select("id, email, full_name, ticket, status, university, user_id, checked_in_at").eq("event_id", event.id).order("full_name").limit(400);
   if (q) regQuery = regQuery.or(`email.ilike.%${q.replace(/[%,()]/g, "")}%,full_name.ilike.%${q.replace(/[%,()]/g, "")}%`);
-  const [{ data: regs }, { data: roles }, { data: teams }, { data: members }, { data: projects }] = await Promise.all([
+  const [{ data: regs }, { data: roles }, { data: teams }, { data: members }, { data: projects }, { data: joinCode }] = await Promise.all([
     regQuery,
     s.from("event_roles").select("user_id, role").eq("event_id", event.id).neq("role", "participant"),
     s.from("teams").select("id, name, track, created_at").eq("event_id", event.id).order("name"),
     s.from("team_members").select("team_id, user_id").eq("event_id", event.id),
     s.from("projects").select("team_id, endpoint_url, repo_url").eq("event_id", event.id),
+    s.rpc("event_join_code", { p_event: event.id }),
   ]);
   const roleUsers = [...new Set((roles ?? []).map((r) => r.user_id))];
   const { data: roleProfiles } = roleUsers.length ? await s.from("profiles").select("id, email, display_name").in("id", roleUsers) : { data: [] };
@@ -34,8 +35,9 @@ async function Participants({ event, q }: { event: EventSummary; q: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid items-start gap-4 min-[1000px]:grid-cols-2">
-        <ImportPanel />
+        <JoinCodePanel code={(joinCode as string | null) ?? null} />
         <RoleForm />
+        <ImportPanel />
       </div>
 
       {roleUsers.length > 0 && (
