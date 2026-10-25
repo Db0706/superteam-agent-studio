@@ -33,6 +33,11 @@ async function List({ event }: { event: EventSummary }) {
     <HackathonSetup defaultName={event.name} />
     <div className="grid items-start gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_380px]">
       <Module label="TOURNAMENTS" right={`${rows.length}`}>
+        {rows.length > 0 && (
+          <p className="m-0 border-b border-hairline bg-strip px-4 py-2.5 text-[13px] leading-[1.45] text-ink-2">
+            You only need <b>one</b> race for the day: the one the form above creates. Everything else here is an old draft or a practice run, so press <b>Archive</b> on those to avoid opening the wrong one. <b>Points</b> races never knock anyone out; <b>Knockout</b> is an older format you don&apos;t need.
+          </p>
+        )}
         {rows.length ? (
           <ul className="m-0 flex list-none flex-col p-0">
             {rows.map((t) => {
@@ -45,7 +50,7 @@ async function List({ event }: { event: EventSummary }) {
                     </Link>
                     <span className="font-mono text-[10.5px] text-muted">
                       {t.simulation ? "REHEARSAL (SIMULATION) · " : ""}
-                      {t.status.toUpperCase()} · {(cfg.mode ?? "").toUpperCase()} · {cfg.layers?.length ?? 0} LAYERS
+                      {t.status.toUpperCase()} · {cfg.mode === "checkpoint" ? "POINTS (NO KNOCKOUT)" : cfg.mode === "survival" ? "KNOCKOUT (OLD FORMAT)" : (cfg.mode ?? "").toUpperCase()} · {cfg.layers?.length ?? 0} STEPS
                       {t.current_version ? ` · V${t.current_version}` : ""}
                       {t.starts_at ? ` · STARTS ${new Date(t.starts_at).toLocaleString("en-GB", { timeZone: event.timezone, dateStyle: "medium", timeStyle: "short" })}` : ""}
                     </span>

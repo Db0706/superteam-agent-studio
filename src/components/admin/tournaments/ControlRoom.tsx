@@ -114,7 +114,12 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
         </Module>
       )}
 
-      <Module label="LAYERS">
+      <Module label={pointsRace ? "STEPS" : "LAYERS"}>
+        {pointsRace && (
+          <p className="m-0 border-b border-hairline bg-strip px-4 py-2.5 text-[13px] leading-[1.45] text-ink-2">
+            Nobody is knocked out. Each step is open during its window (build steps for the whole race, challenges for their own window) and teams do them in any order, whenever they&apos;re ready. Every pass adds points to the leaderboard.
+          </p>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-[13px]">
             <thead>

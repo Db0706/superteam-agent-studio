@@ -184,7 +184,7 @@ function YourStatus({ state, onJoined }: { state: RaceState; onJoined: () => voi
       return (
         <Module label="JOIN THE RACE" right={state.tournament.participation === "team" ? "TEAM ENTRY" : "INDIVIDUAL ENTRY"}>
           <div className="flex flex-col gap-3 p-4 text-[14px] leading-normal text-ink-2">
-            <p className="m-0">Enter your {state.tournament.participation === "team" ? "team" : "self"} before the race starts. Leaving the race never affects your Build or Policy Track submission.</p>
+            <p className="m-0">Enter your {state.tournament.participation === "team" ? "team" : "self"} to start scoring. You can join any time while the race is open. Leaving the race never affects your Build or Policy Track submission.</p>
             <button
               type="button"
               disabled={pending}
