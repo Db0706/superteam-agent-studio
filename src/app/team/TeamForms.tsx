@@ -109,7 +109,7 @@ export function ProjectForm({ teamId, project }: { teamId: string; project: { na
           Your app&apos;s public URL
           <input name="endpoint" value={endpoint} onChange={(e) => setEndpoint(e.target.value)} placeholder="https://your-app.vercel.app" className={`${input} font-mono text-[14px]`} />
           <span className="text-[12.5px] font-normal leading-[1.45] text-muted">
-            The AI Race verifier calls <code>/agent-studio/v1/health</code> and <code>/agent-studio/v1/tasks</code> on this URL. It must be a <b>public https address</b>, not localhost: deploy your app (for example to Vercel), or run <code>npx cloudflared tunnel --url http://localhost:3000</code> and paste the https address it prints.
+            The AI Race verifier calls <code>/agent-studio/v1/health</code> and <code>/agent-studio/v1/tasks</code> on this URL. It must be a <b>public https address</b>, not localhost: deploy your app (for example to Vercel), or run <code>npx cloudflared tunnel --url http://localhost:3000</code> and paste the https address it prints. Use the port your app printed when it started (3000, 3001…), and keep both terminals open.
           </span>
         </label>
         <div className="grid gap-3 min-[700px]:grid-cols-2">
