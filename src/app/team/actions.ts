@@ -48,9 +48,26 @@ export async function saveProject(teamId: string, _: unknown, form: FormData): P
     .object({ name: z.string().trim().max(80), repo: url, demo: url, endpoint: url })
     .safeParse({ name: form.get("name") ?? "", repo: form.get("repo") ?? "", demo: form.get("demo") ?? "", endpoint: form.get("endpoint") ?? "" });
   if (!fields.success) return { ok: false, error: fields.error.issues[0].message };
+  const local = localAddressHint(fields.data.endpoint);
+  if (local) return { ok: false, error: local };
   const r = await callRpc<null>("update_project", { p_team: teamId, p_name: fields.data.name, p_repo: fields.data.repo, p_demo: fields.data.demo, p_endpoint: fields.data.endpoint });
   if (r.ok) refresh();
   return r;
+}
+
+/** The verifier runs on our servers, so an address that only works on the team's laptop can never pass. */
+function localAddressHint(endpoint: string | null | undefined): string | null {
+  if (!endpoint || allowPrivateTargets()) return null;
+  let host = "";
+  try {
+    host = new URL(endpoint).hostname.replace(/^\[|\]$/g, "");
+  } catch {
+    return null;
+  }
+  const local = host === "localhost" || host.endsWith(".localhost") || host === "::1" || host === "0.0.0.0" || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host) || host.endsWith(".local");
+  return local
+    ? "That address only works on your laptop, so the race can't reach it. Use a public https address: deploy your app (for example to Vercel), or run a tunnel such as `npx cloudflared tunnel --url http://localhost:3000` and paste the https address it prints."
+    : null;
 }
 
 export async function saveWallet(teamId: string, _: unknown, form: FormData): Promise<ActionResult<null>> {
@@ -78,6 +95,8 @@ export async function testConnection(teamId: string, endpoint: string): Promise<
   if (!token.ok) return token;
   const base = endpoint.trim().replace(/\/+$/, "");
   if (!base) return { ok: false, error: "Save your app's URL first." };
+  const local = localAddressHint(base);
+  if (local) return { ok: false, error: local };
   const res = await safeFetch(`${base}${HEALTH_PATH}`, { headers: { authorization: `Bearer ${token.data}` }, timeoutMs: 8000, allowPrivate: allowPrivateTargets() });
   if (isFailure(res)) return { ok: true, data: { ok: false, message: res.message, ms: res.elapsedMs } };
   let parsed: unknown = null;
