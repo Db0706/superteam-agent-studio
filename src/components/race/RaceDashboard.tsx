@@ -67,10 +67,19 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
   }, [state.tournament.id, reload]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const current = useMemo(() => state.layers.find((l) => l.id === selectedId) ?? pickCurrentLayer(state.layers), [state.layers, selectedId]);
   const t = state.tournament;
   const me = state.me;
   const scoring = state.layers.some((l) => l.points > 0);
+  const pointsRace = scoring && t.mode === "checkpoint";
+  const passedIds = useMemo(() => new Set((me?.attempts ?? []).filter((a) => a.status === "passed").map((a) => a.layerRunId)), [me?.attempts]);
+  const current = useMemo(
+    () =>
+      state.layers.find((l) => l.id === selectedId) ??
+      // Points race: open the first step the team hasn't passed yet, build steps first.
+      (pointsRace ? [...state.layers.filter((l) => l.config.category === "build_stage"), ...state.layers.filter((l) => l.config.category !== "build_stage")].find((l) => !passedIds.has(l.id)) : null) ??
+      pickCurrentLayer(state.layers),
+    [state.layers, selectedId, pointsRace, passedIds],
+  );
   const myPoints = scoring
     ? state.layers.reduce((sum, l) => sum + (me?.attempts.some((a) => a.layerRunId === l.id && a.status === "passed") || me?.decisions.some((d) => d.layerRunId === l.id && (d.decision === "qualified" || d.decision === "checkpoint_passed")) ? l.points : 0), 0)
     : null;
@@ -86,7 +95,7 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
           </span>
           <h1 className="display-l">{t.name}</h1>
           <p className="m-0 max-w-[640px] text-[15px] leading-normal text-ink-2">
-            {scoring && t.mode === "checkpoint" ? "Points race: every verified pass adds its points to the live leaderboard. Nobody is eliminated." : MODE_COPY[t.mode]}
+            {pointsRace ? "Pick a step, build it, press Run verification. Points land straight away. Nobody is knocked out." : MODE_COPY[t.mode]}
             {scoring && (
               <>
                 {" "}
@@ -98,10 +107,10 @@ export function RaceDashboard({ initial, timezone }: { initial: RaceState; timez
             <span className="font-mono text-[12px] font-semibold text-signal-ink">YOUR TEAM: {myPoints} POINTS</span>
           )}
         </div>
-        {current && <BigClock layer={current} now={now} timezone={timezone} />}
+        {pointsRace ? <RaceClock layers={state.layers} now={now} timezone={timezone} /> : current && <BigClock layer={current} now={now} timezone={timezone} />}
       </header>
 
-      <Progress layers={state.layers} attempts={me?.attempts ?? []} decisions={me?.decisions ?? []} />
+      {!pointsRace && <Progress layers={state.layers} attempts={me?.attempts ?? []} decisions={me?.decisions ?? []} />}
 
       <div className="grid items-start gap-4 min-[1120px]:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex flex-col gap-4">
@@ -126,6 +135,24 @@ function pickCurrentLayer(layers: LayerRunView[]): LayerRunView | null {
     layers.find((l) => l.state === "scheduled" || l.state === "locked") ??
     layers.at(-1) ??
     null
+  );
+}
+
+/** Points race: one clock for the whole race (every step runs side by side). */
+function RaceClock({ layers, now, timezone }: { layers: LayerRunView[]; now: number; timezone: string }) {
+  const end = layers.reduce<string | null>((m, l) => (l.deadlineAt && (!m || l.deadlineAt > m) ? l.deadlineAt : m), null);
+  const start = layers.reduce<string | null>((m, l) => (l.opensAt && (!m || l.opensAt < m) ? l.opensAt : m), null);
+  if (!end || !start) return null;
+  const before = Date.parse(start) > now;
+  const left = (before ? Date.parse(start) : Date.parse(end)) - now;
+  return (
+    <div className="flex flex-col items-end gap-1 max-[899px]:items-start" aria-live="polite">
+      <span className="font-mono text-[10.5px] font-medium text-muted">{before ? "RACE STARTS IN" : left > 0 ? "RACE ENDS IN" : "RACE"}</span>
+      <span className="wide font-mono text-[clamp(40px,6vw,64px)] leading-none tracking-[-0.03em]" style={{ color: !before && left > 0 && left < 10 * 60_000 ? COLORS.fault : COLORS.ink }}>
+        {left > 0 ? formatRemaining(left) : "OVER"}
+      </span>
+      <span className="font-mono text-[10.5px] text-muted">ENDS {formatTime(end, timezone)}</span>
+    </div>
   );
 }
 
@@ -251,6 +278,11 @@ function LayerPanel({ layer, state, now, timezone, onSubmitted }: { layer: Layer
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // Challenges unlock in order: the first prerequisite this team hasn't passed yet.
+  // Only the latest 60 attempts are loaded; past that, leave the check to the server.
+  const done = (id: string) => (me?.attempts ?? []).some((a) => a.layerRunId === id && a.status === "passed") || (me?.decisions ?? []).some((d) => d.layerRunId === id && (d.decision === "qualified" || d.decision === "checkpoint_passed"));
+  const missingPrereq = (me?.attempts.length ?? 0) >= 60 ? undefined : layer.config.prerequisites.map((k) => state.layers.find((l) => l.key === k)).find((l) => l && !done(l.id));
+
   const blocker = !me
     ? "Sign in to run a verification."
     : !me.participantId
@@ -265,7 +297,9 @@ function LayerPanel({ layer, state, now, timezone, onSubmitted }: { layer: Layer
               ? layer.state === "scheduled" || layer.state === "locked"
                 ? `This layer opens at ${formatTime(layer.opensAt, timezone)}.`
                 : "This layer is closed."
-              : !me.hasEndpoint && state.tournament.participation === "team" && !layer.config.verifier.plugin.startsWith("bureau.")
+              : missingPrereq
+                ? `Pass ${missingPrereq.config.title} first.`
+                : !me.hasEndpoint && state.tournament.participation === "team" && !layer.config.verifier.plugin.startsWith("bureau.")
                 ? "Add your app's URL on the team page."
                 : latest && (latest.status === "queued" || latest.status === "running")
                   ? "Verifying your last attempt…"
@@ -277,7 +311,11 @@ function LayerPanel({ layer, state, now, timezone, onSubmitted }: { layer: Layer
 
   return (
     <Module
-      label={`${layer.config.category === "build_stage" ? "BUILD STAGE" : `LAYER ${layer.position + 1} OF ${state.layers.length}`} · ${layer.config.difficulty.toUpperCase()}${layer.points ? ` · ${layer.points} PTS` : ""}`}
+      label={
+        state.tournament.mode === "checkpoint" && layer.points
+          ? `${layer.config.category === "build_stage" ? "BUILD STEP" : "CHALLENGE"} · +${layer.points} PTS`
+          : `${layer.config.category === "build_stage" ? "BUILD STAGE" : `LAYER ${layer.position + 1} OF ${state.layers.length}`} · ${layer.config.difficulty.toUpperCase()}${layer.points ? ` · ${layer.points} PTS` : ""}`
+      }
       right={passed ? <><Led color={COLORS.ok} /> PASSED</> : layer.state.toUpperCase()}
     >
       <div className="flex flex-col gap-4 p-4">
@@ -433,18 +471,19 @@ function Standings({ standings, mode }: { standings: RaceState["standings"]; mod
 
 function Timeline({ layers, attempts, decisions, now, timezone, currentId, onSelect }: { layers: LayerRunView[]; attempts: AttemptView[]; decisions: { layerRunId: string; decision: string }[]; now: number; timezone: string; currentId?: string; onSelect: (id: string) => void }) {
   const groups = layers.some((l) => l.config.category === "build_stage")
-    ? ([["CHALLENGES", layers.filter((l) => l.config.category !== "build_stage")], ["BUILD STAGES", layers.filter((l) => l.config.category === "build_stage")]] as const)
+    ? ([["BUILD STEPS · EVERYONE", layers.filter((l) => l.config.category === "build_stage")], ["CHALLENGES · OPTIONAL · IN ORDER", layers.filter((l) => l.config.category !== "build_stage")]] as const)
     : ([["ALL LAYERS", layers]] as const);
+  const points = groups.length > 1;
   return (
-    <Module label="LAYERS" right="TAP ONE TO OPEN IT">
+    <Module label={points ? "STEPS" : "LAYERS"} right="TAP ONE TO OPEN IT">
       {groups.map(([title, list]) => (
         <div key={title}>
           {groups.length > 1 && <div className="border-b border-hairline bg-strip px-4 py-1.5 font-mono text-[10px] text-muted">{title}</div>}
           <ol className="m-0 flex list-none flex-col p-0">
-            {list.map((l) => {
+            {list.map((l, i) => {
               const d = decisions.find((x) => x.layerRunId === l.id)?.decision;
               const passed = attempts.some((a) => a.layerRunId === l.id && a.status === "passed");
-              const mark = d === "eliminated" ? "OUT" : d === "checkpoint_missed" ? "MISSED" : passed ? "PASSED" : l.state === "open" ? "OPEN" : l.state === "closed" ? "CLOSED" : l.opensAt ? formatTime(l.opensAt, timezone) : "";
+              const mark = d === "eliminated" ? "OUT" : d === "checkpoint_missed" ? "MISSED" : passed ? "✓ DONE" : l.state === "open" ? "OPEN" : l.state === "closed" ? "CLOSED" : l.opensAt ? formatTime(l.opensAt, timezone) : "";
               const color = d === "eliminated" ? COLORS.fault : passed ? COLORS.okText : l.state === "open" ? COLORS.signalInk : COLORS.muted;
               return (
                 <li key={l.id} className="border-b border-hairline last:border-b-0">
@@ -455,10 +494,10 @@ function Timeline({ layers, attempts, decisions, now, timezone, currentId, onSel
                     className="grid w-full grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-2 border-0 bg-transparent px-4 py-2.5 text-left hover:bg-strip"
                     style={l.id === currentId ? { background: COLORS.strip } : undefined}
                   >
-                    <span className="font-mono text-[10px] text-muted">{String(l.position + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-[10px] text-muted">{String(points ? i + 1 : l.position + 1).padStart(2, "0")}</span>
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate text-[13.5px] font-semibold">{l.config.title}</span>
-                      {l.points > 0 && <span className="font-mono text-[10px] text-muted">{l.points} PTS</span>}
+                      {l.points > 0 && <span className="font-mono text-[10px] text-muted">+{l.points} PTS</span>}
                     </span>
                     <span className="font-mono text-[10px] font-medium" style={{ color }}>
                       {mark}
