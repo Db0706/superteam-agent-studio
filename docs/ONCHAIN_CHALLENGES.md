@@ -28,6 +28,14 @@ Two optional puzzles on **Solana devnet**, three tiers each (Operation 30/50/70,
    It prints one line per team (`✓`, or `✗` with the reason) and the authority's remaining SOL. A team that registers later: run it again.
 4. Teams press **Run verification** on each tier. Tiers unlock in order.
 
+## Faucet failed? Send test SOL yourself
+
+```bash
+cd ~/Desktop/SuperteamAgent/superteam-agent-studio && npx tsx scripts/devnet-sol.mts <their address>
+```
+
+Sends 0.05 devnet SOL from the organiser wallet (several addresses at once is fine; `--sol 0.1` for more, up to 0.5). Devnet only. It prints the organiser wallet's remaining balance.
+
 ## Rate limits
 
 Public devnet (`api.devnet.solana.com`) answers "Too Many Requests" quickly. The verifier retries and treats an outage as our problem (never the team's fail), but checks get slower. For the day, a free devnet RPC key (Helius, QuickNode) helps: set it as `SOLANA_DEVNET_RPC_URL` on the Railway worker and in the setup form's "Devnet RPC address" so students use it too.
