@@ -4,7 +4,7 @@ import { Arrow, ConfirmationTag, COLORS, Led, Module, SectionHeading } from "@/c
 import { eventFromDb, FALLBACK_EVENT, type FactStatus, type PublicEvent } from "@/config/active-event";
 import { TRACKS } from "@/config/tracks";
 import type { Confirmation } from "@/config/schema";
-import { pointsRaceTemplate } from "@/core/tournament/templates";
+import { hackathonTemplate } from "@/core/tournament/templates";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { listRaceTournaments, pickFeatured } from "@/server/dal/race";
@@ -61,13 +61,13 @@ function Hero() {
   );
 }
 
-/** The points race as the template defines it (sample points). Organisers set the real race per event. */
-const POINTS_RACE = pointsRaceTemplate();
+/** The hackathon race as the simple setup creates it (default points; organisers can change them). */
+const POINTS_RACE = hackathonTemplate({ onchain: { programId: "-", credMint: "-", presentationAccount: "-", salt: "-" }, payTo: "-" });
 
 function RaceLadder() {
   const groups = [
-    { label: "BUILD STAGES · OPEN ALL DAY, ANY ORDER", layers: POINTS_RACE.layers.filter((l) => l.category === "build_stage") },
-    { label: "CHALLENGES · ONE AT A TIME", layers: POINTS_RACE.layers.filter((l) => l.category !== "build_stage") },
+    { label: "BUILD POINTS · YOUR OWN APP · OPEN ALL SPRINT, ANY ORDER", layers: POINTS_RACE.layers.filter((l) => l.category === "build_stage") },
+    { label: "BONUS CHALLENGES · OPTIONAL SOLANA PUZZLES · 2-HOUR WINDOW", layers: POINTS_RACE.layers.filter((l) => l.category !== "build_stage") },
   ];
   return (
     <Module label="THE AI RACE · POINTS FORMAT" right={<ConfirmationTag status="SAMPLE" />}>
@@ -85,7 +85,7 @@ function RaceLadder() {
         </div>
       ))}
       <p className="m-0 px-3.5 py-2.5 text-[12px] leading-[1.45] text-muted">
-        Every stage is checked automatically against your running app, and points land as soon as it passes. Cambridge vs Oxford on the live leaderboard.
+        Every step is checked automatically and points land as soon as it passes. Nobody is knocked out: do the steps you want, whenever you&apos;re ready. Cambridge vs Oxford on the live leaderboard.
       </p>
     </Module>
   );
