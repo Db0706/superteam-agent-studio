@@ -114,49 +114,54 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
         </Module>
       )}
 
-      <Module label={pointsRace ? "STEPS" : "LAYERS"}>
-        {pointsRace && (
-          <p className="m-0 border-b border-hairline bg-strip px-4 py-2.5 text-[13px] leading-[1.45] text-ink-2">
-            Nobody is knocked out. Each step is open during its window (build steps for the whole race, challenges for their own window) and teams do them in any order, whenever they&apos;re ready. Every pass adds points to the leaderboard.
-          </p>
-        )}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-[13px]">
-            <thead>
-              <tr className="font-mono text-[10px] text-muted">
-                <th className="px-4 py-2 font-medium">#</th>
-                <th className="px-4 py-2 font-medium">LAYER</th>
-                <th className="px-4 py-2 font-medium">STATE</th>
-                <th className="px-4 py-2 font-medium">WINDOW</th>
-                <th className="px-4 py-2 font-medium">{pointsRace ? "PASSED" : "PASSED · OUT"}</th>
-                <th className="px-4 py-2 font-medium" />
-              </tr>
-            </thead>
-            <tbody>
-              {s.layers.map((l) => {
-                const ds = s.decisions.filter((d) => d.layerRunId === l.id);
-                return (
-                  <tr key={l.id} className="border-t border-hairline align-top">
-                    <td className="px-4 py-2 font-mono text-[11px]">{l.position + 1}</td>
-                    <td className="px-4 py-2 font-semibold">{l.title}</td>
-                    <td className="px-4 py-2 font-mono text-[11px]" style={{ color: l.state === "open" ? COLORS.signalInk : l.state === "finalising" ? COLORS.warnText : COLORS.muted }}>
-                      {l.state.toUpperCase()}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2 font-mono text-[11px]">
-                      {formatZoned(l.opensAt, timezone)} to {formatZoned(l.deadlineAt, timezone).split(" ").pop()}
-                      {l.extendedSeconds > 0 && <span className="text-muted"> (+{Math.round(l.extendedSeconds / 60)}m)</span>}
-                    </td>
-                    <td className="px-4 py-2 font-mono text-[11px]">
-                      {ds.length ? (pointsRace ? String(ds.filter((d) => d.decision === "qualified" || d.decision === "checkpoint_passed").length) : `${ds.filter((d) => d.decision === "qualified" || d.decision === "checkpoint_passed").length} · ${ds.filter((d) => d.decision === "eliminated").length}`) : ""}
-                    </td>
-                    <td className="px-4 py-2">{["scheduled", "open", "closing"].includes(l.state) && !ended && <ExtendForm layerRunId={l.id} after={reload} />}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </Module>
+      {pointsRace && !ended && <ExtendAll layers={s.layers.filter((l) => ["scheduled", "open", "closing"].includes(l.state))} timezone={timezone} after={reload} />}
+      {(pointsRace
+        ? [
+            { label: "BUILD STEPS · EVERYONE", layers: s.layers.filter((l) => l.category === "build_stage") },
+            { label: "CHALLENGES · OPTIONAL · UNLOCK ONE AT A TIME", layers: s.layers.filter((l) => l.category !== "build_stage") },
+          ].filter((g) => g.layers.length)
+        : [{ label: "LAYERS", layers: s.layers }]
+      ).map((g) => (
+        <Module key={g.label} label={g.label} right={pointsRace ? `${g.layers.reduce((a, l) => a + l.points, 0).toLocaleString("en-GB")} PTS` : undefined}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-[13px]">
+              <thead>
+                <tr className="font-mono text-[10px] text-muted">
+                  <th className="px-4 py-2 font-medium">#</th>
+                  <th className="px-4 py-2 font-medium">{pointsRace ? "STEP" : "LAYER"}</th>
+                  {pointsRace && <th className="px-4 py-2 font-medium">POINTS</th>}
+                  <th className="px-4 py-2 font-medium">STATE</th>
+                  <th className="px-4 py-2 font-medium">OPEN</th>
+                  <th className="px-4 py-2 font-medium">{pointsRace ? "TEAMS PASSED" : "PASSED · OUT"}</th>
+                  {!pointsRace && <th className="px-4 py-2 font-medium" />}
+                </tr>
+              </thead>
+              <tbody>
+                {g.layers.map((l, i) => {
+                  const ds = s.decisions.filter((d) => d.layerRunId === l.id);
+                  const passed = ds.filter((d) => d.decision === "qualified" || d.decision === "checkpoint_passed").length;
+                  return (
+                    <tr key={l.id} className="border-t border-hairline align-top">
+                      <td className="px-4 py-2 font-mono text-[11px]">{pointsRace ? i + 1 : l.position + 1}</td>
+                      <td className="px-4 py-2 font-semibold">{l.title}</td>
+                      {pointsRace && <td className="px-4 py-2 font-mono text-[11px]">+{l.points}</td>}
+                      <td className="px-4 py-2 font-mono text-[11px]" style={{ color: l.state === "open" ? COLORS.signalInk : l.state === "finalising" ? COLORS.warnText : COLORS.muted }}>
+                        {l.state.toUpperCase()}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2 font-mono text-[11px]">
+                        {formatZoned(l.opensAt, timezone)} to {formatZoned(l.deadlineAt, timezone).split(" ").pop()}
+                        {l.extendedSeconds > 0 && <span className="text-muted"> (+{Math.round(l.extendedSeconds / 60)}m)</span>}
+                      </td>
+                      <td className="px-4 py-2 font-mono text-[11px]">{pointsRace ? String(passed) : ds.length ? `${passed} · ${ds.filter((d) => d.decision === "eliminated").length}` : ""}</td>
+                      {!pointsRace && <td className="px-4 py-2">{["scheduled", "open", "closing"].includes(l.state) && !ended && <ExtendForm layerRunId={l.id} after={reload} />}</td>}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Module>
+      ))}
 
       <Module label="REVIEW QUEUE" right={`${review.length}`}>
         {review.length === 0 ? (
@@ -247,6 +252,37 @@ function Confirm({ label, tone, onConfirm, after, help, needsReason = true }: { 
       </div>
       {error && <span role="alert" className="text-[12.5px] text-fault">{error}</span>}
     </div>
+  );
+}
+
+/** Points races: every step runs side by side, so extending means moving every open step's end time together. */
+function ExtendAll({ layers, timezone, after }: { layers: ControlState["layers"]; timezone: string; after: () => void }) {
+  const [minutes, setMinutes] = useState(30);
+  const latest = layers.reduce<string | null>((m, l) => (!m || l.deadlineAt > m ? l.deadlineAt : m), null);
+  if (!layers.length) return null;
+  return (
+    <Module label="RACE END TIME">
+      <div className="flex flex-wrap items-center gap-3 p-4 text-[13.5px]">
+        <span>
+          Everything closes at <b>{latest ? formatZoned(latest, timezone).split(" ").pop() : "?"}</b>. Need longer?
+        </span>
+        <input type="number" min={1} max={600} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} className={`${field} !h-9 w-20`} aria-label="Minutes to add" />
+        <span>minutes</span>
+        <Confirm
+          label={`Add ${minutes} min to every step`}
+          tone="secondary"
+          needsReason={false}
+          onConfirm={async (r) => {
+            for (const l of layers) {
+              const res = await extendLayer(l.id, minutes, false, r || "Extended the whole race");
+              if (!res.ok) return res;
+            }
+            return { ok: true, data: null };
+          }}
+          after={after}
+        />
+      </div>
+    </Module>
   );
 }
 
