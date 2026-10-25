@@ -210,6 +210,67 @@ export function ChallengePanel({ teamId, challengeId, wallet }: { teamId: string
   );
 }
 
+function CopyLine({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex items-stretch gap-2">
+      <code className="block min-w-0 flex-1 break-all rounded-[3px] bg-ink px-3 py-2 font-mono text-[12.5px] text-[#EDEDE8]">{text}</code>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          } catch {}
+        }}
+        className="btn-secondary !h-auto shrink-0 !px-3 !text-[12px]"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
+/** The three things a team must do so the race can reach the app running on their laptop. */
+export function ConnectSteps({ teamId, endpoint }: { teamId: string; endpoint: string | null }) {
+  const [token, setToken] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const [port, setPort] = useState("3000");
+  const step = "flex flex-col gap-2 border-b border-hairline p-4 last:border-b-0";
+  const num = "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-signal font-mono text-[12px] font-bold text-white";
+  return (
+    <Module label="CONNECT YOUR APP TO THE RACE" right={endpoint ? "URL SAVED" : "3 STEPS"}>
+      <div className={step}>
+        <span className="flex items-center gap-2 text-[14px] font-bold"><span className={num}>1</span>Add your team token</span>
+        {token ? (
+          <CopyLine text={`AGENT_STUDIO_VERIFIER_TOKEN=${token}`} />
+        ) : (
+          <button type="button" disabled={pending} onClick={() => start(async () => { const r = await revealToken(teamId); if (r.ok) setToken(r.data); else setError(r.error); })} className="btn-primary self-start !h-10 !px-4 !text-[13px]">
+            Show my line
+          </button>
+        )}
+        <span className="text-[13px] text-ink-2">Paste it into <code>.env.local</code> in your project folder, save, then restart your app (Ctrl+C, then <code>npm run dev</code> again).</span>
+        {error && <p role="alert" className="m-0 text-[13px] text-fault">{error}</p>}
+      </div>
+      <div className={step}>
+        <span className="flex items-center gap-2 text-[14px] font-bold"><span className={num}>2</span>Open a tunnel in a second terminal</span>
+        <CopyLine text={`npx cloudflared tunnel --url http://localhost:${port || "3000"}`} />
+        <span className="flex flex-wrap items-center gap-2 text-[13px] text-ink-2">
+          Your app&apos;s port (it prints it when it starts):
+          <input value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, "").slice(0, 5))} className={`${input} !h-8 w-20 font-mono`} aria-label="Your app's port" />
+          Keep this terminal open.
+        </span>
+      </div>
+      <div className={step}>
+        <span className="flex items-center gap-2 text-[14px] font-bold"><span className={num}>3</span>Paste the https address it prints below</span>
+        <span className="text-[13px] text-ink-2">It looks like <code>https://some-words.trycloudflare.com</code>. Paste it in <b>Your app&apos;s public URL</b>, press <b>Save project</b>, then <b>Test connection</b>. Green means you&apos;re connected.</span>
+      </div>
+    </Module>
+  );
+}
+
 export function TokenPanel({ teamId }: { teamId: string }) {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
