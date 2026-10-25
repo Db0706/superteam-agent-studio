@@ -266,7 +266,7 @@ export const BUILD_STAGES: LayerTemplate[] = [
   }),
   stage({
     key: "ai-feature",
-    title: "AI feature working",
+    title: "AI Integration",
     description: "Your app answers with a real model.",
     objective: "Handle `respond` tasks through the race adapter with your AI model.",
     instructions: "Write the `respond` handler in your race adapter so it answers `task.input` with your model, in `output.text`. The verifier asks fresh questions with checkable answers.",
@@ -316,7 +316,7 @@ export const BUILD_STAGES: LayerTemplate[] = [
  */
 export function pointsRaceTemplate(opts: { name?: string; sprintSeconds?: number; challengeIntervalSeconds?: number; challenges?: number } = {}): TournamentConfig {
   const sprint = opts.sprintSeconds ?? 7 * 3600;
-  // "AI feature working" and "Agent uses tools" are build stages, so those two challenges aren't repeated.
+  // "AI Integration" and "Agent uses tools" are build stages, so those two challenges aren't repeated.
   const pool = LAYER_TEMPLATES.filter((l) => l.key !== "first-intelligence" && l.key !== "tool-calling");
   const count = Math.max(0, Math.min(opts.challenges ?? pool.length, pool.length));
   const interval = Math.max(60, Math.min(opts.challengeIntervalSeconds ?? 45 * 60, Math.floor(sprint / Math.max(1, count))));
