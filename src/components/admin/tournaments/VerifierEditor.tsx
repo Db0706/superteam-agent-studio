@@ -18,6 +18,11 @@ const LABELS: Record<string, string> = {
   minProblemChars: "Minimum length of the problem statement (characters)",
   cases: "Number of test questions",
   questions: "Number of test questions",
+  programId: "Program ID (from the challenge setup)",
+  credMint: "CRED mint (from the challenge setup)",
+  presentationAccount: "Presentation account (Minesweeper)",
+  codeWindowSlots: "Code window (slots, must match the program)",
+  fastSlots: "Fast hands limit (slots)",
 };
 const human = (key: string) => LABELS[key] ?? key.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()).replace(/ Ms$/, " (ms)");
 

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { pointsRaceTemplate } from "@/core/tournament/templates";
+import { hackathonTemplate, pointsRaceTemplate } from "@/core/tournament/templates";
 import { configHash, drainJobs, eventSlug, rpc, rpcError, runTick, signedInUser, startHarness, validated, type Harness } from "./harness";
 
 /**
@@ -99,6 +99,29 @@ describe("points race", () => {
     await rpc(u.client, "submit_attempt", { p_id: tournamentId, p_layer_key: "app-live" });
     await drainJobs(h);
     expect((await board(u.client)).Exeter.points).toBe(50);
+  });
+
+  it("lets a team with no app URL attempt on-chain challenges, but not app layers", async () => {
+    const cfg = validated(hackathonTemplate({
+      name: "Chain test", sprintSeconds: 3600, challengeWindowSeconds: 3600, payTo: DEVNET_ADDRESS,
+      onchain: { programId: "B3aSCgNhYqukoMrhsUa6tWctG8rhqMJBqC6mKAbE2eV8", credMint: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", presentationAccount: "G5Tu25otWo8kTaSACmTvx68YMoj6e6stn2ad7TM19VvZ", salt: "s" },
+    }));
+    const tid = await rpc<string>(organiser, "create_tournament", { p_event: eventId, p_name: cfg.name, p_config: cfg });
+    await rpc(organiser, "publish_tournament", { p_id: tid, p_config: cfg, p_hash: configHash(cfg), p_note: "chain" });
+    await h.sql`insert into public.registrations (event_id, email, full_name, ticket, status, university) values (${eventId}, ${`chainonly@${h.domain}`}, 'Chain Only', 'hackathon', 'approved', 'Cambridge')`;
+    const u = await signedInUser(h, "chainonly");
+    const teamId = await rpc<string>(u.client, "create_team", { p_event: eventId, p_name: "Chain Only", p_track: "build" });
+    await rpc(u.client, "set_project_wallet", { p_team: teamId, p_wallet: DEVNET_ADDRESS });
+    expect(await rpcError(u.client, "set_project_wallet", { p_team: teamId, p_wallet: "not-a-wallet" })).toMatch(/isn't a Solana address/);
+    await rpc(u.client, "join_tournament", { p_id: tid });
+    await rpc(organiser, "schedule_tournament", { p_id: tid, p_starts_at: new Date().toISOString() });
+    await runTick(h);
+    const attempt = await rpc<string>(u.client, "submit_attempt", { p_id: tid, p_layer_key: "operation-1" });
+    const [a] = await h.sql<{ endpoint_url: string }[]>`select endpoint_url from public.verification_attempts where id = ${attempt}`;
+    expect(a.endpoint_url).toBe("onchain:");
+    expect(await rpcError(u.client, "submit_attempt", { p_id: tid, p_layer_key: "app-live" })).toMatch(/Add your app's URL/);
+    await h.sql`delete from public.verification_jobs where attempt_id = ${attempt}`;
+    await rpc(organiser, "cancel_tournament", { p_id: tid, p_reason: "test done" });
   });
 
   it("works out each team's university and is public", async () => {

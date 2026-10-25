@@ -338,13 +338,90 @@ export function pointsRaceTemplate(opts: { name?: string; sprintSeconds?: number
   };
 }
 
-/** The four optional bonus challenges for a hackathon: one per difficulty, built on existing checks. */
-const BONUS_CHALLENGES: { from: string; key: string; title: string; description: string; points: number }[] = [
-  { from: "structured-outputs", key: "quick-draw", title: "Quick Draw", description: "Bonus challenge (intro): turn messy text into clean structured data.", points: 100 },
-  { from: "external-knowledge", key: "look-it-up", title: "Look It Up", description: "Bonus challenge (core): answer only from the source you're given, and say so when it has no answer.", points: 150 },
-  { from: "memory-context", key: "remember-me", title: "Remember Me", description: "Bonus challenge (advanced): hold a conversation and recall what was said earlier.", points: 175 },
-  { from: "autonomous-workflow", key: "shop-run", title: "Shop Run", description: "Bonus challenge (expert): an agent that plans and places orders with tools, within a budget.", points: 225 },
-];
+/** Published constants for the on-chain challenges, from the challenge setup (deploy script). */
+export interface OnchainConstants {
+  programId: string;
+  credMint: string;
+  presentationAccount: string;
+  salt: string;
+  rpcUrl?: string;
+}
+
+/**
+ * The on-chain bonus challenges (Operation, Minesweeper), three tiers each. Each team solves its
+ * own puzzle on Solana devnet with its registered wallet; the bureau.chain verifier reads the
+ * chain. Tiers chain: tier 2 needs tier 1, tier 3 needs tier 2.
+ */
+export function onchainChallenges(k: OnchainConstants): LayerTemplate[] {
+  const rpc = k.rpcUrl ?? "https://api.devnet.solana.com";
+  const consts = `Published constants: RPC \`${rpc}\` · program \`${k.programId}\` · CRED mint \`${k.credMint}\` · presentation account \`${k.presentationAccount}\` · salt \`${k.salt}\`. Your **Challenge ID** is on your team page; register your team wallet there too. Only transactions signed by that wallet count.`;
+  const verifier = (challenge: "operation" | "minesweeper", tier: 1 | 2 | 3, visibleCriteria: string[]) => ({
+    plugin: "bureau.chain",
+    config: { challenge, tier, programId: k.programId, credMint: k.credMint, presentationAccount: k.presentationAccount, rpcUrl: rpc, codeWindowSlots: 4500, fastSlots: 150, timeoutMs: 60000 },
+    visibleCriteria,
+  });
+  const base = (l: Pick<LayerTemplate, "key" | "title" | "description" | "objective" | "instructions" | "capabilities" | "verifier" | "points" | "difficulty"> & Partial<LayerTemplate>): LayerTemplate =>
+    stage({ category: "challenge", retries: { maxAttempts: null, cooldownSeconds: 60 }, resources: [], ...l });
+  const opBrief =
+    "Find your verification record at the program address derived from the seeds `claim` and your Challenge ID **in lowercase**. Its raw bytes have no schema: bytes 41–49 are the **clearance nonce** (u64, little-endian) and bytes 49–81 are your **clearance account** (32-byte address).";
+  const msBrief =
+    "Find your holdings record at the address derived from `holdings` and your Challenge ID (**not** lowercased). Bytes 8–40 are the **registrar key**. Call the program's `mint_code(challenge_id: string, memo_hash: [u8; 32])` (no IDL is published) with `memo_hash = sha256(utf8(Challenge ID) || utf8(salt))`. In the same transaction include the registrar key as the first extra (remaining) account, the instructions sysvar `Sysvar1nstructions1111111111111111111111111`, and an SPL Memo with the lowercase hex of `memo_hash`. The code is written to the record derived from `deed` and your Challenge ID: operative (4-byte length + string), clearance_code (8 bytes), issued_slot (u64), presented (bool).";
+  return [
+    base({
+      key: "operation-1", title: "Operation · Found it", difficulty: "core", points: 30,
+      description: "Bonus challenge: decode your on-chain record and pay your clearance account.",
+      objective: "Send any amount of CRED from your team wallet to your clearance account.",
+      instructions: `${opBrief}\n\nProve you found it: send **any** amount of CRED to your clearance account, signed by your team wallet. Then press **Run verification**.\n\n${consts}`,
+      capabilities: ["Solana", "Program-derived addresses", "Decoding bytes"],
+      verifier: verifier("operation", 1, ["CRED from your wallet reached your clearance account"]),
+      hints: [{ afterAttempts: 3, text: "The address seed is the Challenge ID in lowercase. The clearance account is the 32 bytes from offset 49, read as a Solana address." }],
+    }),
+    base({
+      key: "operation-2", title: "Operation · Exact", difficulty: "core", points: 50, prerequisites: ["operation-1"],
+      description: "Bonus challenge: pay the exact clearance fee.",
+      objective: "Send exactly 1000 + (nonce mod 9000) base units of CRED.",
+      instructions: `${opBrief}\n\nPay the **exact clearance fee**: \`1000 + (clearance_nonce mod 9000)\` CRED **base units** (not whole tokens), from your team wallet to your clearance account. Then press **Run verification**.\n\n${consts}`,
+      capabilities: ["Solana", "Little-endian decoding", "SPL tokens"],
+      verifier: verifier("operation", 2, ["CRED from your wallet reached your clearance account", "Pays the exact clearance fee"]),
+      hints: [{ afterAttempts: 3, text: "The nonce is 8 raw bytes, little-endian: not text and not hex. Read it as an unsigned 64-bit integer. The fee is in base units (CRED has 6 decimals)." }],
+    }),
+    base({
+      key: "operation-3", title: "Operation · Verified", difficulty: "core", points: 70, prerequisites: ["operation-2"],
+      description: "Bonus challenge: the exact fee with the right memo, in one transaction.",
+      objective: "Send the exact fee with the memo sha256(Challenge ID ‖ nonce LE).hex[:16] in the same transaction.",
+      instructions: `${opBrief}\n\nSend the exact fee **and** an SPL Memo in the **same transaction**. The memo is the first 16 hex characters of \`sha256(utf8(Challenge ID) || nonce as 8 little-endian bytes)\`. Then press **Run verification**.\n\n${consts}`,
+      capabilities: ["Solana", "Hashing", "Transactions with several instructions"],
+      verifier: verifier("operation", 3, ["CRED from your wallet reached your clearance account", "Pays the exact clearance fee", "The exact fee and the right memo in one transaction"]),
+      hints: [{ afterAttempts: 3, text: "The address seed is lowercased but the memo uses the Challenge ID exactly as shown. Hash the raw nonce bytes, not a string. Keep the first 16 hex characters." }],
+    }),
+    base({
+      key: "minesweeper-1", title: "Minesweeper · Minted", difficulty: "advanced", points: 90,
+      description: "Bonus challenge: call the program directly to mint your clearance code.",
+      objective: "Call mint_code with the registrar key as a remaining account and the memo in the same transaction.",
+      instructions: `${msBrief}\n\nWhen the call succeeds, your code record exists. Press **Run verification**.\n\n${consts}`,
+      capabilities: ["Solana", "Raw Anchor instructions", "Remaining accounts"],
+      verifier: verifier("minesweeper", 1, ["A clearance code was minted for your team"]),
+      hints: [{ afterAttempts: 3, text: "The 8-byte instruction identifier is the first 8 bytes of sha256(\"global:mint_code\"). Strings are encoded as a 4-byte little-endian length then the bytes. If the program refuses, check both traps: the registrar key as the first remaining account, and the memo in the same transaction." }],
+    }),
+    base({
+      key: "minesweeper-2", title: "Minesweeper · Presented", difficulty: "advanced", points: 80, prerequisites: ["minesweeper-1"],
+      description: "Bonus challenge: read your code from chain and present it in time.",
+      objective: "Send 1 base unit of CRED to the presentation account with the memo <Challenge ID>:<code>, within the code's window.",
+      instructions: `${msBrief}\n\nThe code doesn't come back from the call: **read it from your code record**. Then present it: send **1 base unit** of CRED to the presentation account with the memo \`<Challenge ID>:<code>\`, within about 30 minutes of chain time after minting. Missed it? Mint a fresh code and try again. Then press **Run verification**.\n\n${consts}`,
+      capabilities: ["Solana", "Decoding bytes", "Memos"],
+      verifier: verifier("minesweeper", 2, ["A clearance code was minted for your team", "Code presented in time"]),
+      hints: [{ afterAttempts: 3, text: "The code record starts with an 8-byte discriminator, then a 4-byte length and the operative string; the 8-byte code comes right after. Present the current code: re-minting replaces it." }],
+    }),
+    base({
+      key: "minesweeper-3", title: "Minesweeper · Fast hands", difficulty: "advanced", points: 30, prerequisites: ["minesweeper-2"],
+      description: "Bonus challenge: mint, read and present within about a minute.",
+      objective: "Present a fresh code within about one minute of minting it.",
+      instructions: `${msBrief}\n\n**Fast hands:** script the whole chain (mint, read, present) so the presentation lands within about one minute (150 slots) of minting. Then press **Run verification**.\n\n${consts}`,
+      capabilities: ["Solana", "Scripting"],
+      verifier: verifier("minesweeper", 3, ["A clearance code was minted for your team", "Code presented in time", "Presented within about a minute of minting"]),
+    }),
+  ];
+}
 
 export interface HackathonOptions {
   name?: string;
@@ -352,8 +429,12 @@ export interface HackathonOptions {
   sprintSeconds?: number;
   /** The six build stages of the team's own product, open all sprint. */
   buildStages?: boolean;
-  /** The four optional bonus challenges, open together at the start. */
+  /** The on-chain bonus challenges (Operation and Minesweeper, three tiers each). */
   bonusChallenges?: boolean;
+  /** Published constants for the on-chain challenges (required when they're on). */
+  onchain?: OnchainConstants;
+  /** When the bonus challenges open, in seconds after the start. */
+  challengeOffsetSeconds?: number;
   /** How long the bonus challenges stay open, from the start. */
   challengeWindowSeconds?: number;
   /** The organiser's devnet address for the on-chain payment build stage. */
@@ -369,12 +450,10 @@ export function hackathonTemplate(opts: HackathonOptions = {}): TournamentConfig
   const sprint = opts.sprintSeconds ?? 7 * 3600;
   const withStages = opts.buildStages ?? true;
   const withChallenges = opts.bonusChallenges ?? true;
-  const window = Math.max(60, Math.min(opts.challengeWindowSeconds ?? 2 * 3600, sprint));
+  const offset = Math.max(0, Math.min(opts.challengeOffsetSeconds ?? 0, sprint - 60));
+  const window = Math.max(60, Math.min(opts.challengeWindowSeconds ?? 2 * 3600, sprint - offset));
   const challenges = withChallenges
-    ? BONUS_CHALLENGES.map((c) => {
-        const base = LAYER_TEMPLATES.find((l) => l.key === c.from)!;
-        return { ...base, key: c.key, title: c.title, description: c.description, points: c.points, category: "challenge" as const, outcome: "checkpoint" as const, prerequisites: [], achievement: undefined, timing: { offsetSeconds: 0, durationSeconds: window } };
-      })
+    ? onchainChallenges(opts.onchain ?? { programId: "", credMint: "", presentationAccount: "", salt: "" }).map((l) => ({ ...l, timing: { offsetSeconds: offset, durationSeconds: window } }))
     : [];
   const stages = withStages
     ? BUILD_STAGES.map((l) => {
@@ -383,7 +462,7 @@ export function hackathonTemplate(opts: HackathonOptions = {}): TournamentConfig
         return layer;
       })
     : [];
-  const parts = [withStages && "points for the build stages of your own product (open all day, any order)", withChallenges && `bonus points from optional challenges open for the first ${Math.round(window / 360) / 10} hours`].filter(Boolean);
+  const parts = [withStages && "points for the build stages of your own product (open all day, any order)", withChallenges && `bonus points from two optional on-chain challenges (Operation and Minesweeper, three tiers each)`].filter(Boolean);
   return {
     schema: TOURNAMENT_SCHEMA,
     name: opts.name ?? "The AI Race",

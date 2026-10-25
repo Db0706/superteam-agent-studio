@@ -9,6 +9,7 @@ import { seededRng } from "@/core/verification/rng";
 import { isFailure, safeFetch } from "@/core/verification/safe-fetch";
 import type { Sql } from "../db";
 import type { EngineEnv } from "../env";
+import { challengeIdFor } from "@/core/challenges/identity";
 
 /**
  * Runs one verification attempt end to end and returns the result to persist.
@@ -152,11 +153,12 @@ export async function runAttempt(sql: Sql, env: EngineEnv, attemptId: string): P
     async team() {
       if (!row.team_id) return null;
       try {
-        const [t] = await sql<{ name: string }[]>`select name from public.teams where id = ${row.team_id}`;
+        const [t] = await sql<{ name: string; wallet: string | null }[]>`
+          select t.name, p.solana_wallet as wallet from public.teams t left join public.projects p on p.team_id = t.id where t.id = ${row.team_id}`;
         if (!t) return null;
         const submissions = await sql<{ track: string; status: string; title: string; fields: Record<string, unknown> }[]>`
           select track::text, status::text, title, fields from public.submissions where team_id = ${row.team_id}`;
-        return { name: t.name, submissions: [...submissions] };
+        return { id: row.team_id, name: t.name, challengeId: challengeIdFor(row.team_id), wallet: t.wallet, submissions: [...submissions] };
       } catch (err) {
         throw new InfrastructureError(`could not read team records: ${(err as Error).message}`);
       }

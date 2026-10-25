@@ -1,5 +1,6 @@
 import type { VerifierPlugin } from "./plugin";
 import { respondPlugin, structuredPlugin } from "./plugins/ai";
+import { bureauPlugin } from "./plugins/bureau";
 import { httpPlugin } from "./plugins/http";
 import { humanPlugin } from "./plugins/human";
 import { memoryPlugin } from "./plugins/memory";
@@ -26,6 +27,7 @@ export const VERIFIERS: VerifierPlugin<never>[] = [
   appLivePlugin,
   ideaPlugin,
   submittedPlugin,
+  bureauPlugin,
 ] as unknown as VerifierPlugin<never>[];
 
 export function getVerifier(id: string): VerifierPlugin<unknown> | undefined {

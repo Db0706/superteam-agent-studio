@@ -79,7 +79,12 @@ export interface VerifierContext {
 }
 
 export interface TeamRecord {
+  id: string;
   name: string;
+  /** For on-chain challenges: "T-" + 8 hex characters, derived from the team id. */
+  challengeId: string;
+  /** The team's registered Solana devnet wallet, if any. */
+  wallet: string | null;
   submissions: { track: string; status: string; title: string; fields: Record<string, unknown> }[];
 }
 

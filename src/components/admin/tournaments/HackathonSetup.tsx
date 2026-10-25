@@ -58,11 +58,13 @@ export function HackathonSetup({ defaultName }: { defaultName: string }) {
             <input type="checkbox" name="bonusChallenges" checked={challenges} onChange={(e) => setChallenges(e.target.checked)} className="mt-1" />
             <span className="flex flex-col gap-2">
               <span>
-                <b>Bonus challenges</b>: four optional challenges for extra points: Quick Draw (100), Look It Up (150), Remember Me (175), Shop Run (225). All open together at the start.
+                <b>Bonus challenges</b>: two optional on-chain puzzles on Solana devnet, three tiers each. <b>Operation</b> (30 + 50 + 70 = 150) and <b>Minesweeper</b> (90 + 80 + 30 = 200). Teams solve them with their own registered wallet; the platform reads the chain. No app needed.
               </span>
               {challenges && (
                 <span className="flex flex-wrap items-center gap-2 text-[13px]">
-                  Open for the first
+                  Open from
+                  <input name="challengeStartMinutes" type="number" min={0} max={hours * 60} step={5} defaultValue={20} className={`${field} !h-8 w-20`} />
+                  minutes after the start, for
                   <input name="challengeHours" type="number" min={0.25} max={hours} step={0.25} value={challengeHours} onChange={(e) => setChallengeHours(Number(e.target.value))} className={`${field} !h-8 w-20`} />
                   hours
                 </span>
@@ -76,6 +78,35 @@ export function HackathonSetup({ defaultName }: { defaultName: string }) {
             Your devnet receiving address (for the on-chain payment build stage)
             <input name="payTo" required placeholder="A Solana devnet wallet address you control" className={`${field} font-mono text-[13px]`} />
           </label>
+        )}
+
+        {challenges && (
+          <fieldset className="m-0 flex flex-col gap-2 rounded-[3px] border border-hairline p-3">
+            <legend className="px-1 text-[13px] font-semibold">Challenge constants (from the challenge setup, copy exactly)</legend>
+            <div className="grid gap-2 min-[700px]:grid-cols-2">
+              <label className={labelCls}>
+                Program ID
+                <input name="programId" required className={`${field} font-mono text-[13px]`} autoComplete="off" />
+              </label>
+              <label className={labelCls}>
+                CRED mint
+                <input name="credMint" required className={`${field} font-mono text-[13px]`} autoComplete="off" />
+              </label>
+              <label className={labelCls}>
+                Presentation account
+                <input name="presentationAccount" required className={`${field} font-mono text-[13px]`} autoComplete="off" />
+              </label>
+              <label className={labelCls}>
+                Salt
+                <input name="salt" required className={`${field} font-mono text-[13px]`} autoComplete="off" />
+              </label>
+            </div>
+            <label className={labelCls}>
+              Devnet RPC address (optional; leave blank for public devnet)
+              <input name="challengeRpc" placeholder="https://api.devnet.solana.com" className={`${field} font-mono text-[13px]`} autoComplete="off" />
+            </label>
+            <span className="text-[12.5px] text-muted">Teams see these on each challenge. They register their wallet and see their Challenge ID on their team page.</span>
+          </fieldset>
         )}
 
         {error && (
@@ -106,7 +137,7 @@ export function HackathonSetup({ defaultName }: { defaultName: string }) {
         <p className="m-0 text-[12.5px] leading-[1.5] text-muted">
           {sure
             ? "This publishes the race (teams can join straight away) and starts it at the time above. After that you can pause, extend or cancel it from its control room, but not change the setup."
-            : "The practice run uses exactly this setup, 30× faster, with three pretend teams. Students never see it. Create and schedule makes the real race."}
+            : `The practice run uses exactly this setup, 30× faster, with three pretend teams. Students never see it. ${challenges ? "Pretend teams have no wallet, so the on-chain challenges show as not passed in practice: that's expected. " : ""}Create and schedule makes the real race.`}
         </p>
       </form>
     </Module>

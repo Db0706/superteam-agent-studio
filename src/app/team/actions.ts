@@ -53,6 +53,14 @@ export async function saveProject(teamId: string, _: unknown, form: FormData): P
   return r;
 }
 
+export async function saveWallet(teamId: string, _: unknown, form: FormData): Promise<ActionResult<null>> {
+  const wallet = String(form.get("wallet") ?? "").trim();
+  if (wallet && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) return { ok: false, error: "That isn't a Solana address. Paste your wallet's public address (32 to 44 letters and numbers)." };
+  const r = await callRpc<null>("set_project_wallet", { p_team: teamId, p_wallet: wallet });
+  if (r.ok) refresh();
+  return r;
+}
+
 export async function revealToken(teamId: string): Promise<ActionResult<string>> {
   return callRpc<string>("project_verifier_token", { p_team: teamId });
 }
