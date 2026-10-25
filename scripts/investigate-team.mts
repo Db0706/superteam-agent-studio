@@ -7,6 +7,7 @@
  *
  * Runs in a READ ONLY transaction: it cannot change anything.
  */
+import { challengeIdFor } from "../src/core/challenges/identity";
 import { createSql } from "../src/server/db";
 
 const name = process.argv[2];
@@ -42,7 +43,7 @@ try {
 
       const [p] = await q`select name, repo_url, demo_url, endpoint_url, solana_wallet, created_at, updated_at from public.projects where team_id = ${team.id}`;
       console.log(`\nPROJECT · ${p?.name || "(no name)"} · created ${t(p?.created_at)} · last change ${t(p?.updated_at)}`);
-      console.log(`  app URL ${p?.endpoint_url ?? "-"}\n  repo    ${p?.repo_url ?? "-"}\n  demo    ${p?.demo_url ?? "-"}`);
+      console.log(`  app URL ${p?.endpoint_url ?? "-"}\n  repo    ${p?.repo_url ?? "-"}\n  demo    ${p?.demo_url ?? "-"}\n  wallet  ${p?.solana_wallet ?? "- (none saved)"}\n  challenge ID ${challengeIdFor(team.id)}`);
       if (p?.repo_url) {
         const same = await q`select t.name from public.projects pr join public.teams t on t.id = pr.team_id where pr.event_id = ${ev.id} and pr.team_id <> ${team.id} and lower(pr.repo_url) = lower(${p.repo_url})`;
         if (same.length) flags.push(`${team.name}: same repo as ${same.map((s) => s.name).join(", ")}.`);

@@ -71,6 +71,33 @@ export async function autoAssign(t: "build" | "policy", perSubmission: number, f
   return { ok: true, data: plan.length };
 }
 
+/** Open judging: every judge gets every submission in both tracks. Safe to press again for new submissions. */
+export async function assignEveryone(): Promise<ActionResult<number>> {
+  const id = await eventId();
+  const s = await createSupabaseServer();
+  const [{ data: subs }, { data: judges }, { data: existing }] = await Promise.all([
+    s.from("submissions").select("id").eq("event_id", id),
+    s.from("event_roles").select("user_id").eq("event_id", id).eq("role", "judge"),
+    s.from("judge_assignments").select("submission_id, judge_id").eq("event_id", id),
+  ]);
+  if (!judges?.length) return { ok: false, error: "Add judges on the People page first." };
+  const have = new Set((existing ?? []).map((e) => `${e.judge_id}:${e.submission_id}`));
+  let added = 0;
+  for (const sub of subs ?? []) {
+    for (const j of judges) {
+      if (have.has(`${j.user_id}:${sub.id}`)) continue;
+      const r = await callRpc("assign_judge", { p_event: id, p_judge: j.user_id, p_submission: sub.id });
+      if (!r.ok) {
+        refresh();
+        return { ok: false, error: `Stopped after ${added}: ${r.error}` };
+      }
+      added++;
+    }
+  }
+  refresh();
+  return { ok: true, data: added };
+}
+
 export async function unassign(assignmentId: string): Promise<ActionResult<null>> {
   const r = await callRpc<null>("unassign_judge", { p_assignment: assignmentId });
   if (r.ok) refresh();
