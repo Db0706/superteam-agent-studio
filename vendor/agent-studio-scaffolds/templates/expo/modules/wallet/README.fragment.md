@@ -1,5 +1,7 @@
 ## Wallet Connection
 
+> **Android only.** Mobile Wallet Adapter connects to a wallet app on an Android phone, so this screen doesn't work in the browser version (`npm run web`); the rest of the app does.
+
 **What you get:** a **Pay with your wallet** screen (`app/wallet.tsx`). People connect a Solana wallet app that is on the same phone (Phantom, Solflare, Backpack, …) and pay the companion's `GET /premium-data` from it. The wallet shows every payment, and they approve or reject it there. The app never sees a key.
 
 **How it works:** [Solana Mobile Wallet Adapter](https://docs.solanamobile.com) (`@solana-mobile/mobile-wallet-adapter-protocol-kit`, maintained by Solana Mobile) opens the wallet app. `lib/wallet/mobileWallet.ts` turns the connected wallet into a `@solana/kit` signer, and `lib/wallet/pay.ts` gives that signer to the same x402 client the web template uses. The x402 facilitator pays the network fee, so the wallet only needs devnet USDC, not SOL. React Native has no WebCrypto, which `@solana/kit` uses for SHA-256, so `lib/wallet/crypto-polyfill.ts` provides it from Expo's own `expo-crypto`.
