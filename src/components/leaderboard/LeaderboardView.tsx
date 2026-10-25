@@ -52,7 +52,7 @@ export function LeaderboardView({ initial, eventId }: { initial: Leaderboard; ev
           <ol className="m-0 flex list-none flex-col p-0">
             {board.teams.map((t) => (
               <li key={t.teamId} className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 border-b border-hairline px-4 py-3 last:border-b-0">
-                <span className="wide text-[22px] leading-none">{t.rank}</span>
+                <span className="wide text-[22px] leading-none">{t.rankLabel}</span>
                 <span className="flex min-w-0 flex-col gap-1">
                   <span className="flex flex-wrap items-center gap-2">
                     <b className="truncate text-[15px]">{t.name}</b>
