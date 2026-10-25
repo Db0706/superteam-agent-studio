@@ -66,7 +66,7 @@ function localAddressHint(endpoint: string | null | undefined): string | null {
   }
   const local = host === "localhost" || host.endsWith(".localhost") || host === "::1" || host === "0.0.0.0" || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host) || host.endsWith(".local");
   return local
-    ? "That address only works on your laptop, so the race can't reach it. Use a public https address: deploy your app (for example to Vercel), or run a tunnel such as `npx cloudflared tunnel --url http://localhost:3000` and paste the https address it prints."
+    ? "That address only works on your laptop, so the race can't reach it. Use a public https address: deploy your app (for example to Vercel), or run a tunnel such as `npx cloudflared tunnel --url http://localhost:3000` (use the port your app printed) and paste the https address it prints."
     : null;
 }
 
