@@ -61,4 +61,14 @@ describe("event join code", () => {
     const fay = await signedInUser(h, "fay");
     expect(await rpcError(fay.client, "join_with_code", { p_event: eventId, p_code: "OXBRIDGE26", p_university: "other" })).toMatch(/isn't right/);
   });
+
+  it("teams have at most 4 people", async () => {
+    await rpc(organiser, "set_join_code", { p_event: eventId, p_code: "FULLTEAM" });
+    const people = await Promise.all(["m1", "m2", "m3", "m4", "m5"].map((n) => signedInUser(h, n)));
+    for (const p of people) await rpc(p.client, "join_with_code", { p_event: eventId, p_code: "FULLTEAM", p_university: "cambridge" });
+    const team = await rpc<string>(people[0].client, "create_team", { p_event: eventId, p_name: "Four Max", p_track: "build" });
+    const code = await rpc<string>(people[0].client, "create_team_invite", { p_team: team });
+    for (const p of people.slice(1, 4)) await rpc(p.client, "join_team", { p_code: code });
+    expect(await rpcError(people[4].client, "join_team", { p_code: code })).toMatch(/at most 4/);
+  });
 });

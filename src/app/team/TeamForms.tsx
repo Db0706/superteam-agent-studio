@@ -310,7 +310,7 @@ export function InvitePanel({ teamId }: { teamId: string }) {
   return (
     <Module label="INVITE TEAMMATES" right="CAPTAIN">
       <div className="flex flex-col gap-3 p-4 text-[13px] leading-[1.45] text-ink-2">
-        <p className="m-0">Create a code and share it with up to six teammates. It works for seven days. Teammates must be on the approved participant list.</p>
+        <p className="m-0">Teams have at most 4 people. Create a code and share it with up to three teammates. It works for seven days. Teammates must be on the approved participant list.</p>
         {code && <code className="block rounded-[3px] bg-strip px-3 py-2 font-mono text-[15px] text-ink">{code}</code>}
         <button
           type="button"
