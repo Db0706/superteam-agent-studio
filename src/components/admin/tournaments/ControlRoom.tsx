@@ -123,6 +123,15 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
         : [{ label: "LAYERS", layers: s.layers }]
       ).map((g) => (
         <Module key={g.label} label={g.label} right={pointsRace ? `${g.layers.reduce((a, l) => a + l.points, 0).toLocaleString("en-GB")} PTS` : undefined}>
+          {pointsRace && !ended && (
+            <ExtendAll
+              inline
+              what={g.label.startsWith("BUILD") ? "the build steps" : "the challenges"}
+              layers={g.layers.filter((l) => ["scheduled", "open", "closing"].includes(l.state))}
+              timezone={timezone}
+              after={reload}
+            />
+          )}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead>
@@ -256,25 +265,24 @@ function Confirm({ label, tone, onConfirm, after, help, needsReason = true }: { 
 }
 
 /** Points races: every step runs side by side, so extending means moving every open step's end time together. */
-function ExtendAll({ layers, timezone, after }: { layers: ControlState["layers"]; timezone: string; after: () => void }) {
+function ExtendAll({ layers, timezone, after, what = "every step", inline = false }: { layers: ControlState["layers"]; timezone: string; after: () => void; what?: string; inline?: boolean }) {
   const [minutes, setMinutes] = useState(30);
   const latest = layers.reduce<string | null>((m, l) => (!m || l.deadlineAt > m ? l.deadlineAt : m), null);
   if (!layers.length) return null;
-  return (
-    <Module label="RACE END TIME">
-      <div className="flex flex-wrap items-center gap-3 p-4 text-[13.5px]">
+  const bar = (
+      <div className={`flex flex-wrap items-center gap-3 text-[13.5px] ${inline ? "border-b border-hairline bg-strip px-4 py-2.5" : "p-4"}`}>
         <span>
-          Everything closes at <b>{latest ? formatZoned(latest, timezone).split(" ").pop() : "?"}</b>. Need longer?
+          {inline ? "These close" : "Everything closes"} at <b>{latest ? formatZoned(latest, timezone).split(" ").pop() : "?"}</b>. Need longer?
         </span>
         <input type="number" min={1} max={600} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} className={`${field} !h-9 w-20`} aria-label="Minutes to add" />
         <span>minutes</span>
         <Confirm
-          label={`Add ${minutes} min to every step`}
+          label={`Add ${minutes} min to ${what}`}
           tone="secondary"
           needsReason={false}
           onConfirm={async (r) => {
             for (const l of layers) {
-              const res = await extendLayer(l.id, minutes, false, r || "Extended the whole race");
+              const res = await extendLayer(l.id, minutes, false, r || `Extended ${what}`);
               if (!res.ok) return res;
             }
             return { ok: true, data: null };
@@ -282,8 +290,8 @@ function ExtendAll({ layers, timezone, after }: { layers: ControlState["layers"]
           after={after}
         />
       </div>
-    </Module>
   );
+  return inline ? bar : <Module label="RACE END TIME">{bar}</Module>;
 }
 
 function ExtendForm({ layerRunId, after }: { layerRunId: string; after: () => void }) {
