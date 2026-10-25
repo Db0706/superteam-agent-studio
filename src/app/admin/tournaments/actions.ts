@@ -147,6 +147,13 @@ export async function control(
   return r;
 }
 
+export async function reopenLayer(layerRunId: string, minutes: number, reason: string): Promise<ActionResult<null>> {
+  if (!Number.isFinite(minutes) || minutes < 1 || minutes > 600) return { ok: false, error: "Reopen for 1 to 600 minutes." };
+  const r = await callRpc<null>("reopen_layer", { p_layer_run: layerRunId, p_seconds: Math.round(minutes * 60), p_reason: reasonOf(reason) });
+  if (r.ok) refresh();
+  return r;
+}
+
 export async function extendLayer(layerRunId: string, minutes: number, shiftFollowing: boolean, reason: string): Promise<ActionResult<null>> {
   if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 600) return { ok: false, error: "Extend by 1 to 600 minutes." };
   const r = await callRpc<null>("extend_layer", { p_layer_run: layerRunId, p_seconds: Math.round(minutes * 60), p_shift_following: shiftFollowing, p_reason: reasonOf(reason) });

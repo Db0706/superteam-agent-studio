@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { COLORS, Led, Module } from "@/components/system";
 import { formatRemaining, useServerClock } from "@/components/race/useServerClock";
-import { attemptEvidence, control, extendLayer, overrideDecision, reinstate, reprocessAttempt, reviewAttempt } from "@/app/admin/tournaments/actions";
+import { attemptEvidence, control, extendLayer, overrideDecision, reopenLayer, reinstate, reprocessAttempt, reviewAttempt } from "@/app/admin/tournaments/actions";
 import { fetchControlState } from "@/app/admin/tournaments/[id]/control/actions";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { ControlState } from "@/server/dal/control";
@@ -128,6 +128,7 @@ export function ControlRoom({ initial, timezone }: { initial: ControlState; time
               inline
               what={g.label.startsWith("BUILD") ? "the build steps" : "the challenges"}
               layers={g.layers.filter((l) => ["scheduled", "open", "closing"].includes(l.state))}
+              closed={g.layers.filter((l) => l.state === "closed")}
               timezone={timezone}
               after={reload}
             />
@@ -265,9 +266,35 @@ function Confirm({ label, tone, onConfirm, after, help, needsReason = true }: { 
 }
 
 /** Points races: every step runs side by side, so extending means moving every open step's end time together. */
-function ExtendAll({ layers, timezone, after, what = "every step", inline = false }: { layers: ControlState["layers"]; timezone: string; after: () => void; what?: string; inline?: boolean }) {
+function ExtendAll({ layers, closed = [], timezone, after, what = "every step", inline = false }: { layers: ControlState["layers"]; closed?: ControlState["layers"]; timezone: string; after: () => void; what?: string; inline?: boolean }) {
   const [minutes, setMinutes] = useState(30);
   const latest = layers.reduce<string | null>((m, l) => (!m || l.deadlineAt > m ? l.deadlineAt : m), null);
+  // Everything in this section has closed: offer to reopen it instead.
+  if (!layers.length && closed.length) {
+    const closedAt = closed.reduce<string | null>((m, l) => (!m || l.deadlineAt > m ? l.deadlineAt : m), null);
+    return (
+      <div className="flex flex-wrap items-center gap-3 border-b border-hairline bg-strip px-4 py-2.5 text-[13.5px]">
+        <span>
+          These closed at <b>{closedAt ? formatZoned(closedAt, timezone).split(" ").pop() : "?"}</b>. Reopen them for
+        </span>
+        <input type="number" min={1} max={600} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} className={`${field} !h-9 w-20`} aria-label="Minutes to reopen for" />
+        <span>minutes from now</span>
+        <Confirm
+          label={`Reopen ${what} for ${minutes} min`}
+          tone="secondary"
+          needsReason={false}
+          onConfirm={async (r) => {
+            for (const l of closed) {
+              const res = await reopenLayer(l.id, minutes, r || `Reopened ${what}`);
+              if (!res.ok) return res;
+            }
+            return { ok: true, data: null };
+          }}
+          after={after}
+        />
+      </div>
+    );
+  }
   if (!layers.length) return null;
   const bar = (
       <div className={`flex flex-wrap items-center gap-3 text-[13.5px] ${inline ? "border-b border-hairline bg-strip px-4 py-2.5" : "p-4"}`}>
