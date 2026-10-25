@@ -15,7 +15,7 @@ describe("hackathon template", () => {
     expect(valid(cfg)).toBe(true);
     const build = cfg.layers.filter((l) => l.category === "build_stage");
     expect(build.map((l) => [l.title, l.points])).toEqual([
-      ["Idea locked in", 50], ["App live", 150], ["AI feature working", 200], ["Agent uses tools", 300], ["Agentic end-to-end payment", 400], ["Submitted", 200],
+      ["Idea locked in", 50], ["App live", 150], ["AI Integration", 200], ["Agent uses tools", 300], ["Agentic end-to-end payment", 400], ["Submitted", 200],
     ]);
     const ch = cfg.layers.filter((l) => l.category === "challenge");
     expect(ch.map((l) => [l.title, l.points, l.prerequisites])).toEqual([

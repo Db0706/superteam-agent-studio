@@ -53,7 +53,7 @@ export function HackathonSetup({ defaultName }: { defaultName: string }) {
           <label className="flex items-start gap-2.5 rounded-[3px] border border-hairline p-3 text-[14px]">
             <input type="checkbox" name="buildStages" checked={stages} onChange={(e) => setStages(e.target.checked)} className="mt-1" />
             <span>
-              <b>Build points</b>: six milestones of the team&apos;s own app. Idea locked in 50, App live 150, AI feature working 200, Agent uses tools 300, Agentic end-to-end payment 400, Submitted 200. Open all {hours} hours, in any order. Up to 1,300 points.
+              <b>Build points</b>: six milestones of the team&apos;s own app. Idea locked in 50, App live 150, AI Integration 200, Agent uses tools 300, Agentic end-to-end payment 400, Submitted 200. Open all {hours} hours, in any order. Up to 1,300 points.
             </span>
           </label>
           <label className="flex items-start gap-2.5 rounded-[3px] border border-hairline p-3 text-[14px]">
