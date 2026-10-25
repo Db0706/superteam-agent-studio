@@ -178,7 +178,7 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
               <ol className="m-0 flex list-none flex-col gap-[0.8vh] overflow-hidden p-0">
                 {state.leaderboard.teams.slice(0, 8).map((t) => (
                   <li key={t.teamId} className="grid grid-cols-[3vw_minmax(0,1fr)_auto] items-baseline gap-[1vw] text-[clamp(14px,1.4vw,26px)] font-semibold">
-                    <span className="wide" style={{ color: DIM }}>{t.rank}</span>
+                    <span className="wide" style={{ color: DIM }}>{t.rankLabel}</span>
                     <span className="truncate">
                       {t.name}{" "}
                       <span className="font-mono text-[clamp(10px,0.8vw,14px)] font-normal" style={{ color: DIM }}>

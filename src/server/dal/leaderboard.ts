@@ -15,6 +15,8 @@ export interface LeaderboardTeam {
   challengesTotal: number;
   lastScoredAt: string | null;
   rank: number;
+  /** What to show: "–" before a team has any points, "=4" for a shared place, otherwise "4". */
+  rankLabel: string;
   finalistRank: number | null;
 }
 
@@ -52,9 +54,13 @@ export async function loadLeaderboard(eventId: string): Promise<Leaderboard> {
     }))
     .sort((a, b) => b.points - a.points || (a.lastScoredAt ?? "9").localeCompare(b.lastScoredAt ?? "9") || a.name.localeCompare(b.name));
   // Equal points and equal time share a rank.
-  const teams: LeaderboardTeam[] = sorted.map((t, i) => ({ ...t, rank: i + 1 }));
+  const teams: LeaderboardTeam[] = sorted.map((t, i) => ({ ...t, rank: i + 1, rankLabel: "" }));
   for (let i = 1; i < teams.length; i++) {
     if (teams[i].points === teams[i - 1].points && teams[i].lastScoredAt === teams[i - 1].lastScoredAt) teams[i].rank = teams[i - 1].rank;
+  }
+  for (const t of teams) {
+    const shared = teams.filter((x) => x.rank === t.rank).length > 1;
+    t.rankLabel = t.points <= 0 ? "–" : shared ? `=${t.rank}` : String(t.rank);
   }
   const side = (u: "cambridge" | "oxford") => {
     const list = teams.filter((t) => t.university === u);
