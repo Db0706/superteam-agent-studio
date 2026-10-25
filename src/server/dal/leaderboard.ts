@@ -24,7 +24,7 @@ export interface Leaderboard {
   serverNow: string;
   teams: LeaderboardTeam[];
   /** Average points per team, by university. Mixed and other teams are listed but not in either side. */
-  sides: Record<"cambridge" | "oxford", { teams: number; average: number; total: number }>;
+  sides: Record<"cambridge" | "oxford", { teams: number; counted: number; average: number; total: number }>;
   finalistsConfirmed: boolean;
 }
 
@@ -63,9 +63,11 @@ export async function loadLeaderboard(eventId: string): Promise<Leaderboard> {
     t.rankLabel = t.points <= 0 ? "–" : shared ? `=${t.rank}` : String(t.rank);
   }
   const side = (u: "cambridge" | "oxford") => {
+    // The side's score: average of its top 10 teams that have scored (teams on 0 points don't count).
     const list = teams.filter((t) => t.university === u);
+    const top = list.filter((t) => t.points > 0).sort((a, b) => b.points - a.points).slice(0, 10);
     const total = list.reduce((a, t) => a + t.points, 0);
-    return { teams: list.length, total, average: list.length ? Math.round(total / list.length) : 0 };
+    return { teams: list.length, counted: top.length, total, average: top.length ? Math.round(top.reduce((a, t) => a + t.points, 0) / top.length) : 0 };
   };
   return {
     serverNow: typeof now === "string" ? now : new Date().toISOString(),
