@@ -429,8 +429,14 @@ export interface HackathonOptions {
   sprintSeconds?: number;
   /** The six build stages of the team's own product, open all sprint. */
   buildStages?: boolean;
-  /** The on-chain bonus challenges (Operation and Minesweeper, three tiers each). */
+  /** Optional challenges on top of the build stages. */
   bonusChallenges?: boolean;
+  /**
+   * Which challenges: "ai" = the six AI capability challenges (Structured Outputs … Final Mission),
+   * checked against the team's app and unlocking one at a time, in order; "onchain" = the Solana
+   * puzzles (Operation and Minesweeper, three tiers each).
+   */
+  challengeSet?: "ai" | "onchain";
   /** Published constants for the on-chain challenges (required when they're on). */
   onchain?: OnchainConstants;
   /** When the bonus challenges open, in seconds after the start. */
@@ -439,6 +445,20 @@ export interface HackathonOptions {
   challengeWindowSeconds?: number;
   /** The organiser's devnet address for the on-chain payment build stage. */
   payTo?: string;
+}
+
+/** Points for the hackathon format, as published to students ("How the points work": 1,300 build + 700 challenges). */
+export const HACKATHON_BUILD_POINTS: Record<string, number> = { "idea-locked": 50, "app-live": 150, "ai-feature": 200, "agent-tools": 300, "onchain-payment": 400, submitted: 200 };
+const HACKATHON_BUILD_ORDER = ["idea-locked", "app-live", "ai-feature", "agent-tools", "onchain-payment", "submitted"];
+export const HACKATHON_AI_CHALLENGE_POINTS: Record<string, number> = { "structured-outputs": 50, "external-knowledge": 100, "memory-context": 100, reliability: 100, "autonomous-workflow": 150, "final-mission": 200 };
+
+/** The six AI capability challenges, unlocking one at a time in order (each needs the one before). */
+export function aiChallenges(): LayerTemplate[] {
+  const keys = Object.keys(HACKATHON_AI_CHALLENGE_POINTS);
+  return keys.map((key, i) => {
+    const l = LAYER_TEMPLATES.find((x) => x.key === key)!;
+    return { ...l, category: "challenge" as const, outcome: "checkpoint" as const, points: HACKATHON_AI_CHALLENGE_POINTS[key], prerequisites: i ? [keys[i - 1]] : [] };
+  });
 }
 
 /**
@@ -452,17 +472,21 @@ export function hackathonTemplate(opts: HackathonOptions = {}): TournamentConfig
   const withChallenges = opts.bonusChallenges ?? true;
   const offset = Math.max(0, Math.min(opts.challengeOffsetSeconds ?? 0, sprint - 60));
   const window = Math.max(60, Math.min(opts.challengeWindowSeconds ?? 2 * 3600, sprint - offset));
-  const challenges = withChallenges
-    ? onchainChallenges(opts.onchain ?? { programId: "", credMint: "", presentationAccount: "", salt: "" }).map((l) => ({ ...l, timing: { offsetSeconds: offset, durationSeconds: window } }))
-    : [];
+  const set = opts.challengeSet ?? "onchain";
+  const challenges = !withChallenges
+    ? []
+    : set === "ai"
+      ? aiChallenges().map((l) => ({ ...l, timing: { offsetSeconds: offset, durationSeconds: window } }))
+      : onchainChallenges(opts.onchain ?? { programId: "", credMint: "", presentationAccount: "", salt: "" }).map((l) => ({ ...l, timing: { offsetSeconds: offset, durationSeconds: window } }));
   const stages = withStages
-    ? BUILD_STAGES.map((l) => {
-        const layer = { ...l, timing: { offsetSeconds: 0, durationSeconds: sprint } };
+    ? HACKATHON_BUILD_ORDER.map((key) => BUILD_STAGES.find((l) => l.key === key)!).map((l) => {
+        const layer = { ...l, points: HACKATHON_BUILD_POINTS[l.key] ?? l.points, timing: { offsetSeconds: 0, durationSeconds: sprint } };
+        if (l.key === "onchain-payment") Object.assign(layer, { title: "Agentic end-to-end payment", description: "Your agent pays for something on its own, on Solana devnet." });
         if (l.key === "onchain-payment" && opts.payTo) layer.verifier = { ...l.verifier, config: { ...l.verifier.config, payTo: opts.payTo } };
         return layer;
       })
     : [];
-  const parts = [withStages && "points for the build stages of your own product (open all day, any order)", withChallenges && `bonus points from two optional on-chain challenges (Operation and Minesweeper, three tiers each)`].filter(Boolean);
+  const parts = [withStages && "points for the build stages of your own product (open all day, any order)", withChallenges && (set === "ai" ? "points from six optional AI challenges that unlock one at a time, in order" : "bonus points from two optional on-chain challenges (Operation and Minesweeper, three tiers each)")].filter(Boolean);
   return {
     schema: TOURNAMENT_SCHEMA,
     name: opts.name ?? "The AI Race",

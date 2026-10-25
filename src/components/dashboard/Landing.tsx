@@ -62,12 +62,12 @@ function Hero() {
 }
 
 /** The hackathon race as the simple setup creates it (default points; organisers can change them). */
-const POINTS_RACE = hackathonTemplate({ onchain: { programId: "-", credMint: "-", presentationAccount: "-", salt: "-" }, payTo: "-" });
+const POINTS_RACE = hackathonTemplate({ challengeSet: "ai", payTo: "-" });
 
 function RaceLadder() {
   const groups = [
     { label: "BUILD POINTS · YOUR OWN APP · OPEN ALL SPRINT, ANY ORDER", layers: POINTS_RACE.layers.filter((l) => l.category === "build_stage") },
-    { label: "BONUS CHALLENGES · OPTIONAL SOLANA PUZZLES · 2-HOUR WINDOW", layers: POINTS_RACE.layers.filter((l) => l.category !== "build_stage") },
+    { label: "CHALLENGES · OPTIONAL · UNLOCK ONE AT A TIME, IN ORDER", layers: POINTS_RACE.layers.filter((l) => l.category !== "build_stage") },
   ];
   return (
     <Module label="THE AI RACE · POINTS FORMAT" right={<ConfirmationTag status="SAMPLE" />}>

@@ -207,8 +207,10 @@ async function hackathonFromForm(form: FormData): Promise<{ ok: true; config: To
   if (!f.success) return { ok: false, error: f.error.issues[0].message };
   const buildStages = f.data.buildStages === "on";
   const bonusChallenges = f.data.bonusChallenges === "on";
-  if (!buildStages && !bonusChallenges) return { ok: false, error: "Switch on build points, bonus challenges, or both." };
-  if (bonusChallenges) {
+  const challengeSet = form.get("challengeSet") === "onchain" ? "onchain" : "ai";
+  const onchain = bonusChallenges && challengeSet === "onchain";
+  if (!buildStages && !bonusChallenges) return { ok: false, error: "Switch on build points, challenges, or both." };
+  if (onchain) {
     const missing = [["programId", "program ID"], ["credMint", "CRED mint"], ["presentationAccount", "presentation account"], ["salt", "salt"]].filter(([k]) => !f.data[k as "salt"]).map(([, l]) => l);
     if (missing.length) return { ok: false, error: `Fill in the challenge constants from the challenge setup: ${missing.join(", ")}.` };
     for (const [k, l] of [["programId", "program ID"], ["credMint", "CRED mint"], ["presentationAccount", "presentation account"]] as const) {
@@ -221,10 +223,12 @@ async function hackathonFromForm(form: FormData): Promise<{ ok: true; config: To
     sprintSeconds: Math.round(f.data.hours * 3600),
     buildStages,
     bonusChallenges,
-    challengeWindowSeconds: Math.round((f.data.challengeHours ?? 2) * 3600),
-    challengeOffsetSeconds: Math.round((f.data.challengeStartMinutes ?? 0) * 60),
+    challengeSet,
+    // AI challenges are open the whole race and unlock in order; the Solana puzzles have their own window.
+    challengeWindowSeconds: onchain ? Math.round((f.data.challengeHours ?? 2) * 3600) : Math.round(f.data.hours * 3600),
+    challengeOffsetSeconds: onchain ? Math.round((f.data.challengeStartMinutes ?? 0) * 60) : 0,
     payTo: f.data.payTo || undefined,
-    onchain: bonusChallenges
+    onchain: onchain
       ? { programId: f.data.programId!, credMint: f.data.credMint!, presentationAccount: f.data.presentationAccount!, salt: f.data.salt!, rpcUrl: f.data.challengeRpc || undefined }
       : undefined,
   });
