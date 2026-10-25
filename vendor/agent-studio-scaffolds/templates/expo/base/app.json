@@ -6,10 +6,20 @@
     "scheme": "superteamagentapp",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios",
+      "web"
+    ],
     "android": {
       "package": "com.superteam.agentapp"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
   }
 }

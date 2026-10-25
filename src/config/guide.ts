@@ -215,7 +215,7 @@ export const GUIDES: Record<FrameworkId, FrameworkGuide> = {
   },
   expo: {
     framework: "expo",
-    needs: "Node.js 20.19.4 or newer, and Expo Go on an Android phone or an Android emulator.",
+    needs: "Node.js 20.19.4 or newer and a web browser. No phone needed: the app runs in your browser (an Android phone with Expo Go also works).",
     where: "The app never holds a wallet key. Payments happen in a small companion server that comes in the ZIP, in companion-server/.",
     steps: [
       download,
@@ -248,12 +248,12 @@ export const GUIDES: Record<FrameworkId, FrameworkGuide> = {
         id: "run",
         title: "Start the companion and the app",
         minutes: "2 MIN",
-        body: "Check the wallets, go back to the app's folder and start the companion. Then start the app in a second terminal and scan the QR code with Expo Go, or press a for the emulator. Your phone must be on the same Wi-Fi as your laptop.",
+        body: "Check the wallets, go back to the app's folder and start the companion. Then start the app in a second terminal: it opens in your browser. Each terminal prints one line and then waits; that's normal, leave both running. (On an Android phone, run npm start instead and scan the QR code with Expo Go.)",
         commands: [
           { what: "Both lines should show ✓", cmd: "npm run wallets" },
           { what: "Back to the app's folder", cmd: "cd .." },
           { what: "Terminal 1: the companion server", cmd: "npm run companion" },
-          { what: "Terminal 2: the app", cmd: "npm start" },
+          { what: "Terminal 2: the app, in your browser", cmd: "npm run web" },
         ],
         check: "The app opens and its Companion server panel says ONLINE.",
       },
@@ -261,7 +261,7 @@ export const GUIDES: Record<FrameworkId, FrameworkGuide> = {
         id: "pay",
         title: "Make your first paid request",
         minutes: "1 MIN",
-        body: "In the app, tap Premium data. Call without paying shows the price the companion asks for; Let the agent pay spends $0.01 of test USDC.",
+        body: "In the app, click Premium data. Call without paying shows the price the companion asks for; Let the agent pay spends $0.01 of test USDC.",
         commands: [],
         check: "A transaction id. Tap it to see your payment on chain in the Solana Explorer.",
       },

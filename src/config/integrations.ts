@@ -88,8 +88,8 @@ export const FRAMEWORKS: Record<FrameworkId, FrameworkDef> = {
     abbr: "RN",
     name: "Mobile Application",
     tech: "React Native + Expo",
-    blurb: "For Android consumer applications.",
-    useCase: "Track 02 · consumer Android apps. Secrets stay in a companion server, never in the app.",
+    blurb: "For consumer apps. Runs in your browser, no phone needed, and on Android.",
+    useCase: "Track 02 · consumer apps. Runs in the browser (npm run web) or on Android. Secrets stay in a companion server, never in the app.",
     // The app holds no secrets; its only setting is the optional EXPO_PUBLIC_COMPANION_URL.
     envFile: ".env.local",
     manager: "npm",

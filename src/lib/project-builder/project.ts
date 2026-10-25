@@ -238,7 +238,7 @@ export function deriveProject({ id, framework, integrations }: { id: string; fra
                   { cmd: "npm run companion", note: "second terminal" },
                 ]
               : []),
-            { cmd: "npm start", note: "scan the QR code in Expo Go" },
+            { cmd: "npm run web", note: "opens in your browser (npm start for a phone)" },
           ]
         : [
             { cmd: `cd ${id}`, note: "" },

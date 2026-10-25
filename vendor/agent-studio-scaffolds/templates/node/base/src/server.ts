@@ -13,6 +13,22 @@ try {
 const app = express();
 app.use(express.json({ limit: "100kb" }));
 
+// Browsers block a web page from calling a server on another port or domain unless the server
+// allows it (CORS). Pages on this computer (localhost, e.g. an Expo app in the browser) are
+// allowed; add your deployed site with CORS_ALLOW_ORIGIN=https://your-site.example.
+const extraOrigins = (process.env.CORS_ALLOW_ORIGIN ?? "").split(",").map((o) => o.trim()).filter(Boolean);
+app.use((req, res, next) => {
+  const origin = req.get("origin");
+  if (origin && (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || extraOrigins.includes(origin))) {
+    res.set({ "Access-Control-Allow-Origin": origin, Vary: "Origin", "Access-Control-Allow-Headers": "Content-Type, Authorization, PAYMENT-SIGNATURE, X-PAYMENT", "Access-Control-Expose-Headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-PAYMENT-RESPONSE", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" });
+    if (req.method === "OPTIONS") {
+      res.sendStatus(204);
+      return;
+    }
+  }
+  next();
+});
+
 // Home: lists every feature included in this service. Browsers get a readable page
 // (src/landing.ts); code (curl, fetch, other agents) gets JSON.
 app.get("/", (req, res) => {

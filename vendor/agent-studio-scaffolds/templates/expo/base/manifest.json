@@ -2,7 +2,7 @@
   "id": "base",
   "kind": "base",
   "framework": "expo",
-  "name": "Expo mobile app (Android)",
+  "name": "Expo app (Android, or in a web browser)",
   "description": "Expo + expo-router + TypeScript app. Every module is layered on top of this. Modules that need secrets add a companion server (the node template) in companion-server/.",
   "requires": [],
   "files": [
@@ -20,8 +20,15 @@
     "README.md"
   ],
   "modulesFile": "lib/modules.ts",
-  "generatedFiles": ["lib/modules.ts", "package.json", ".env.example", "README.md", "studio.manifest.json"],
+  "generatedFiles": [
+    "lib/modules.ts",
+    "package.json",
+    ".env.example",
+    "README.md",
+    "studio.manifest.json"
+  ],
   "dependencies": {
+    "@expo/metro-runtime": "57.0.16",
     "expo": "57.0.25",
     "expo-constants": "57.0.19",
     "expo-linking": "57.0.11",
@@ -33,6 +40,7 @@
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "5.7.0",
     "react-native-screens": "4.26.2",
+    "react-native-web": "0.21.3",
     "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
@@ -41,8 +49,10 @@
   },
   "scripts": {
     "start": "expo start",
+    "web": "expo start --web",
     "android": "expo start --android",
     "build": "expo export --platform android",
+    "build:web": "expo export --platform web",
     "typecheck": "tsc --noEmit"
   },
   "env": [],
@@ -67,7 +77,7 @@
   },
   "prerequisites": [
     "Node.js 20.19.4 or newer (22 LTS recommended)",
-    "An Android phone with the Expo Go app, or an Android emulator from Android Studio"
+    "A web browser (nothing else needed), or an Android phone with Expo Go, or an Android emulator"
   ],
   "readme": "README.fragment.md"
 }
