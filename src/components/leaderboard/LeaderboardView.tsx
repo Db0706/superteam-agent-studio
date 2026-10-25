@@ -41,7 +41,7 @@ export function LeaderboardView({ initial, eventId }: { initial: Leaderboard; ev
               </span>
               <span className="wide text-[clamp(40px,6vw,72px)] leading-none tracking-[-0.03em]">{board.sides[u].average}</span>
               <span className="text-[12.5px] text-muted">
-                {board.sides[u].teams} team{board.sides[u].teams === 1 ? "" : "s"} · {board.sides[u].total} points in total
+                Average of the top {board.sides[u].counted || 0} scoring team{board.sides[u].counted === 1 ? "" : "s"} (max 10) · {board.sides[u].teams} team{board.sides[u].teams === 1 ? "" : "s"} in all
               </span>
             </div>
           ))}

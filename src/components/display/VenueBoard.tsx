@@ -141,7 +141,7 @@ export function VenueBoard({ initial, timezone }: { initial: SpectatorState; tim
           {state.leaderboard ? (
             <div className="grid grid-cols-2 gap-[1vw]">
               {(["cambridge", "oxford"] as const).map((u) => (
-                <Stat key={u} label={`${u.toUpperCase()} · AVG PER TEAM`} value={state.leaderboard!.sides[u].average} color={(state.leaderboard!.sides.cambridge.average === state.leaderboard!.sides.oxford.average) ? PAPER : (state.leaderboard!.sides[u].average > state.leaderboard!.sides[u === "cambridge" ? "oxford" : "cambridge"].average ? OK : PAPER)} />
+                <Stat key={u} label={`${u.toUpperCase()} · AVG OF TOP 10`} value={state.leaderboard!.sides[u].average} color={(state.leaderboard!.sides.cambridge.average === state.leaderboard!.sides.oxford.average) ? PAPER : (state.leaderboard!.sides[u].average > state.leaderboard!.sides[u === "cambridge" ? "oxford" : "cambridge"].average ? OK : PAPER)} />
               ))}
             </div>
           ) : (
