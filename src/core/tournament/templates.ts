@@ -471,7 +471,7 @@ export function hackathonTemplate(opts: HackathonOptions = {}): TournamentConfig
     participation: "team",
     timezone: "Europe/London",
     tieBreak: ["score_desc", "first_pass_at_asc", "attempts_asc"],
-    countsTowardsJudging: false,
+    countsTowardsJudging: true,
     layers: [...challenges, ...stages],
   };
 }

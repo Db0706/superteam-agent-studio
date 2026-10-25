@@ -88,7 +88,8 @@ export function RubricEditor({ track, label, name: initialName, criteria: initia
 
 export function AutoAssign({ track, judges }: { track: "build" | "policy"; judges: number }) {
   const [n, setN] = useState(Math.min(3, Math.max(1, judges)));
-  const [finalistsOnly, setFinalistsOnly] = useState(true);
+  // Build Track finalists come from the leaderboard; Policy Track teams have no app to score points, so judges see them all.
+  const [finalistsOnly, setFinalistsOnly] = useState(track === "build");
   const { pending, run, note } = useRun();
   return (
     <div className="flex flex-wrap items-center gap-2 text-[13px]">
