@@ -3,4 +3,4 @@
  * supabase/migrations (a unit test fails otherwise). Admin → Readiness compares it with the
  * database, so a deploy whose migration wasn't applied is flagged.
  */
-export const EXPECTED_SCHEMA_VERSION = "20261025000017";
+export const EXPECTED_SCHEMA_VERSION = "20261025000018";
