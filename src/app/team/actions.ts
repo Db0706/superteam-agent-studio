@@ -101,3 +101,15 @@ export async function testConnection(teamId: string, endpoint: string): Promise<
     },
   };
 }
+
+export async function joinWithCode(_: unknown, form: FormData): Promise<ActionResult<null>> {
+  const event = await getActiveEvent();
+  if (!event) return { ok: false, error: "No active event." };
+  const code = String(form.get("code") ?? "").trim();
+  if (code.length < 4) return { ok: false, error: "Type the event code shown on the screen in the room." };
+  const university = z.enum(["cambridge", "oxford", "other"]).safeParse(form.get("university"));
+  if (!university.success) return { ok: false, error: "Choose Cambridge, Oxford or Other." };
+  const r = await callRpc<null>("join_with_code", { p_event: event.id, p_code: code, p_university: university.data });
+  if (r.ok) refresh();
+  return r;
+}

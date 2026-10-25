@@ -5,7 +5,7 @@ import { Gate } from "@/components/platform/Gate";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import type { EventSummary, Viewer } from "@/server/dal/viewer";
 import { challengeIdFor } from "@/core/challenges/identity";
-import { ChallengePanel, InvitePanel, JoinOrCreate, LeaveTeam, ProjectForm, TokenPanel } from "./TeamForms";
+import { ChallengePanel, EventCodeForm, InvitePanel, JoinOrCreate, LeaveTeam, ProjectForm, TokenPanel } from "./TeamForms";
 
 export const metadata: Metadata = { title: "Your team" };
 
@@ -41,7 +41,10 @@ async function Workspace({ viewer, event }: { viewer: Viewer; event: EventSummar
           <p className="m-0">
             <b>{viewer.email}</b> isn&apos;t on the approved participant list for {event.name}.
           </p>
-          <p className="m-0 text-[13px] text-muted">Sign in with the email you registered with on Luma, or ask an organiser to add you.</p>
+          <p className="m-0 text-[13px] text-muted">If you&apos;re in the room, enter the event code below. Otherwise sign in with the email you registered with, or ask an organiser to add you.</p>
+          <div className="mt-2 border-t border-hairline pt-4">
+            <EventCodeForm />
+          </div>
         </div>
       </Module>
     );

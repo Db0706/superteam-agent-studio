@@ -43,3 +43,12 @@ export async function setCheckIn(registrationId: string, checkedIn: boolean): Pr
   if (r.ok) refresh();
   return r;
 }
+
+export async function setJoinCode(_: unknown, form: FormData): Promise<ActionResult<null>> {
+  const event = await getActiveEvent();
+  if (!event) return { ok: false, error: "No active event." };
+  const code = form.get("clear") === "1" ? "" : String(form.get("code") ?? "").trim();
+  const r = await callRpc<null>("set_join_code", { p_event: event.id, p_code: code });
+  if (r.ok) refresh();
+  return r;
+}
