@@ -5,7 +5,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import type { EventSummary } from "@/server/dal/viewer";
 import { rankSubmissions, type RubricCriterion } from "@/core/judging/results";
 import { TRACK_LABEL, type Track } from "@/core/submissions/fields";
-import { AssignmentActions, AssignOne, AutoAssign, RubricEditor, WinnerControl } from "./JudgingControls";
+import { AssignmentActions, AssignOne, AutoAssign, OpenJudging, RubricEditor, WinnerControl } from "./JudgingControls";
 
 export const metadata = { title: "Judging" };
 
@@ -45,8 +45,9 @@ async function Judging({ event }: { event: EventSummary }) {
   return (
     <div className="flex flex-col gap-5">
       <p className="m-0 max-w-[760px] text-[14px] leading-normal text-ink-2">
-        Judges score independently and never see each other&apos;s scores. Results below use only final scores. Add judges on the Participants page, confirm each track&apos;s criteria, then assign.
+        Judges score independently and never see each other&apos;s scores. Results below use only final scores. Add judges on the People page, confirm each track&apos;s criteria, then assign.
       </p>
+      <OpenJudging judges={judges.length} />
 
       {flags.length > 0 && (
         <Module label="NEEDS YOUR ATTENTION" right={`${flags.length}`}>

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { COLORS, Module } from "@/components/system";
 import { rubricIssues, type RubricCriterion } from "@/core/judging/results";
-import { assignJudge, autoAssign, publishWinner, resolveFlag, saveRubric, unassign, unpublishWinner } from "./actions";
+import { assignEveryone, assignJudge, autoAssign, publishWinner, resolveFlag, saveRubric, unassign, unpublishWinner } from "./actions";
 
 const input = "rounded-[3px] border border-[#CFCFC8] bg-white px-2 text-[13.5px] font-normal";
 
@@ -81,6 +81,21 @@ export function RubricEditor({ track, label, name: initialName, criteria: initia
           </button>
           {note}
         </div>
+      </div>
+    </Module>
+  );
+}
+
+export function OpenJudging({ judges }: { judges: number }) {
+  const { pending, run, note } = useRun();
+  return (
+    <Module label="OPEN JUDGING" right="EVERY JUDGE · EVERY TRACK">
+      <div className="flex flex-wrap items-center gap-3 p-4 text-[13.5px]">
+        <span>Give all {judges} judge{judges === 1 ? "" : "s"} every submission in both tracks. Press again later to add new submissions.</span>
+        <button type="button" disabled={pending || !judges} onClick={() => run(() => assignEveryone(), (d) => `Added ${d as number} assignment${d === 1 ? "" : "s"}.`)} className="btn-primary !h-10 !px-4 !text-[13px]">
+          Give every judge every submission
+        </button>
+        {note}
       </div>
     </Module>
   );
