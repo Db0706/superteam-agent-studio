@@ -63,6 +63,18 @@ export async function listRaceTournaments(eventId: string) {
   return (data ?? []) as { id: string; name: string; status: string; starts_at: string | null; simulation: boolean }[];
 }
 
+/** Whether the event's featured race includes the on-chain challenges (so teams need a wallet and Challenge ID). */
+export async function featuredRaceHasOnchain(eventId: string): Promise<boolean> {
+  const featured = pickFeatured(await listRaceTournaments(eventId));
+  if (!featured || featured.status === "cancelled") return false;
+  const supabase = await createSupabaseServer();
+  const { data: t } = await supabase.from("tournaments").select("current_version").eq("id", featured.id).maybeSingle();
+  if (t?.current_version == null) return false;
+  const { data: v } = await supabase.from("tournament_versions").select("config").eq("tournament_id", featured.id).eq("version", t.current_version).maybeSingle();
+  const layers = ((v?.config as { layers?: { verifier?: { plugin?: string } }[] } | null)?.layers ?? []);
+  return layers.some((l) => l.verifier?.plugin?.startsWith("bureau."));
+}
+
 /** The tournament the dashboard should feature: running, then upcoming, then most recent. */
 export function pickFeatured<T extends { status: string; simulation: boolean }>(list: T[]): T | null {
   const real = list.filter((t) => !t.simulation);
