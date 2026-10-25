@@ -35,9 +35,9 @@ export const FALLBACK_EVENT: PublicEvent = {
   name: "Oxford and Cambridge AI Race",
   shortName: "Oxbridge AI Race",
   timezone: "Europe/London",
-  startsAt: "2026-10-25T08:00:00Z",
-  endsAt: "2026-10-25T20:30:00Z",
-  source: { url: "https://luma.com/Oxbridge-AI-Race", readAt: "2026-10-20" },
+  startsAt: "2026-10-25T09:30:00Z",
+  endsAt: "2026-10-25T21:30:00Z",
+  source: { url: "https://luma.com/Oxbridge-AI-Race", readAt: "2026-10-25" },
   venue: { value: "King's College, Cambridge · Keynes Hall", address: "King's Parade, Cambridge CB2 1ST", status: "confirmed" },
   organisers: { value: ["Kings Politics Cambridge", "AI3", "Solana Superteam UK", "Oxbridge AIx"], status: "confirmed" },
   supporters: { value: ["Cambridge Entrepreneurs Society", "Oxford Entrepreneurs", "OxVC", "OXAI"], status: "confirmed" },
@@ -49,8 +49,8 @@ export const FALLBACK_EVENT: PublicEvent = {
     status: "confirmed",
     note: "Programme subject to change.",
     value: [
-      { start: "09:00", end: null, title: "Registration, breakfast and coffee" },
-      { start: "09:30", end: "11:30", title: "Welcome, keynote, panels and competition launch" },
+      { start: "09:30", end: null, title: "Registration, breakfast and coffee" },
+      { start: "10:00", end: "11:30", title: "Welcome, keynote, panels and competition launch" },
       { start: "11:30", end: "18:30", title: "Build sprint, mentoring and lunch" },
       { start: "18:30", end: "19:45", title: "Pitches, demos, judging and awards" },
       { start: "19:45", end: "21:30", title: "Dinner, drinks and networking" },
@@ -59,7 +59,7 @@ export const FALLBACK_EVENT: PublicEvent = {
   prizes: {
     status: "confirmed",
     note: "Prize details will be shared before the event.",
-    value: ["Cash prizes of up to £2,000 across winning teams", "Fast-track access to the Solana Scholars Programme", "Tickets to the Solana Breakpoint Conference"],
+    value: ["Cash prizes of up to £1000 across winning teams", "Fast-track access to the Solana Scholars Programme", "Tickets to the Solana Breakpoint Conference"],
   },
   teams: { value: "Apply with a team or individually. Team size not stated.", status: "tbc" },
   judging: { value: "Criteria and judges to be announced.", status: "tbc" },
@@ -72,10 +72,10 @@ export const FALLBACK_EVENT: PublicEvent = {
       description:
         "Build an AI application: accelerate scientific discovery, improve research workflows, address institutional challenges, or explore AI × Solana applications such as agent payments, identity, provenance and verification.",
       status: "confirmed",
-      opensAt: "2026-10-25T10:30:00Z",
-      closesAt: "2026-10-25T17:30:00Z",
+      opensAt: "2026-10-25T11:30:00Z",
+      closesAt: "2026-10-25T18:30:00Z",
     },
-    { track: "policy", name: "Policy Track", description: "Develop practical governance proposals alongside the technologies being built.", status: "confirmed", opensAt: "2026-10-25T10:30:00Z", closesAt: "2026-10-25T17:30:00Z" },
+    { track: "policy", name: "Policy Track", description: "Develop practical governance proposals alongside the technologies being built.", status: "confirmed", opensAt: "2026-10-25T11:30:00Z", closesAt: "2026-10-25T18:30:00Z" },
   ],
 };
 
