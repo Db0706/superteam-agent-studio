@@ -6,7 +6,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import type { EventSummary, Viewer } from "@/server/dal/viewer";
 import { challengeIdFor } from "@/core/challenges/identity";
 import { featuredRaceHasOnchain } from "@/server/dal/race";
-import { ChallengePanel, EventCodeForm, InvitePanel, JoinOrCreate, LeaveTeam, ProjectForm, TokenPanel } from "./TeamForms";
+import { ChallengePanel, ConnectSteps, EventCodeForm, InvitePanel, JoinOrCreate, LeaveTeam, ProjectForm, TokenPanel } from "./TeamForms";
 
 export const metadata: Metadata = { title: "Your team" };
 
@@ -79,6 +79,7 @@ async function Workspace({ viewer, event }: { viewer: Viewer; event: EventSummar
             })}
           </ul>
         </Module>
+        <ConnectSteps teamId={viewer.team.id} endpoint={project?.endpoint_url ?? null} />
         <ProjectForm teamId={viewer.team.id} project={project ?? { name: "", repo_url: null, demo_url: null, endpoint_url: null }} />
       </div>
       <aside className="flex flex-col gap-4">
