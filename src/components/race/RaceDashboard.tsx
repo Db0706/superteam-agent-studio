@@ -229,9 +229,9 @@ function YourStatus({ state, onJoined }: { state: RaceState; onJoined: () => voi
     // On-chain challenges don't need the app, so say so rather than blocking everything.
     const chainOnly = state.layers.some((l) => l.config.verifier.plugin.startsWith("bureau."));
     return (
-      <Notice tone="warn">
-        Add your app&apos;s public URL on the <Link href="/team">team page</Link> so the verifier can reach it.
-        {chainOnly && " The on-chain challenges don't need it: register your team wallet on the team page instead."}
+      <Notice tone="info">
+        <b>You&apos;re in the race.</b> You don&apos;t need a finished app: the starter from the Builder already passes <b>App live</b> once it&apos;s online. When you want an app step checked, add your app&apos;s public URL on the <Link href="/team">team page</Link>. <b>Idea locked in</b> and <b>Submitted</b> don&apos;t need the app at all.
+        {chainOnly && " Neither do the on-chain challenges: register your team wallet on the team page instead."}
       </Notice>
     );
   }
