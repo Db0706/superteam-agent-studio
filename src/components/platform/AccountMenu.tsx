@@ -28,7 +28,7 @@ export async function AccountMenu() {
         </Link>
       )}
       {hasRole(viewer, "organiser") && (
-        <Link href="/admin" className={link}>
+        <Link href="/admin/readiness" className={link}>
           ADMIN
         </Link>
       )}
