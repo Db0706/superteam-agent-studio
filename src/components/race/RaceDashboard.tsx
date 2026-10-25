@@ -226,9 +226,12 @@ function YourStatus({ state, onJoined }: { state: RaceState; onJoined: () => voi
     );
   }
   if (!me.hasEndpoint && state.tournament.participation === "team") {
+    // On-chain challenges don't need the app, so say so rather than blocking everything.
+    const chainOnly = state.layers.some((l) => l.config.verifier.plugin.startsWith("bureau."));
     return (
       <Notice tone="warn">
         Add your app&apos;s public URL on the <Link href="/team">team page</Link> so the verifier can reach it.
+        {chainOnly && " The on-chain challenges don't need it: register your team wallet on the team page instead."}
       </Notice>
     );
   }
@@ -262,7 +265,7 @@ function LayerPanel({ layer, state, now, timezone, onSubmitted }: { layer: Layer
               ? layer.state === "scheduled" || layer.state === "locked"
                 ? `This layer opens at ${formatTime(layer.opensAt, timezone)}.`
                 : "This layer is closed."
-              : !me.hasEndpoint && state.tournament.participation === "team"
+              : !me.hasEndpoint && state.tournament.participation === "team" && !layer.config.verifier.plugin.startsWith("bureau.")
                 ? "Add your app's URL on the team page."
                 : latest && (latest.status === "queued" || latest.status === "running")
                   ? "Verifying your last attempt…"

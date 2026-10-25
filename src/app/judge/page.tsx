@@ -45,7 +45,13 @@ async function Assignments({ viewer, event }: { viewer: Viewer; event: EventSumm
     s.from("submission_artifacts").select("submission_id, kind, label, url").in("submission_id", ids),
   ]);
   const teamIds = [...new Set((subs ?? []).map((x) => x.team_id))];
-  const { data: teams } = await s.from("teams").select("id, name").in("id", teamIds);
+  const [{ data: teams }, { data: evidence }, { data: board }] = await Promise.all([
+    s.from("teams").select("id, name").in("id", teamIds),
+    s.rpc("judge_team_evidence", { p_event: event.id }),
+    s.rpc("event_leaderboard", { p_event: event.id }),
+  ]);
+  const verified = (evidence ?? []) as { team_id: string; layer_title: string; category: string; passed_at: string }[];
+  const pointsFor = new Map(((board ?? []) as { team_id: string; points: number }[]).map((r) => [r.team_id, r.points]));
   const done = (assignments ?? []).filter((a) => a.status === "submitted").length;
 
   return (
@@ -87,6 +93,7 @@ async function Assignments({ viewer, event }: { viewer: Viewer; event: EventSumm
                 ))}
               </div>
               <div className="flex flex-col gap-3">
+                <Verified rows={verified.filter((v) => v.team_id === sub.team_id)} points={pointsFor.get(sub.team_id) ?? null} />
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="mono-label">{rubric?.name.toUpperCase() ?? "NO RUBRIC"}</span>
                   {rubric?.status !== "confirmed" && <span className="rounded-[2px] border border-warn-border bg-warn-tint px-1.5 py-[3px] font-mono text-[9.5px] text-warn-text">SAMPLE CRITERIA, NOT YET CONFIRMED</span>}
@@ -101,6 +108,29 @@ async function Assignments({ viewer, event }: { viewer: Viewer; event: EventSumm
           </Module>
         );
       })}
+    </div>
+  );
+}
+
+/** What the platform checked automatically for this team (shown when the race allows it). */
+function Verified({ rows, points }: { rows: { layer_title: string; category: string; passed_at: string }[]; points: number | null }) {
+  const stages = rows.filter((r) => r.category === "build_stage");
+  const challenges = rows.filter((r) => r.category !== "build_stage");
+  return (
+    <div className="flex flex-col gap-1.5 rounded-[3px] border border-hairline bg-strip p-3 text-[13px]">
+      <span className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="mono-label">VERIFIED BY THE PLATFORM</span>
+        {points !== null && <span className="font-mono text-[11px] text-muted">{points} LEADERBOARD POINTS</span>}
+      </span>
+      {rows.length === 0 ? (
+        <span className="text-muted">Nothing verified automatically for this team (normal for Policy Track teams, which have no app).</span>
+      ) : (
+        <>
+          {stages.length > 0 && <span><b>Build:</b> {stages.map((r) => `✓ ${r.layer_title}`).join(" · ")}</span>}
+          {challenges.length > 0 && <span><b>Challenges:</b> {challenges.map((r) => `✓ ${r.layer_title}`).join(" · ")}</span>}
+          <span className="text-[12px] text-muted">Checked against the team&apos;s live app or the blockchain, not self-reported. Supporting evidence only: score on the criteria.</span>
+        </>
+      )}
     </div>
   );
 }

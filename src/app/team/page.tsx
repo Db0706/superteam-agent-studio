@@ -4,7 +4,8 @@ import { Module } from "@/components/system";
 import { Gate } from "@/components/platform/Gate";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import type { EventSummary, Viewer } from "@/server/dal/viewer";
-import { InvitePanel, JoinOrCreate, LeaveTeam, ProjectForm, TokenPanel } from "./TeamForms";
+import { challengeIdFor } from "@/core/challenges/identity";
+import { ChallengePanel, InvitePanel, JoinOrCreate, LeaveTeam, ProjectForm, TokenPanel } from "./TeamForms";
 
 export const metadata: Metadata = { title: "Your team" };
 
@@ -50,7 +51,7 @@ async function Workspace({ viewer, event }: { viewer: Viewer; event: EventSummar
   const supabase = await createSupabaseServer();
   const [{ data: memberRows }, { data: project }] = await Promise.all([
     supabase.from("team_members").select("user_id, role, joined_at").eq("team_id", viewer.team.id).order("joined_at"),
-    supabase.from("projects").select("name, repo_url, demo_url, endpoint_url").eq("team_id", viewer.team.id).maybeSingle(),
+    supabase.from("projects").select("name, repo_url, demo_url, endpoint_url, solana_wallet").eq("team_id", viewer.team.id).maybeSingle(),
   ]);
   // Teammates can read each other's profiles (RLS); team_members points at auth.users, so fetch separately.
   const ids = (memberRows ?? []).map((m) => m.user_id as string);
@@ -77,6 +78,7 @@ async function Workspace({ viewer, event }: { viewer: Viewer; event: EventSummar
       </div>
       <aside className="flex flex-col gap-4">
         {viewer.team.isCaptain && <InvitePanel teamId={viewer.team.id} />}
+        <ChallengePanel teamId={viewer.team.id} challengeId={challengeIdFor(viewer.team.id)} wallet={(project as { solana_wallet?: string | null } | null)?.solana_wallet ?? null} />
         <TokenPanel teamId={viewer.team.id} />
         <LeaveTeam teamId={viewer.team.id} />
       </aside>

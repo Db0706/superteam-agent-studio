@@ -192,7 +192,13 @@ const hackathonForm = z.object({
   buildStages: z.string().optional(),
   bonusChallenges: z.string().optional(),
   challengeHours: z.coerce.number().min(0.25).max(24).optional(),
+  challengeStartMinutes: z.coerce.number().min(0).max(24 * 60).optional(),
   payTo: z.string().trim().optional(),
+  programId: z.string().trim().optional(),
+  credMint: z.string().trim().optional(),
+  presentationAccount: z.string().trim().optional(),
+  salt: z.string().trim().max(200).optional(),
+  challengeRpc: z.string().trim().optional(),
 });
 
 /** Builds and checks the hackathon race from the simple form; plain-English errors only. */
@@ -202,13 +208,25 @@ async function hackathonFromForm(form: FormData): Promise<{ ok: true; config: To
   const buildStages = f.data.buildStages === "on";
   const bonusChallenges = f.data.bonusChallenges === "on";
   if (!buildStages && !bonusChallenges) return { ok: false, error: "Switch on build points, bonus challenges, or both." };
+  if (bonusChallenges) {
+    const missing = [["programId", "program ID"], ["credMint", "CRED mint"], ["presentationAccount", "presentation account"], ["salt", "salt"]].filter(([k]) => !f.data[k as "salt"]).map(([, l]) => l);
+    if (missing.length) return { ok: false, error: `Fill in the challenge constants from the challenge setup: ${missing.join(", ")}.` };
+    for (const [k, l] of [["programId", "program ID"], ["credMint", "CRED mint"], ["presentationAccount", "presentation account"]] as const) {
+      if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(f.data[k]!) || /^1+$/.test(f.data[k]!)) return { ok: false, error: `The ${l} isn't a Solana address. Copy it exactly from the challenge setup.` };
+    }
+    if (f.data.challengeRpc && !/^https:\/\//.test(f.data.challengeRpc)) return { ok: false, error: "The devnet RPC address must start with https://" };
+  }
   const config = hackathonTemplate({
     name: f.data.name,
     sprintSeconds: Math.round(f.data.hours * 3600),
     buildStages,
     bonusChallenges,
     challengeWindowSeconds: Math.round((f.data.challengeHours ?? 2) * 3600),
+    challengeOffsetSeconds: Math.round((f.data.challengeStartMinutes ?? 0) * 60),
     payTo: f.data.payTo || undefined,
+    onchain: bonusChallenges
+      ? { programId: f.data.programId!, credMint: f.data.credMint!, presentationAccount: f.data.presentationAccount!, salt: f.data.salt!, rpcUrl: f.data.challengeRpc || undefined }
+      : undefined,
   });
   const v = await validateConfig(config);
   if (!v.ok) {

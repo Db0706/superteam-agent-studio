@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import { COLORS, Led, Module } from "@/components/system";
 import type { ActionResult } from "@/server/actions/rpc";
-import { createInvite, createTeam, joinTeam, leaveTeam, revealToken, rotateToken, saveProject, testConnection } from "./actions";
+import { createInvite, createTeam, joinTeam, leaveTeam, revealToken, rotateToken, saveProject, saveWallet, testConnection } from "./actions";
 
 const input = "h-11 rounded-[3px] border border-[#CFCFC8] bg-white px-3 text-[15px] font-normal";
 const label = "flex flex-col gap-1.5 text-[13px] font-semibold";
@@ -116,6 +116,47 @@ export function ProjectForm({ teamId, project }: { teamId: string; project: { na
             </span>
           </div>
         )}
+      </form>
+    </Module>
+  );
+}
+
+/** For the on-chain challenges: the team's Challenge ID and its registered devnet wallet. */
+export function ChallengePanel({ teamId, challengeId, wallet }: { teamId: string; challengeId: string; wallet: string | null }) {
+  const [saved, save, saving] = useActionState(saveWallet.bind(null, teamId), null);
+  const [copied, setCopied] = useState(false);
+  return (
+    <Module label="ON-CHAIN CHALLENGES" right="OPTIONAL">
+      <form action={save} className="flex flex-col gap-3 p-4 text-[13px] leading-[1.45] text-ink-2">
+        <div className="flex flex-col gap-1">
+          <span className="font-semibold text-ink">Your Challenge ID</span>
+          <span className="flex items-center gap-2">
+            <code className="rounded-[3px] bg-ink px-3 py-1.5 font-mono text-[15px] text-[#EDEDE8]">{challengeId}</code>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(challengeId);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                } catch {}
+              }}
+              className="border-0 bg-transparent p-0 font-mono text-[11px] text-signal"
+            >
+              {copied ? "COPIED" : "COPY"}
+            </button>
+          </span>
+          <span>Use it exactly as shown in the challenge puzzles.</span>
+        </div>
+        <label className={label}>
+          Team wallet (Solana devnet public address)
+          <input name="wallet" defaultValue={wallet ?? ""} placeholder="Your devnet wallet's public address" className={`${input} font-mono text-[13px]`} autoComplete="off" />
+        </label>
+        <p className="m-0">Only transactions signed by this wallet count. Register it before the challenges open so the organisers can fund it and set up your puzzle.</p>
+        <button type="submit" disabled={saving} className="btn-secondary self-start !h-10 !px-4 !text-[13px]">
+          {saving ? "Saving…" : "Save wallet"}
+        </button>
+        <Result state={saved} success="Wallet saved." />
       </form>
     </Module>
   );
