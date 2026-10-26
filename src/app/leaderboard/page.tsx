@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LeaderboardView } from "@/components/leaderboard/LeaderboardView";
+import { WinnersSection } from "@/components/winners/WinnersSection";
+import { loadWinners } from "@/server/dal/winners";
 import { PlatformNotConfigured } from "@/components/platform/NotConfigured";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { loadLeaderboard } from "@/server/dal/leaderboard";
@@ -29,5 +31,17 @@ export default function LeaderboardPage() {
 async function Board() {
   const event = await getActiveEvent();
   if (!event) return <PlatformNotConfigured feature="The leaderboard" />;
-  return <LeaderboardView initial={await loadLeaderboard(event.id)} eventId={event.id} />;
+  const [board, winners] = await Promise.all([loadLeaderboard(event.id), loadWinners(event.id)]);
+  return (
+    <>
+      {winners.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <span className="eyebrow">TRACK WINNERS · CHOSEN BY THE JUDGES</span>
+          <WinnersSection winners={winners} />
+          <span className="eyebrow mt-4">AI RACE · LIVE POINTS</span>
+        </div>
+      )}
+      <LeaderboardView initial={board} eventId={event.id} />
+    </>
+  );
 }
