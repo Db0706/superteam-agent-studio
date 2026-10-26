@@ -36,7 +36,6 @@ async function Board() {
     <>
       {winners.length > 0 && (
         <div className="flex flex-col gap-3">
-          <span className="eyebrow">TRACK WINNERS · CHOSEN BY THE JUDGES</span>
           <WinnersSection winners={winners} />
           <span className="eyebrow mt-4">AI RACE · LIVE POINTS</span>
         </div>

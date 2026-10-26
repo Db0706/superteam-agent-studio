@@ -70,7 +70,7 @@ describe("permissions", () => {
     const open = await h.sql<{ proname: string }[]>`
       select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
       where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`;
-    const allowed = ["event_leaderboard", "has_event_role", "is_organiser", "is_platform_admin", "is_team_member", "owns_participant", "public_winners", "server_now", "team_university"];
+    const allowed = ["event_leaderboard", "has_event_role", "is_organiser", "is_platform_admin", "is_team_member", "owns_participant", "public_team_members", "public_winners", "server_now", "team_university"];
     expect(open.map((r) => r.proname).filter((n) => !allowed.includes(n))).toEqual([]);
     expect(await rpcError(h.anon, "create_team", { p_event: eventId, p_name: "x", p_track: "build" })).toMatch(/permission denied/);
   });
