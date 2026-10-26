@@ -1,10 +1,10 @@
 import type { University } from "@/server/dal/leaderboard";
 import type { Winner } from "@/server/dal/winners";
 
-const PLACE: Record<number, { label: string; icon: string; color: string; tint: string }> = {
-  1: { label: "WINNER", icon: "🏆", color: "#D4A72C", tint: "#FFF6D6" },
-  2: { label: "RUNNER-UP", icon: "🥈", color: "#A7ADB4", tint: "#F1F3F5" },
-  3: { label: "HONOURABLE MENTION", icon: "🎖️", color: "#B87A3D", tint: "#F8EBDD" },
+const PLACE: Record<number, { label: string; mark: string; color: string; tint: string }> = {
+  1: { label: "WINNER", mark: "1", color: "#D4A72C", tint: "#FFF6D6" },
+  2: { label: "RUNNER-UP", mark: "2", color: "#A7ADB4", tint: "#F1F3F5" },
+  3: { label: "HONOURABLE MENTION", mark: "HM", color: "#B87A3D", tint: "#F8EBDD" },
 };
 const UNI_LABEL: Record<University, string> = { cambridge: "Cambridge", oxford: "Oxford", mixed: "Mixed", other: "Other" };
 const UNI_COLOR: Record<University, string> = { cambridge: "#3B9FD6", oxford: "#1F3A93", mixed: "#8E8E87", other: "#AFAFA8" };
@@ -15,7 +15,7 @@ const TRACKS = [
 
 function Card({ w }: { w: Winner }) {
   const first = w.place === 1;
-  const p = PLACE[w.place] ?? { label: `PLACE ${w.place}`, icon: "★", color: "#AFAFA8", tint: "#F5F5F1" };
+  const p = PLACE[w.place] ?? { label: `PLACE ${w.place}`, mark: String(w.place), color: "#AFAFA8", tint: "#F5F5F1" };
   return (
     <article
       className={`flex flex-col overflow-hidden rounded-[6px] bg-white text-ink ${first ? "min-[860px]:row-span-2" : ""}`}
@@ -23,7 +23,7 @@ function Card({ w }: { w: Winner }) {
     >
       <div className="flex items-center justify-between gap-2 px-4 py-2.5" style={{ background: p.color }}>
         <span className={`flex items-center gap-2 font-mono font-bold tracking-[0.06em] text-ink ${first ? "text-[15px]" : "text-[12.5px]"}`}>
-          <span aria-hidden="true" className={first ? "text-[24px]" : "text-[18px]"}>{p.icon}</span>
+          <span aria-hidden="true" className={`flex shrink-0 items-center justify-center rounded-full bg-ink font-mono font-bold text-white ${first ? "h-8 w-8 text-[14px]" : "h-6 w-6 text-[10.5px]"}`}>{p.mark}</span>
           {p.label}
         </span>
         <span className="font-mono text-[10.5px] font-semibold text-ink/70">{w.track === "build" ? "BUILD TRACK" : "POLICY TRACK"}</span>
@@ -63,7 +63,7 @@ export function WinnersSection({ winners }: { winners: Winner[] }) {
   return (
     <section aria-label="Winners" className="flex flex-col gap-7 rounded-[8px] bg-ink px-[clamp(16px,3vw,32px)] py-[clamp(22px,3.5vw,40px)] text-white">
       <div className="flex flex-col items-center gap-2 text-center">
-        <span aria-hidden="true" className="text-[44px] leading-none">🏆</span>
+        <span aria-hidden="true" className="h-[3px] w-14 rounded-full bg-[#D4A72C]" />
         <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-[#D4A72C]">THE JUDGES HAVE DECIDED</span>
         <h2 className="m-0 font-extrabold leading-none tracking-[-0.02em] text-white [font-stretch:125%] text-[clamp(32px,5vw,56px)]">The winners</h2>
       </div>
