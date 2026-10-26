@@ -37,6 +37,7 @@ export const NAV_GROUPS = [
     items: [
       { href: "/race", label: "AI Race", hint: "Verify your app and score points" },
       { href: "/leaderboard", label: "Leaderboard", hint: "Live points, Cambridge vs Oxford" },
+      { href: "/winners", label: "Winners", hint: "The winning projects and their teams" },
       { href: "/submit", label: "Submit your project", hint: "Your entry for the Build or Policy track" },
     ],
   },
