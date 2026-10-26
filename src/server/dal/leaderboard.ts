@@ -18,6 +18,8 @@ export interface LeaderboardTeam {
   /** What to show: "–" before a team has any points, "=4" for a shared place, otherwise "4". */
   rankLabel: string;
   finalistRank: number | null;
+  /** Members' display names (never emails). */
+  members: string[];
 }
 
 export interface Leaderboard {
@@ -31,11 +33,13 @@ export interface Leaderboard {
 /** Ranks by points, then by who reached their score first. Public: names and totals only. */
 export async function loadLeaderboard(eventId: string): Promise<Leaderboard> {
   const supabase = await createSupabaseServer();
-  const [{ data: rows }, { data: finalists }, { data: now }] = await Promise.all([
+  const [{ data: rows }, { data: finalists }, { data: now }, { data: memberRows }] = await Promise.all([
     supabase.rpc("event_leaderboard", { p_event: eventId }),
     supabase.from("finalists").select("team_id, rank").eq("event_id", eventId),
     supabase.rpc("server_now"),
+    supabase.rpc("public_team_members", { p_event: eventId }),
   ]);
+  const membersOf = new Map(((memberRows ?? []) as { team_id: string; members: string[] | null }[]).map((m) => [m.team_id, m.members ?? []]));
   const fin = new Map((finalists ?? []).map((f) => [f.team_id as string, f.rank as number]));
   type Row = { team_id: string; team_name: string; university: University; points: number; award_points: number; build_done: number; build_total: number; challenges_done: number; challenges_total: number; last_scored_at: string | null };
   const sorted = ((rows ?? []) as Row[])
@@ -51,6 +55,7 @@ export async function loadLeaderboard(eventId: string): Promise<Leaderboard> {
       challengesTotal: r.challenges_total,
       lastScoredAt: r.last_scored_at,
       finalistRank: fin.get(r.team_id) ?? null,
+      members: membersOf.get(r.team_id) ?? [],
     }))
     .sort((a, b) => b.points - a.points || (a.lastScoredAt ?? "9").localeCompare(b.lastScoredAt ?? "9") || a.name.localeCompare(b.name));
   // Equal points and equal time share a rank.

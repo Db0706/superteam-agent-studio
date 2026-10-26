@@ -70,6 +70,7 @@ export function LeaderboardView({ initial, eventId }: { initial: Leaderboard; ev
                     {t.challengesTotal > 0 && ` · CHALLENGES ${t.challengesDone}/${t.challengesTotal}`}
                     {t.awardPoints !== 0 && ` · AWARDS ${t.awardPoints > 0 ? "+" : ""}${t.awardPoints}`}
                   </span>
+                  {t.members.length > 0 && <span className="text-[12.5px] leading-snug text-ink-2">{t.members.join(" · ")}</span>}
                 </span>
                 <span className="wide text-[24px] leading-none">{t.points}</span>
               </li>
