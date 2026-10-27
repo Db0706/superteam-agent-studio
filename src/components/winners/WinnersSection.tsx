@@ -1,116 +1,112 @@
 import type { University } from "@/server/dal/leaderboard";
 import type { Winner } from "@/server/dal/winners";
 
-const PLACE: Record<number, { label: string; mark: string; text: string; medal: string; block: string; height: string }> = {
-  1: { label: "WINNER", mark: "1", text: "#A87F0C", medal: "radial-gradient(circle at 35% 30%, #FFF3B0, #E7B923 55%, #A87F0C)", block: "repeating-linear-gradient(135deg, #E7B923 0 18px, #F2CC4A 18px 36px)", height: "150px" },
-  2: { label: "RUNNER-UP", mark: "2", text: "#7D858F", medal: "radial-gradient(circle at 35% 30%, #FFFFFF, #C3C9D1 55%, #7D858F)", block: "repeating-linear-gradient(135deg, #C3C9D1 0 18px, #D5DAE0 18px 36px)", height: "105px" },
-  3: { label: "HONOURABLE MENTION", mark: "HM", text: "#8A5220", medal: "radial-gradient(circle at 35% 30%, #FFD9B0, #C9813F 55%, #8A5220)", block: "repeating-linear-gradient(135deg, #C9813F 0 18px, #D9955A 18px 36px)", height: "75px" },
-};
 const UNI_LABEL: Record<University, string> = { cambridge: "Cambridge", oxford: "Oxford", mixed: "Mixed", other: "Other" };
 const UNI_COLOR: Record<University, string> = { cambridge: "#3B9FD6", oxford: "#1F3A93", mixed: "#8E8E87", other: "#8E8E87" };
+// Brand colours per place: signal purple, Oxford blue, then the site's red.
+const PLACE: Record<number, { mark: string; label: string; color: string }> = {
+  1: { mark: "01", label: "WINNER", color: "#5A3CF0" },
+  2: { mark: "02", label: "RUNNER-UP", color: "#1F3A93" },
+  3: { mark: "HM", label: "HONOURABLE MENTION", color: "#C2361F" },
+};
 const TRACKS = [
   { track: "build", name: "Build Track" },
   { track: "policy", name: "Policy Track" },
 ] as const;
 
-function Spot({ w }: { w: Winner }) {
-  const p = PLACE[w.place] ?? { ...PLACE[3], label: `PLACE ${w.place}`, mark: String(w.place) };
-  const first = w.place === 1;
+function Team({ w, dark }: { w: Winner; dark?: boolean }) {
   return (
-    <div className={`flex flex-col ${first ? "max-[879px]:order-first" : ""}`}>
-      <div
-        className={`relative rounded-t-[14px] border-[3px] border-b-0 border-ink bg-white px-5 pb-5 text-ink ${first ? "pt-9" : "pt-7"}`}
-        style={first ? { boxShadow: "0 0 0 6px rgba(231,185,35,.35), 0 30px 60px -20px rgba(231,185,35,.6)" } : undefined}
-      >
-        <span
-          aria-hidden="true"
-          className={`absolute left-5 grid place-items-center rounded-full border-[3px] border-ink font-black text-ink ${first ? "-top-[34px] h-[66px] w-[66px] text-[26px]" : "-top-[26px] h-[52px] w-[52px] text-[19px]"}`}
-          style={{ background: p.medal }}
-        >
-          {p.mark}
+    <>
+      <div className={`flex flex-wrap items-center gap-2 font-bold ${dark ? "text-[16px] text-white" : "text-[14.5px]"}`}>
+        {w.team}
+        <span className="rounded-[2px] px-1.5 py-[3px] font-mono text-[9.5px] font-semibold tracking-[0.04em] text-white" style={{ background: UNI_COLOR[w.university] }}>
+          {UNI_LABEL[w.university].toUpperCase()}
         </span>
-        <span className="mb-2.5 block text-right font-mono text-[11px] font-bold tracking-[0.12em]" style={{ color: p.text }}>
-          {p.label}
-        </span>
-        <h3 className={`m-0 mb-2.5 font-black leading-[1.05] tracking-[-0.015em] [font-stretch:112%] ${first ? "text-[clamp(24px,2.6vw,32px)]" : "text-[21px]"}`}>{w.project}</h3>
-        {w.summary && <p className="m-0 mb-3.5 line-clamp-4 text-[14px] leading-normal text-ink-2">{w.summary}</p>}
-        <div className="flex flex-wrap items-center gap-2 text-[16px] font-extrabold">
-          {w.team}
-          <span className="rounded-[3px] px-[7px] py-[3px] font-mono text-[9.5px] font-bold tracking-[0.06em] text-white" style={{ background: UNI_COLOR[w.university] }}>
-            {UNI_LABEL[w.university].toUpperCase()}
-          </span>
-        </div>
-        {w.members.length > 0 && (
-          <ul className="m-0 mt-2.5 flex list-none flex-wrap gap-1.5 p-0">
-            {w.members.map((m, i) => (
-              <li key={`${m}-${i}`} className="rounded-full border border-[#DEDAD0] bg-[#F4F2EC] px-2.5 py-1 text-[12.5px]">
-                {m}
-              </li>
-            ))}
-          </ul>
-        )}
-        {(w.repo || w.demo) && (
-          <div className="mt-3.5 flex gap-4 font-mono text-[11px] font-semibold">
-            {w.repo && <a href={w.repo} target="_blank" rel="noopener noreferrer">REPO ↗</a>}
-            {w.demo && <a href={w.demo} target="_blank" rel="noopener noreferrer">{w.track === "policy" ? "DOCUMENT ↗" : "DEMO ↗"}</a>}
-          </div>
-        )}
       </div>
-      <div className="grid place-items-center border-[3px] border-t-0 border-ink text-ink" style={{ background: p.block, height: p.height }}>
-        <div className="text-center">
-          <div className={`font-black leading-none [font-stretch:125%] ${w.place === 3 ? "text-[40px]" : "text-[64px]"}`}>{p.mark}</div>
-          <div className="mt-1 font-mono text-[11px] font-bold tracking-[0.14em]">{p.label}</div>
+      {w.members.length > 0 && (
+        <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
+          {w.members.map((m, i) => (
+            <li key={`${m}-${i}`} className={`rounded-[3px] border px-2 py-1 font-mono text-[10.5px] ${dark ? "border-[#3A3A36] bg-[#232320] text-[#D9D9D2]" : "border-hairline bg-strip text-ink-2"}`}>
+              {m}
+            </li>
+          ))}
+        </ul>
+      )}
+      {(w.repo || w.demo) && (
+        <div className={`flex gap-4 font-mono text-[10.5px] font-semibold ${dark ? "mt-0.5 border-t border-[#2E2E2B] pt-3" : "mt-1"}`}>
+          {w.repo && <a href={w.repo} target="_blank" rel="noopener noreferrer" className={dark ? "!text-[#B8A8FF]" : ""}>REPO ↗</a>}
+          {w.demo && <a href={w.demo} target="_blank" rel="noopener noreferrer" className={dark ? "!text-[#B8A8FF]" : ""}>{w.track === "policy" ? "DOCUMENT ↗" : "DEMO ↗"}</a>}
         </div>
+      )}
+    </>
+  );
+}
+
+function First({ w }: { w: Winner }) {
+  return (
+    <div className="grid bg-ink text-[#EDEDE8] min-[760px]:grid-cols-[200px_minmax(0,1fr)]">
+      <div className="flex items-end justify-between gap-4 bg-signal p-6 min-[760px]:flex-col min-[760px]:items-start">
+        <span className="wide text-[clamp(84px,9vw,120px)] leading-[0.8] tracking-[-0.04em] text-white">01</span>
+        <span className="font-mono text-[11px] font-semibold tracking-[0.08em] text-white">WINNER</span>
+      </div>
+      <div className="flex flex-col gap-3 px-[26px] pb-[22px] pt-6">
+        <h3 className="m-0 text-[clamp(26px,3vw,38px)] font-extrabold leading-[1.05] tracking-[-0.02em] text-white [font-stretch:115%]">{w.project}</h3>
+        {w.summary && <p className="m-0 line-clamp-3 max-w-[760px] text-[15px] leading-[1.55] text-[#B9B9B2]">{w.summary}</p>}
+        <Team w={w} dark />
       </div>
     </div>
   );
 }
 
-/** One podium per track: winner in the middle and tallest, runner-up left, honourable mention right. */
-export function WinnersPodiums({ winners, tone = "light" }: { winners: Winner[]; tone?: "light" | "dark" }) {
+function Other({ w }: { w: Winner }) {
+  const p = PLACE[w.place] ?? { mark: String(w.place).padStart(2, "0"), label: `PLACE ${w.place}`, color: "#161616" };
+  return (
+    <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-5 p-5" style={{ boxShadow: `inset 0 4px 0 ${p.color}` }}>
+      <div>
+        <div className={`wide leading-[0.85] tracking-[-0.04em] ${p.mark.length > 2 || /[A-Z]/.test(p.mark) ? "text-[46px]" : "text-[60px]"}`} style={{ color: p.color }}>{p.mark}</div>
+        <div className="mt-2 font-mono text-[10px] font-semibold tracking-[0.06em]" style={{ color: p.color }}>{p.label}</div>
+      </div>
+      <div className="flex min-w-0 flex-col gap-2">
+        <h4 className="m-0 text-[20px] font-extrabold leading-[1.15] [font-stretch:112%]">{w.project}</h4>
+        {w.summary && <p className="m-0 line-clamp-3 text-[13.5px] leading-normal text-ink-2">{w.summary}</p>}
+        <Team w={w} />
+      </div>
+    </div>
+  );
+}
+
+/** One results panel per track: the winner on a dark row, runner-up and honourable mention beneath. */
+export function WinnersSection({ winners }: { winners: Winner[] }) {
   if (!winners.length) return null;
   return (
-    <div className="flex flex-col gap-[clamp(56px,7vw,90px)]">
+    <div className="flex flex-col gap-7">
       {TRACKS.map(({ track, name }) => {
         const list = winners.filter((w) => w.track === track).sort((a, b) => a.place - b.place);
         if (!list.length) return null;
-        // Podium order: 2 · 1 · 3 with three places, 1 · 2 with two.
-        const order = list.length >= 3 ? [list[1], list[0], ...list.slice(2)] : list;
+        const [first, ...rest] = list[0].place === 1 ? list : [null, ...list];
         return (
-          <section key={track} aria-label={`${name} winners`} className="flex flex-col gap-[42px]">
-            <h3 className={`m-0 flex items-center justify-center gap-3.5 font-mono text-[13px] font-bold tracking-[0.14em] ${tone === "dark" ? "text-white" : "text-ink"}`}>
-              <span className="h-[2px] max-w-[220px] flex-1 bg-current opacity-35" />
-              {name.toUpperCase()}
-              <span className="h-[2px] max-w-[220px] flex-1 bg-current opacity-35" />
-            </h3>
-            <div className={`grid items-end gap-[18px] max-[879px]:gap-12 ${list.length >= 3 ? "min-[880px]:grid-cols-[1fr_1.15fr_1fr]" : list.length === 2 ? "mx-auto w-full max-w-[880px] min-[880px]:grid-cols-[1.15fr_1fr]" : "mx-auto w-full max-w-[520px]"}`}>
-              {order.map((w) => (
-                <Spot key={`${w.track}-${w.place}`} w={w} />
-              ))}
+          <section key={track} aria-label={`${name} winners`} className="module">
+            <div className="module-strip">
+              <span className="flex items-center gap-2">
+                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-signal shadow-[0_0_0_3px_rgba(90,60,240,0.2)]" />
+                {name.toUpperCase()} · RESULTS
+              </span>
+              <span className="text-muted">JUDGED BY THE PANEL</span>
             </div>
+            {first && <First w={first} />}
+            {rest.length > 0 && (
+              <div className="grid border-t border-ink min-[760px]:grid-cols-2">
+                {rest.map((w, i) => (
+                  <div key={w!.place} className={i % 2 ? "border-ink max-[759px]:border-t min-[760px]:border-l" : ""}>
+                    <Other w={w!} />
+                  </div>
+                ))}
+                {rest.length % 2 === 1 && <div className="border-ink bg-strip max-[759px]:hidden min-[760px]:border-l" />}
+              </div>
+            )}
           </section>
         );
       })}
     </div>
-  );
-}
-
-/** The leaderboard's winners block: a dark banner with the podiums. Nothing until something is published. */
-export function WinnersSection({ winners }: { winners: Winner[] }) {
-  if (!winners.length) return null;
-  return (
-    <section
-      aria-label="Winners"
-      className="flex flex-col gap-12 overflow-hidden rounded-[14px] px-[clamp(16px,3vw,36px)] pb-[clamp(28px,4vw,48px)] pt-[clamp(28px,4vw,48px)] text-white"
-      style={{ background: "radial-gradient(1100px 420px at 50% -10%, #3A24C9 0%, #1A1240 45%, #0F0F12 85%)" }}
-    >
-      <div className="flex flex-col items-center gap-2.5 text-center">
-        <span className="font-mono text-[12px] font-bold tracking-[0.1em] text-[#E7B923]">THE JUDGES HAVE DECIDED</span>
-        <h2 className="m-0 font-black leading-[0.95] tracking-[-0.03em] text-white [font-stretch:125%] text-[clamp(38px,6vw,72px)]">
-          The <span className="bg-[linear-gradient(90deg,#E7B923,#FFF3B0,#E7B923)] bg-clip-text text-transparent">winners</span>
-        </h2>
-      </div>
-      <WinnersPodiums winners={winners} tone="dark" />
-    </section>
   );
 }
