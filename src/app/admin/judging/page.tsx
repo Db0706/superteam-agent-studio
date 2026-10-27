@@ -5,15 +5,17 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import type { EventSummary } from "@/server/dal/viewer";
 import { rankSubmissions, type RubricCriterion } from "@/core/judging/results";
 import { TRACK_LABEL, type Track } from "@/core/submissions/fields";
+import { googleConfigured } from "@/server/google/client";
+import { GoogleSheetPanel } from "./GoogleSheetPanel";
 import { AssignmentActions, AssignOne, AutoAssign, OpenJudging, RubricEditor, WinnerControl } from "./JudgingControls";
 
 export const metadata = { title: "Judging" };
 
-export default function JudgingPage() {
+export default function JudgingPage({ searchParams }: PageProps<"/admin/judging">) {
   return (
     <Suspense fallback={<p className="text-[14px] text-muted">Loading…</p>}>
       <Gate path="/admin/judging" roles={["organiser"]}>
-        {({ event }) => <Judging event={event} />}
+        {async ({ event }) => <Judging event={event} googleStatus={String((await searchParams).google ?? "")} />}
       </Gate>
     </Suspense>
   );
@@ -21,8 +23,10 @@ export default function JudgingPage() {
 
 const TRACKS: Track[] = ["build", "policy"];
 
-async function Judging({ event }: { event: EventSummary }) {
+async function Judging({ event, googleStatus }: { event: EventSummary; googleStatus: string }) {
   const s = await createSupabaseServer();
+  const { data: google } = await s.rpc("google_connection_get", { p_event: event.id });
+  const gc = ((google ?? []) as { google_email: string; spreadsheet_url: string | null }[])[0];
   const [{ data: rubrics }, { data: subs }, { data: assignments }, { data: scores }, { data: judgeRoles }, { data: winners }] = await Promise.all([
     s.from("judging_rubrics").select("track, name, criteria, status").eq("event_id", event.id),
     s.from("submissions").select("id, team_id, track, title, status, submitted_at").eq("event_id", event.id),
@@ -47,6 +51,7 @@ async function Judging({ event }: { event: EventSummary }) {
       <p className="m-0 max-w-[760px] text-[14px] leading-normal text-ink-2">
         Judges score independently and never see each other&apos;s scores. Results below use only final scores. Add judges on the People page, confirm each track&apos;s criteria, then assign.
       </p>
+      <GoogleSheetPanel configured={googleConfigured()} email={gc?.google_email ?? null} sheetUrl={gc?.spreadsheet_url ?? null} status={googleStatus || undefined} />
       <OpenJudging judges={judges.length} />
 
       {flags.length > 0 && (
