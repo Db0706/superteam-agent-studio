@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SITE } from "@/config/site";
 
 export function Footer() {
@@ -9,6 +10,8 @@ export function Footer() {
           <a href={SITE.githubUrl} target="_blank" rel="noopener noreferrer" className="!text-[#EDEDE8]">
             GITHUB ↗
           </a>
+          <Link href="/privacy" className="!text-[#EDEDE8]">PRIVACY</Link>
+          <Link href="/terms" className="!text-[#EDEDE8]">TERMS</Link>
           <span>PAYMENTS ON SOLANA</span>
         </span>
       </div>
