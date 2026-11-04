@@ -64,7 +64,8 @@ export async function disconnectGoogle(): Promise<ActionResult<null>> {
 }
 
 /** Creates the judging sheet in the organiser's Drive and shares it with every judge. */
-export async function createSheet(): Promise<ActionResult<{ url: string; shared: number; failed: string[] }>> {
+/** Creates the judging sheet in the organiser's Drive. Shares it with nobody: see shareSheet. */
+export async function createSheet(): Promise<ActionResult<{ url: string }>> {
   try {
     const { event, token } = await connection();
     const tracks = (await sheetData(event.id)).filter((t) => t.submissions.length);
@@ -72,14 +73,26 @@ export async function createSheet(): Promise<ActionResult<{ url: string; shared:
     const { id, url } = await createJudgingSheet(token, `${event.name}: judging`, tracks);
     const saved = await callRpc("google_sheet_set", { p_event: event.id, p_id: id, p_url: url });
     if (!saved.ok) return saved;
+    refresh();
+    return { ok: true, data: { url } };
+  } catch (err) {
+    return fail(err);
+  }
+}
+
+/** Shares the current judging sheet with every judge (Google emails each one an edit link). */
+export async function shareSheet(): Promise<ActionResult<{ shared: number; failed: string[] }>> {
+  try {
+    const { event, c, token } = await connection();
+    if (!c.spreadsheet_id) return { ok: false, error: "Create the judging sheet first." };
     const s = await createSupabaseServer();
     const { data: roles } = await s.from("event_roles").select("user_id").eq("event_id", event.id).eq("role", "judge");
     const ids = (roles ?? []).map((r) => r.user_id);
     const { data: profiles } = ids.length ? await s.from("profiles").select("email").in("id", ids) : { data: [] };
     const emails = [...new Set((profiles ?? []).map((p) => String(p.email).toLowerCase()).filter(Boolean))];
-    const failed = await shareWith(token, id, emails, `Judging sheet for ${event.name}. Score each project, agree a Place (${PLACES.join(", ")}), and the organisers will publish the winners from it.`);
-    refresh();
-    return { ok: true, data: { url, shared: emails.length - failed.length, failed } };
+    if (!emails.length) return { ok: false, error: "There are no judges yet. Add them on the People page." };
+    const failed = await shareWith(token, c.spreadsheet_id, emails, `Judging sheet for ${event.name}. Score each project, agree a Place (${PLACES.join(", ")}), and the organisers will publish the winners from it.`);
+    return { ok: true, data: { shared: emails.length - failed.length, failed } };
   } catch (err) {
     return fail(err);
   }
