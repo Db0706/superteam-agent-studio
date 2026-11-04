@@ -27,9 +27,10 @@ The site only ever gets the `drive.file` permission: it can see and edit **only 
 ## Using it
 
 1. **Connect Google** (once per event): sign in with the Google account that should own the sheet.
-2. **Create judging sheet**: makes the sheet and emails every judge (the People page's judges) an edit link.
-3. Judges score each criterion (the cell refuses numbers above the maximum), and agree a **Place**: Winner, Runner-up or Honourable mention.
-4. **Check the sheet**: shows what would be published, with any problems (two winners in a track, a renamed column).
-5. **Publish winners from the sheet**: sets the places, clears places the sheet leaves empty. The winners page and leaderboard update.
+2. **Create judging sheet**: makes the sheet in your Drive, shared with nobody yet. Open it and check it.
+3. **Share with judges**: Google emails every judge (the People page's judges) an edit link.
+4. Judges score each criterion (the cell refuses numbers above the maximum), and agree a **Place**: Winner, Runner-up or Honourable mention.
+5. **Check the sheet**: shows what would be published, with any problems (two winners in a track, a renamed column).
+6. **Publish winners from the sheet**: sets the places, clears places the sheet leaves empty. The winners page and leaderboard update.
 
 Don't rename, move or delete columns; column A (hidden) links each row to its submission. Add comments in **Notes**. **Create a new sheet** if submissions change after the sheet was made.

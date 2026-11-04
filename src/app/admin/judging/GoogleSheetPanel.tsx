@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Module } from "@/components/system";
 import { PLACES } from "@/core/judging/sheet";
-import { createSheet, disconnectGoogle, previewSheet, publishFromSheet, type SyncPreview } from "./google";
+import { createSheet, disconnectGoogle, previewSheet, publishFromSheet, shareSheet, type SyncPreview } from "./google";
 
 const STATUS: Record<string, string> = {
   connected: "Google connected.",
@@ -41,7 +41,8 @@ export function GoogleSheetPanel({ configured, email, sheetUrl, status }: { conf
         ) : (
           <>
             <ol className="m-0 flex list-decimal flex-col gap-1 pl-5 text-ink-2">
-              <li><b>Create the sheet.</b> One tab per track, one row per final submission, shared with every judge.</li>
+              <li><b>Create the sheet</b> (one tab per track, one row per final submission) and check it. Nobody else can see it yet.</li>
+              <li><b>Share with judges.</b> Google emails each judge an edit link.</li>
               <li>Judges score each criterion and set <b>Place</b> to {PLACES.join(", ")}.</li>
               <li><b>Check the sheet</b>, then <b>Publish winners</b>. The winners page and leaderboard update.</li>
             </ol>
@@ -49,9 +50,14 @@ export function GoogleSheetPanel({ configured, email, sheetUrl, status }: { conf
               {sheetUrl && (
                 <a href={sheetUrl} target="_blank" rel="noopener noreferrer" className="btn-primary !h-10 !px-4 !text-[13px]">Open the sheet ↗</a>
               )}
-              <button type="button" disabled={pending} className="btn-secondary !h-10 !px-4 !text-[13px]" onClick={() => run(createSheet, (d) => setNote({ ok: true, text: `Sheet created and shared with ${d.shared} judge${d.shared === 1 ? "" : "s"}.${d.failed.length ? ` Couldn't share with: ${d.failed.join(", ")}.` : ""}` }))}>
+              <button type="button" disabled={pending} className="btn-secondary !h-10 !px-4 !text-[13px]" onClick={() => run(createSheet, () => setNote({ ok: true, text: "Sheet created in your Google Drive. Open it to check, then share it with the judges." }))}>
                 {pending ? "Working…" : sheetUrl ? "Create a new sheet" : "Create judging sheet"}
               </button>
+              {sheetUrl && (
+                <button type="button" disabled={pending} className="btn-secondary !h-10 !px-4 !text-[13px]" onClick={() => { if (confirm("Share the sheet with every judge? Google emails each one an edit link.")) run(shareSheet, (d) => setNote({ ok: true, text: `Shared with ${d.shared} judge${d.shared === 1 ? "" : "s"}.${d.failed.length ? ` Couldn't share with: ${d.failed.join(", ")}.` : ""}` })); }}>
+                  Share with judges
+                </button>
+              )}
               {sheetUrl && (
                 <button type="button" disabled={pending} className="btn-secondary !h-10 !px-4 !text-[13px]" onClick={() => run(previewSheet, (d) => setPreview(d))}>
                   Check the sheet
