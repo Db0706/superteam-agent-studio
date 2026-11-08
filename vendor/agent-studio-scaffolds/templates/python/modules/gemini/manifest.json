@@ -1,0 +1,19 @@
+{
+  "id": "gemini",
+  "kind": "module",
+  "framework": "python",
+  "name": "Gemini AI",
+  "summary": "The agent can ask Google Gemini (python -m agent ask, POST /api/chat). Your key stays in .env.",
+  "nav": { "label": "Gemini chat (POST /api/chat)", "href": "/api/chat" },
+  "requires": [],
+  "files": ["agent/ai/__init__.py", "agent/ai/gemini.py", "agent/routes/chat.py", "agent/commands/ask.py"],
+  "dependencies": { "google-genai": "2.29.0" },
+  "devDependencies": {},
+  "scripts": { "ask": "python -m agent ask" },
+  "env": [
+    { "key": "GEMINI_API_KEY", "example": "", "required": true, "secret": true, "note": "From https://aistudio.google.com/apikey. Server-only." },
+    { "key": "GEMINI_MODEL", "example": "gemini-flash-latest", "required": false, "secret": false, "note": "Optional model override." }
+  ],
+  "prerequisites": ["Google account", "Gemini API key from Google AI Studio (free tier is enough)"],
+  "readme": "README.fragment.md"
+}

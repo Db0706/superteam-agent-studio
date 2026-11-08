@@ -1,0 +1,17 @@
+{
+  "id": "gemini",
+  "kind": "module",
+  "framework": "expo",
+  "name": "Gemini AI",
+  "summary": "A chat screen that asks Google Gemini through your companion server. The key never ships in the app.",
+  "nav": { "label": "Gemini chat", "href": "/chat" },
+  "requires": [],
+  "companionModules": ["gemini"],
+  "files": ["lib/ai/client.ts", "app/chat.tsx"],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {},
+  "env": [],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

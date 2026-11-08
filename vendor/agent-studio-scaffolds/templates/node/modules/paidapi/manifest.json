@@ -1,0 +1,23 @@
+{
+  "id": "paidapi",
+  "kind": "module",
+  "framework": "node",
+  "name": "Paid API Example",
+  "summary": "GET /premium-data costs devnet USDC per request; examples/client.ts and POST /api/buy pay for it within the spending limits.",
+  "nav": { "label": "Paid endpoint (GET /premium-data)", "href": "/premium-data" },
+  "requires": ["payments", "spending"],
+  "files": [
+    "src/routes/premium-data.ts",
+    "src/routes/buy.ts",
+    "src/lib/paidapi/buyer.ts",
+    "examples/client.ts"
+  ],
+  "dependencies": {},
+  "devDependencies": { "tsx": "4.23.15" },
+  "scripts": { "pay": "tsx examples/client.ts" },
+  "env": [
+    { "key": "PAID_API_PRICE_USD", "example": "0.01", "required": false, "secret": false, "note": "Price per request in (devnet) USDC. Default 0.01." }
+  ],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

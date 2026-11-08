@@ -1,0 +1,48 @@
+{
+  "id": "wallet",
+  "kind": "module",
+  "framework": "expo",
+  "name": "Wallet Connection",
+  "summary": "People connect a Solana wallet app on their phone (Phantom, Solflare, Backpack, \u2026) through Solana Mobile Wallet Adapter and pay the companion's paid API from it, approving each payment in the wallet. Devnet only. Needs a development build, not Expo Go.",
+  "nav": {
+    "label": "Pay with your wallet",
+    "href": "/wallet"
+  },
+  "requires": [
+    "paidapi"
+  ],
+  "files": [
+    "lib/wallet/crypto-polyfill.ts",
+    "lib/wallet/mobileWallet.ts",
+    "lib/wallet/pay.ts",
+    "app/wallet.tsx"
+  ],
+  "dependencies": {
+    "@solana-mobile/mobile-wallet-adapter-protocol": "3.0.1",
+    "@solana-mobile/mobile-wallet-adapter-protocol-kit": "3.0.1",
+    "@solana/kit": "8.5.0",
+    "@x402/core": "2.28.0",
+    "@x402/fetch": "2.28.0",
+    "@x402/svm": "2.28.0",
+    "expo-crypto": "57.0.3",
+    "expo-dev-client": "57.0.19"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "android:dev": "expo run:android"
+  },
+  "env": [
+    {
+      "key": "EXPO_PUBLIC_SOLANA_RPC_URL",
+      "example": "https://api.devnet.solana.com",
+      "required": false,
+      "secret": false,
+      "note": "Devnet RPC the app uses to build wallet payments. EXPO_PUBLIC_ values ship inside the app, so never put a key here"
+    }
+  ],
+  "prerequisites": [
+    "Android Studio with an emulator, or an Android phone with USB debugging (a development build replaces Expo Go)",
+    "A Solana wallet app with Mobile Wallet Adapter (Phantom, Solflare, Backpack, \u2026) switched to devnet, holding devnet USDC from https://faucet.circle.com (no real money)"
+  ],
+  "readme": "README.fragment.md"
+}

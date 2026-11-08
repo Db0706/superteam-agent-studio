@@ -1,0 +1,35 @@
+name: Scaffold ZIP smoke test
+
+# Runs on every PR: `zip` is a required status check on main, so it must always report.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      # The vendor check compares vendor/ against the scaffold repo itself.
+      - uses: actions/checkout@v4
+        with:
+          repository: Db0706/agent-studio-scaffolds
+          path: .scaffolds-src
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # The python case builds a venv; templates support Python 3.10+.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Vendored scaffolds match the pinned commit
+        run: node scripts/vendor-scaffolds.mjs --check --source .scaffolds-src
+      - name: Download, install, build and run generated projects (next, node, python, expo + wallet)
+        run: npm run test:zip

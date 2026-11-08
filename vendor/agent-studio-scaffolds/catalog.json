@@ -1,0 +1,1392 @@
+[
+  {
+    "framework": "next",
+    "base": {
+      "id": "base",
+      "kind": "base",
+      "framework": "next",
+      "name": "Next.js web application",
+      "description": "Next.js App Router + TypeScript starter. Every module is layered on top of this.",
+      "requires": [],
+      "files": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "app/globals.css",
+        "components/ui.tsx",
+        "components/Nav.tsx",
+        "lib/modules.ts",
+        "next.config.ts",
+        "tsconfig.json",
+        "package.json",
+        ".gitignore",
+        ".env.example",
+        "README.md"
+      ],
+      "modulesFile": "lib/modules.ts",
+      "generatedFiles": [
+        "lib/modules.ts",
+        "package.json",
+        ".env.example",
+        "README.md",
+        "studio.manifest.json"
+      ],
+      "dependencies": {
+        "next": "16.4.2",
+        "react": "19.3.0",
+        "react-dom": "19.3.0",
+        "server-only": "0.0.1"
+      },
+      "devDependencies": {
+        "typescript": "5.9.3",
+        "@types/node": "22.20.5",
+        "@types/react": "19.3.0",
+        "@types/react-dom": "19.3.0"
+      },
+      "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "typecheck": "tsc --noEmit"
+      },
+      "env": [],
+      "prerequisites": [
+        "Node.js 20.9 or newer (22 LTS recommended)"
+      ],
+      "readme": "README.fragment.md"
+    },
+    "modules": [
+      {
+        "id": "gemini",
+        "kind": "module",
+        "framework": "next",
+        "name": "Gemini AI",
+        "summary": "Ask Google Gemini a question from a server route. Your key never reaches the browser.",
+        "nav": {
+          "label": "Gemini chat",
+          "href": "/chat"
+        },
+        "requires": [],
+        "files": [
+          "lib/ai/gemini.ts",
+          "app/api/chat/route.ts",
+          "app/chat/page.tsx"
+        ],
+        "dependencies": {
+          "@google/genai": "2.28.0"
+        },
+        "devDependencies": {},
+        "scripts": {},
+        "env": [
+          {
+            "key": "GEMINI_API_KEY",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From https://aistudio.google.com/apikey. Server-only."
+          },
+          {
+            "key": "GEMINI_MODEL",
+            "example": "gemini-flash-latest",
+            "required": false,
+            "secret": false,
+            "note": "Optional model override."
+          }
+        ],
+        "prerequisites": [
+          "Google account",
+          "Gemini API key from Google AI Studio (free tier is enough)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paidapi",
+        "kind": "module",
+        "framework": "next",
+        "name": "Paid API Example",
+        "summary": "A pay-per-request API route plus a buyer (page + CLI script) that pays for it within its spending limits.",
+        "nav": {
+          "label": "Paid API",
+          "href": "/premium"
+        },
+        "requires": [
+          "payments",
+          "spending"
+        ],
+        "files": [
+          "app/api/premium/route.ts",
+          "app/api/buy/route.ts",
+          "app/premium/page.tsx",
+          "lib/paidapi/buyer.ts",
+          "scripts/pay.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "pay": "tsx --conditions=react-server scripts/pay.ts"
+        },
+        "env": [
+          {
+            "key": "PAID_API_PRICE_USD",
+            "example": "0.01",
+            "required": false,
+            "secret": false,
+            "note": "Price per request in (devnet) USDC. Default 0.01."
+          }
+        ],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "payments",
+        "kind": "module",
+        "framework": "next",
+        "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+        "summary": "Charge for API routes with x402 V2 and pay for them with a devnet wallet. Test money only.",
+        "requires": [],
+        "files": [
+          "lib/payments/config.ts",
+          "lib/payments/server.ts",
+          "lib/payments/client.ts",
+          "lib/payments/transfer.ts",
+          "scripts/keygen.ts",
+          "scripts/wallets.ts",
+          "scripts/test-transfer.ts"
+        ],
+        "dependencies": {
+          "@x402/core": "2.28.0",
+          "@x402/next": "2.28.0",
+          "@x402/fetch": "2.28.0",
+          "@x402/svm": "2.28.0",
+          "@solana/kit": "5.5.1",
+          "@solana-program/token": "0.9.0"
+        },
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "keygen": "tsx scripts/keygen.ts",
+          "wallets": "tsx scripts/wallets.ts",
+          "test:transfer": "tsx --test scripts/test-transfer.ts"
+        },
+        "env": [
+          {
+            "key": "PAY_TO_ADDRESS",
+            "example": "",
+            "required": true,
+            "secret": false,
+            "note": "Your Solana devnet wallet address. Payments to your paid API arrive here."
+          },
+          {
+            "key": "X402_NETWORK",
+            "example": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+            "required": false,
+            "secret": false,
+            "note": "CAIP-2 id. Only Solana devnet is allowed by this template."
+          },
+          {
+            "key": "X402_FACILITATOR_URL",
+            "example": "https://x402.org/facilitator",
+            "required": false,
+            "secret": false,
+            "note": "Free public test facilitator: verifies + settles devnet payments and pays the SOL fees."
+          },
+          {
+            "key": "AGENT_PRIVATE_KEY",
+            "example": "",
+            "required": false,
+            "secret": true,
+            "note": "DEVNET-ONLY throwaway key for the paying side (buyer). Base58 or solana-keygen JSON array. Never commit."
+          },
+          {
+            "key": "SOLANA_RPC_URL",
+            "example": "https://api.devnet.solana.com",
+            "required": false,
+            "secret": false,
+            "note": "Optional devnet RPC used when building payments."
+          }
+        ],
+        "prerequisites": [
+          "A Solana devnet address to receive test payments (PAY_TO_ADDRESS); `npm run keygen -- --pay-to` makes one",
+          "To pay: a throwaway devnet keypair (`npm run keygen`) funded with devnet USDC from https://faucet.circle.com (no real money)",
+          "The receiving address also needs a devnet USDC token account: send it faucet USDC once"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paysh",
+        "kind": "module",
+        "framework": "next",
+        "name": "Pay.sh",
+        "summary": "Pay your own GET /api/premium (or any x402 API) with the Pay.sh `pay` CLI, let Claude Code pay through it, and draft a Pay.sh catalog listing.",
+        "requires": [
+          "paidapi"
+        ],
+        "files": [
+          "lib/paysh/listing.ts",
+          "scripts/paysh.ts",
+          "scripts/test-paysh.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "paysh": "tsx scripts/paysh.ts",
+          "test:paysh": "tsx --test scripts/test-paysh.ts"
+        },
+        "env": [
+          {
+            "key": "PAYSH_SERVICE_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "Your deployed https:// address, used in the Pay.sh catalog listing. Leave empty while you build locally."
+          }
+        ],
+        "prerequisites": [
+          "The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "race",
+        "kind": "module",
+        "framework": "next",
+        "name": "AI Race adapter",
+        "summary": "Speaks the race protocol (ASRP/1) so the AI Race verifier can test your app. You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness",
+          "href": "/race"
+        },
+        "requires": [],
+        "files": [
+          "lib/race/protocol.ts",
+          "lib/race/adapter.ts",
+          "lib/race/handlers.ts",
+          "lib/race/tools.ts",
+          "lib/race/memory.ts",
+          "app/agent-studio/v1/health/route.ts",
+          "app/agent-studio/v1/tasks/route.ts",
+          "app/race/page.tsx",
+          "scripts/test-race.ts",
+          "scripts/race-try.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "test:race": "tsx --test scripts/test-race.ts",
+          "race:try": "tsx scripts/race-try.ts"
+        },
+        "env": [
+          {
+            "key": "AGENT_STUDIO_VERIFIER_TOKEN",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From your team page on Agent Studio. Only the race verifier sends it."
+          },
+          {
+            "key": "AGENT_STUDIO_APP_NAME",
+            "example": "my-race-app",
+            "required": false,
+            "secret": false,
+            "note": "Name shown in the health response."
+          },
+          {
+            "key": "UPSTASH_REDIS_REST_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "For the Memory layer on serverless hosting (Vercel): keeps conversation history between requests. Free Upstash Redis database; Vercel's Upstash integration sets KV_REST_API_URL instead, which also works."
+          },
+          {
+            "key": "UPSTASH_REDIS_REST_TOKEN",
+            "example": "",
+            "required": false,
+            "secret": true,
+            "note": "The REST token for that database (or KV_REST_API_TOKEN from Vercel's integration)."
+          }
+        ],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "spending",
+        "kind": "module",
+        "framework": "next",
+        "name": "Spending Controls",
+        "summary": "A total budget and a per-payment cap, checked before every automatic payment.",
+        "requires": [
+          "payments"
+        ],
+        "files": [
+          "lib/spending/policy.ts",
+          "lib/spending/tracker.ts",
+          "lib/spending/attach.ts",
+          "scripts/test-spending.ts",
+          "scripts/test-spending-x402.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "test:spending": "tsx --test scripts/test-spending.ts scripts/test-spending-x402.ts"
+        },
+        "env": [
+          {
+            "key": "AGENT_BUDGET_USD",
+            "example": "1.00",
+            "required": false,
+            "secret": false,
+            "note": "Total the buyer may spend before the server restarts. Default 1.00."
+          },
+          {
+            "key": "MAX_PAYMENT_USD",
+            "example": "0.10",
+            "required": false,
+            "secret": false,
+            "note": "Largest single payment allowed. Default 0.10."
+          }
+        ],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "wallet",
+        "kind": "module",
+        "framework": "next",
+        "name": "Wallet Connection",
+        "summary": "Visitors connect their own Solana wallet (Phantom, Solflare, Backpack, …) and pay your paid API from it, approving each payment in the wallet. Devnet only.",
+        "nav": {
+          "label": "Pay with your wallet",
+          "href": "/wallet"
+        },
+        "requires": [
+          "paidapi"
+        ],
+        "files": [
+          "components/wallet/WalletProvider.tsx",
+          "components/wallet/ConnectWallet.tsx",
+          "components/wallet/PayWithWallet.tsx",
+          "app/wallet/page.tsx"
+        ],
+        "dependencies": {
+          "@solana/react": "5.5.1",
+          "@wallet-standard/react": "1.0.3"
+        },
+        "devDependencies": {},
+        "scripts": {},
+        "env": [
+          {
+            "key": "NEXT_PUBLIC_SOLANA_RPC_URL",
+            "example": "https://api.devnet.solana.com",
+            "required": false,
+            "secret": false,
+            "note": "Devnet RPC the browser uses to build wallet payments. NEXT_PUBLIC_ values are visible to everyone, so never put a key here"
+          }
+        ],
+        "prerequisites": [
+          "A Solana browser wallet (Phantom, Solflare, Backpack, …) switched to devnet, holding devnet USDC from https://faucet.circle.com (no real money)"
+        ],
+        "readme": "README.fragment.md"
+      }
+    ]
+  },
+  {
+    "framework": "node",
+    "base": {
+      "id": "base",
+      "kind": "base",
+      "framework": "node",
+      "name": "Node.js backend service",
+      "description": "Express + TypeScript HTTP service. Every module is layered on top of this.",
+      "requires": [],
+      "files": [
+        "src/server.ts",
+        "src/landing.ts",
+        "src/modules.ts",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        "package.json",
+        ".gitignore",
+        ".env.example",
+        "README.md"
+      ],
+      "modulesFile": "src/modules.ts",
+      "generatedFiles": [
+        "src/modules.ts",
+        "package.json",
+        ".env.example",
+        "README.md",
+        "studio.manifest.json"
+      ],
+      "dependencies": {
+        "express": "5.2.1"
+      },
+      "devDependencies": {
+        "typescript": "5.9.3",
+        "tsx": "4.23.15",
+        "@types/node": "22.20.5",
+        "@types/express": "5.0.6"
+      },
+      "scripts": {
+        "dev": "tsx watch src/server.ts",
+        "build": "tsc -p tsconfig.build.json",
+        "start": "node dist/server.js",
+        "typecheck": "tsc --noEmit"
+      },
+      "env": [],
+      "prerequisites": [
+        "Node.js 20.12 or newer (22 LTS recommended)"
+      ],
+      "readme": "README.fragment.md"
+    },
+    "modules": [
+      {
+        "id": "gemini",
+        "kind": "module",
+        "framework": "node",
+        "name": "Gemini AI",
+        "summary": "POST /api/chat asks Google Gemini a question. Your key stays on the server.",
+        "nav": {
+          "label": "Gemini chat (POST /api/chat)",
+          "href": "/api/chat"
+        },
+        "requires": [],
+        "files": [
+          "src/lib/ai/gemini.ts",
+          "src/routes/chat.ts"
+        ],
+        "dependencies": {
+          "@google/genai": "2.28.0"
+        },
+        "devDependencies": {},
+        "scripts": {},
+        "env": [
+          {
+            "key": "GEMINI_API_KEY",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From https://aistudio.google.com/apikey. Server-only."
+          },
+          {
+            "key": "GEMINI_MODEL",
+            "example": "gemini-flash-latest",
+            "required": false,
+            "secret": false,
+            "note": "Optional model override."
+          }
+        ],
+        "prerequisites": [
+          "Google account",
+          "Gemini API key from Google AI Studio (free tier is enough)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paidapi",
+        "kind": "module",
+        "framework": "node",
+        "name": "Paid API Example",
+        "summary": "GET /premium-data costs devnet USDC per request; examples/client.ts and POST /api/buy pay for it within the spending limits.",
+        "nav": {
+          "label": "Paid endpoint (GET /premium-data)",
+          "href": "/premium-data"
+        },
+        "requires": [
+          "payments",
+          "spending"
+        ],
+        "files": [
+          "src/routes/premium-data.ts",
+          "src/routes/buy.ts",
+          "src/lib/paidapi/buyer.ts",
+          "examples/client.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "pay": "tsx examples/client.ts"
+        },
+        "env": [
+          {
+            "key": "PAID_API_PRICE_USD",
+            "example": "0.01",
+            "required": false,
+            "secret": false,
+            "note": "Price per request in (devnet) USDC. Default 0.01."
+          }
+        ],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "payments",
+        "kind": "module",
+        "framework": "node",
+        "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+        "summary": "Charge for API endpoints with x402 V2 and pay for them with a devnet wallet. Test money only.",
+        "requires": [],
+        "files": [
+          "src/lib/payments/config.ts",
+          "src/lib/payments/server.ts",
+          "src/lib/payments/client.ts",
+          "src/lib/payments/transfer.ts",
+          "scripts/keygen.ts",
+          "scripts/wallets.ts",
+          "scripts/test-transfer.ts"
+        ],
+        "dependencies": {
+          "@x402/core": "2.28.0",
+          "@x402/express": "2.28.0",
+          "@x402/fetch": "2.28.0",
+          "@x402/svm": "2.28.0",
+          "@solana/kit": "5.5.1",
+          "@solana-program/token": "0.9.0"
+        },
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "keygen": "tsx scripts/keygen.ts",
+          "wallets": "tsx scripts/wallets.ts",
+          "test:transfer": "tsx --test scripts/test-transfer.ts"
+        },
+        "env": [
+          {
+            "key": "PAY_TO_ADDRESS",
+            "example": "",
+            "required": true,
+            "secret": false,
+            "note": "Your Solana devnet wallet address. Payments to your paid endpoints arrive here."
+          },
+          {
+            "key": "X402_NETWORK",
+            "example": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+            "required": false,
+            "secret": false,
+            "note": "CAIP-2 id. Only Solana devnet is allowed by this template."
+          },
+          {
+            "key": "X402_FACILITATOR_URL",
+            "example": "https://x402.org/facilitator",
+            "required": false,
+            "secret": false,
+            "note": "Free public test facilitator: verifies + settles devnet payments and pays the SOL fees."
+          },
+          {
+            "key": "AGENT_PRIVATE_KEY",
+            "example": "",
+            "required": false,
+            "secret": true,
+            "note": "DEVNET-ONLY throwaway key for the paying side (buyer). Base58 or solana-keygen JSON array. Never commit."
+          },
+          {
+            "key": "SOLANA_RPC_URL",
+            "example": "https://api.devnet.solana.com",
+            "required": false,
+            "secret": false,
+            "note": "Optional devnet RPC used when building payments."
+          }
+        ],
+        "prerequisites": [
+          "A Solana devnet address to receive test payments (PAY_TO_ADDRESS); `npm run keygen -- --pay-to` makes one",
+          "To pay: a throwaway devnet keypair (`npm run keygen`) funded with devnet USDC from https://faucet.circle.com (no real money)",
+          "The receiving address also needs a devnet USDC token account: send it faucet USDC once"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paysh",
+        "kind": "module",
+        "framework": "node",
+        "name": "Pay.sh",
+        "summary": "Pay your own GET /premium-data (or any x402 API) with the Pay.sh `pay` CLI, let Claude Code pay through it, and draft a Pay.sh catalog listing.",
+        "requires": [
+          "paidapi"
+        ],
+        "files": [
+          "src/lib/paysh/listing.ts",
+          "scripts/paysh.ts",
+          "scripts/test-paysh.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "paysh": "tsx scripts/paysh.ts",
+          "test:paysh": "tsx --test scripts/test-paysh.ts"
+        },
+        "env": [
+          {
+            "key": "PAYSH_SERVICE_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "Your deployed https:// address, used in the Pay.sh catalog listing. Leave empty while you build locally."
+          }
+        ],
+        "prerequisites": [
+          "The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "race",
+        "kind": "module",
+        "framework": "node",
+        "name": "AI Race adapter",
+        "summary": "Speaks the race protocol (ASRP/1) so the AI Race verifier can test your app. You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness (GET /race)",
+          "href": "/race"
+        },
+        "requires": [],
+        "files": [
+          "src/race/protocol.ts",
+          "src/race/adapter.ts",
+          "src/race/handlers.ts",
+          "src/race/tools.ts",
+          "src/race/memory.ts",
+          "src/routes/race.ts",
+          "scripts/test-race.ts",
+          "scripts/race-try.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "test:race": "tsx --test scripts/test-race.ts",
+          "race:try": "tsx scripts/race-try.ts"
+        },
+        "env": [
+          {
+            "key": "AGENT_STUDIO_VERIFIER_TOKEN",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From your team page on Agent Studio. Only the race verifier sends it."
+          },
+          {
+            "key": "AGENT_STUDIO_APP_NAME",
+            "example": "my-race-app",
+            "required": false,
+            "secret": false,
+            "note": "Name shown in the health response."
+          },
+          {
+            "key": "UPSTASH_REDIS_REST_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "For the Memory layer on serverless hosting (Vercel): keeps conversation history between requests. Free Upstash Redis database; Vercel's Upstash integration sets KV_REST_API_URL instead, which also works."
+          },
+          {
+            "key": "UPSTASH_REDIS_REST_TOKEN",
+            "example": "",
+            "required": false,
+            "secret": true,
+            "note": "The REST token for that database (or KV_REST_API_TOKEN from Vercel's integration)."
+          }
+        ],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "spending",
+        "kind": "module",
+        "framework": "node",
+        "name": "Spending Controls",
+        "summary": "A total budget and a per-payment cap, checked before every automatic payment.",
+        "requires": [
+          "payments"
+        ],
+        "files": [
+          "src/lib/spending/policy.ts",
+          "src/lib/spending/tracker.ts",
+          "src/lib/spending/attach.ts",
+          "scripts/test-spending.ts",
+          "scripts/test-spending-x402.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {
+          "tsx": "4.23.15"
+        },
+        "scripts": {
+          "test:spending": "tsx --test scripts/test-spending.ts scripts/test-spending-x402.ts"
+        },
+        "env": [
+          {
+            "key": "AGENT_BUDGET_USD",
+            "example": "1.00",
+            "required": false,
+            "secret": false,
+            "note": "Total the buyer may spend before the server or script restarts. Default 1.00."
+          },
+          {
+            "key": "MAX_PAYMENT_USD",
+            "example": "0.10",
+            "required": false,
+            "secret": false,
+            "note": "Largest single payment allowed. Default 0.10."
+          }
+        ],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      }
+    ]
+  },
+  {
+    "framework": "python",
+    "base": {
+      "id": "base",
+      "kind": "base",
+      "framework": "python",
+      "name": "Python autonomous agent",
+      "description": "Python 3.10+ agent: a command line (python -m agent) plus a FastAPI HTTP service. Every module is layered on top of this.",
+      "requires": [],
+      "files": [
+        "agent/__init__.py",
+        "agent/__main__.py",
+        "agent/config.py",
+        "agent/plugins.py",
+        "agent/modules.py",
+        "agent/server.py",
+        "agent/landing.py",
+        "agent/commands/__init__.py",
+        "agent/routes/__init__.py",
+        "tests/test_agent.py",
+        "pyproject.toml",
+        "requirements.txt",
+        "requirements-dev.txt",
+        ".gitignore",
+        ".env.example",
+        "README.md"
+      ],
+      "modulesFile": "agent/modules.py",
+      "modulesPlaceholder": "modules: list[StudioModule] = []",
+      "dependencyFiles": {
+        "dependencies": "requirements.txt",
+        "devDependencies": "requirements-dev.txt"
+      },
+      "generatedFiles": [
+        "agent/modules.py",
+        "requirements.txt",
+        "requirements-dev.txt",
+        ".env.example",
+        "README.md",
+        "studio.manifest.json"
+      ],
+      "dependencies": {
+        "fastapi": "0.143.0",
+        "uvicorn": "0.54.0",
+        "python-dotenv": "1.2.4"
+      },
+      "devDependencies": {
+        "pyright[nodejs]": "1.1.414"
+      },
+      "scripts": {
+        "agent": "python -m agent",
+        "dev": "python -m agent serve --reload",
+        "start": "python -m agent serve",
+        "test": "python -m unittest discover -s tests -v",
+        "typecheck": "pyright"
+      },
+      "env": [],
+      "prerequisites": [
+        "Python 3.10 or newer (3.12 recommended)"
+      ],
+      "readme": "README.fragment.md"
+    },
+    "modules": [
+      {
+        "id": "gemini",
+        "kind": "module",
+        "framework": "python",
+        "name": "Gemini AI",
+        "summary": "The agent can ask Google Gemini (python -m agent ask, POST /api/chat). Your key stays in .env.",
+        "nav": {
+          "label": "Gemini chat (POST /api/chat)",
+          "href": "/api/chat"
+        },
+        "requires": [],
+        "files": [
+          "agent/ai/__init__.py",
+          "agent/ai/gemini.py",
+          "agent/routes/chat.py",
+          "agent/commands/ask.py"
+        ],
+        "dependencies": {
+          "google-genai": "2.29.0"
+        },
+        "devDependencies": {},
+        "scripts": {
+          "ask": "python -m agent ask"
+        },
+        "env": [
+          {
+            "key": "GEMINI_API_KEY",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From https://aistudio.google.com/apikey. Server-only."
+          },
+          {
+            "key": "GEMINI_MODEL",
+            "example": "gemini-flash-latest",
+            "required": false,
+            "secret": false,
+            "note": "Optional model override."
+          }
+        ],
+        "prerequisites": [
+          "Google account",
+          "Gemini API key from Google AI Studio (free tier is enough)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paidapi",
+        "kind": "module",
+        "framework": "python",
+        "name": "Paid API Example",
+        "summary": "GET /premium-data costs devnet USDC per request; `python -m agent buy` and POST /api/buy pay for it within the spending limits.",
+        "nav": {
+          "label": "Paid endpoint (GET /premium-data)",
+          "href": "/premium-data"
+        },
+        "requires": [
+          "payments",
+          "spending"
+        ],
+        "files": [
+          "agent/paidapi/__init__.py",
+          "agent/paidapi/buyer.py",
+          "agent/routes/premium_data.py",
+          "agent/routes/buy.py",
+          "agent/commands/buy.py"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {
+          "buy": "python -m agent buy"
+        },
+        "env": [
+          {
+            "key": "PAID_API_PRICE_USD",
+            "example": "0.01",
+            "required": false,
+            "secret": false,
+            "note": "Price per request in (devnet) USDC. Default 0.01."
+          }
+        ],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "payments",
+        "kind": "module",
+        "framework": "python",
+        "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+        "summary": "Charge for API endpoints with x402 V2 and pay for them with a devnet wallet. Test money only.",
+        "requires": [],
+        "files": [
+          "agent/payments/__init__.py",
+          "agent/payments/config.py",
+          "agent/payments/server.py",
+          "agent/payments/client.py",
+          "agent/payments/transfer.py",
+          "agent/commands/keygen.py",
+          "agent/commands/wallets.py",
+          "tests/test_transfer.py"
+        ],
+        "dependencies": {
+          "x402[httpx,svm]": "2.25.0",
+          "solana": "0.38.0",
+          "solders": "0.27.1",
+          "httpx": "0.28.1"
+        },
+        "devDependencies": {},
+        "scripts": {
+          "keygen": "python -m agent keygen",
+          "wallets": "python -m agent wallets"
+        },
+        "env": [
+          {
+            "key": "PAY_TO_ADDRESS",
+            "example": "",
+            "required": true,
+            "secret": false,
+            "note": "Your Solana devnet wallet address. Payments to your paid endpoints arrive here."
+          },
+          {
+            "key": "X402_NETWORK",
+            "example": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+            "required": false,
+            "secret": false,
+            "note": "CAIP-2 id. Only Solana devnet is allowed by this template."
+          },
+          {
+            "key": "X402_FACILITATOR_URL",
+            "example": "https://x402.org/facilitator",
+            "required": false,
+            "secret": false,
+            "note": "Free public test facilitator: verifies + settles devnet payments and pays the SOL fees."
+          },
+          {
+            "key": "AGENT_PRIVATE_KEY",
+            "example": "",
+            "required": false,
+            "secret": true,
+            "note": "DEVNET-ONLY throwaway key for the paying side (buyer). Base58 or solana-keygen JSON array. Never commit."
+          },
+          {
+            "key": "SOLANA_RPC_URL",
+            "example": "https://api.devnet.solana.com",
+            "required": false,
+            "secret": false,
+            "note": "Optional devnet RPC used when building payments."
+          }
+        ],
+        "prerequisites": [
+          "A Solana devnet address to receive test payments (PAY_TO_ADDRESS); `python -m agent keygen --pay-to` makes one",
+          "To pay: a throwaway devnet keypair (`python -m agent keygen`) funded with devnet USDC from https://faucet.circle.com (no real money)",
+          "The receiving address also needs a devnet USDC token account: send it faucet USDC once"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paysh",
+        "kind": "module",
+        "framework": "python",
+        "name": "Pay.sh",
+        "summary": "Pay your own GET /premium-data (or any x402 API) with the Pay.sh `pay` CLI, let Claude Code pay through it, and draft a Pay.sh catalog listing.",
+        "requires": [
+          "paidapi"
+        ],
+        "files": [
+          "agent/commands/paysh.py",
+          "tests/test_paysh.py"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {
+          "paysh": "python -m agent paysh"
+        },
+        "env": [
+          {
+            "key": "PAYSH_SERVICE_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "Your deployed https:// address, used in the Pay.sh catalog listing. Leave empty while you build locally."
+          }
+        ],
+        "prerequisites": [
+          "The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "race",
+        "kind": "module",
+        "framework": "python",
+        "name": "AI Race adapter",
+        "summary": "Speaks the race protocol (ASRP/1) so the AI Race verifier can test your agent (python -m agent race to try a task). You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness (GET /race)",
+          "href": "/race"
+        },
+        "requires": [],
+        "files": [
+          "agent/race/__init__.py",
+          "agent/race/protocol.py",
+          "agent/race/adapter.py",
+          "agent/race/handlers.py",
+          "agent/race/tools.py",
+          "agent/race/memory.py",
+          "agent/routes/race.py",
+          "agent/commands/race.py",
+          "tests/test_race.py"
+        ],
+        "dependencies": {
+          "httpx": "0.28.1"
+        },
+        "devDependencies": {},
+        "scripts": {
+          "race": "python -m agent race"
+        },
+        "env": [
+          {
+            "key": "AGENT_STUDIO_VERIFIER_TOKEN",
+            "example": "",
+            "required": true,
+            "secret": true,
+            "note": "From your team page on Agent Studio. Only the race verifier sends it."
+          },
+          {
+            "key": "AGENT_STUDIO_APP_NAME",
+            "example": "my-race-agent",
+            "required": false,
+            "secret": false,
+            "note": "Name shown in the health response."
+          },
+          {
+            "key": "UPSTASH_REDIS_REST_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "For the Memory layer on serverless hosting: keeps conversation history between requests. Free Upstash Redis database; Vercel's Upstash integration sets KV_REST_API_URL instead, which also works."
+          },
+          {
+            "key": "UPSTASH_REDIS_REST_TOKEN",
+            "example": "",
+            "required": false,
+            "secret": true,
+            "note": "The REST token for that database (or KV_REST_API_TOKEN from Vercel's integration)."
+          }
+        ],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL when you race (deploy, or a tunnel such as ngrok)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "spending",
+        "kind": "module",
+        "framework": "python",
+        "name": "Spending Controls",
+        "summary": "A total budget and a per-payment cap, checked before every automatic payment.",
+        "requires": [
+          "payments"
+        ],
+        "files": [
+          "agent/spending/__init__.py",
+          "agent/spending/policy.py",
+          "agent/spending/tracker.py",
+          "agent/spending/attach.py",
+          "tests/test_spending.py",
+          "tests/test_spending_x402.py"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {
+          "test:spending": "python -m unittest discover -s tests -p \"test_spending*.py\" -v"
+        },
+        "env": [
+          {
+            "key": "AGENT_BUDGET_USD",
+            "example": "1.00",
+            "required": false,
+            "secret": false,
+            "note": "Total the agent may spend before it restarts. Default 1.00."
+          },
+          {
+            "key": "MAX_PAYMENT_USD",
+            "example": "0.10",
+            "required": false,
+            "secret": false,
+            "note": "Largest single payment allowed. Default 0.10."
+          }
+        ],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      }
+    ]
+  },
+  {
+    "framework": "expo",
+    "base": {
+      "id": "base",
+      "kind": "base",
+      "framework": "expo",
+      "name": "Expo app (Android, or in a web browser)",
+      "description": "Expo + expo-router + TypeScript app. Every module is layered on top of this. Modules that need secrets add a companion server (the node template) in companion-server/.",
+      "requires": [],
+      "files": [
+        "app/_layout.tsx",
+        "app/index.tsx",
+        "components/Screen.tsx",
+        "lib/companion.ts",
+        "lib/modules.ts",
+        "app.json",
+        "metro.config.js",
+        "tsconfig.json",
+        "package.json",
+        ".gitignore",
+        ".env.example",
+        "README.md"
+      ],
+      "modulesFile": "lib/modules.ts",
+      "generatedFiles": [
+        "lib/modules.ts",
+        "package.json",
+        ".env.example",
+        "README.md",
+        "studio.manifest.json"
+      ],
+      "dependencies": {
+        "@expo/metro-runtime": "57.0.16",
+        "expo": "57.0.25",
+        "expo-constants": "57.0.19",
+        "expo-linking": "57.0.11",
+        "expo-router": "57.0.23",
+        "expo-status-bar": "57.0.1",
+        "react": "19.2.3",
+        "react-dom": "19.2.3",
+        "react-native": "0.86.3",
+        "react-native-reanimated": "4.5.1",
+        "react-native-safe-area-context": "5.7.0",
+        "react-native-screens": "4.26.2",
+        "react-native-web": "0.21.3",
+        "react-native-worklets": "0.10.1"
+      },
+      "devDependencies": {
+        "typescript": "6.0.3",
+        "@types/react": "19.2.18"
+      },
+      "scripts": {
+        "start": "expo start",
+        "web": "expo start --web",
+        "android": "expo start --android",
+        "build": "expo export --platform android",
+        "build:web": "expo export --platform web",
+        "typecheck": "tsc --noEmit"
+      },
+      "env": [],
+      "companion": {
+        "framework": "node",
+        "dir": "companion-server",
+        "name": "Companion server",
+        "scripts": {
+          "companion:install": "npm --prefix companion-server install",
+          "companion": "npm --prefix companion-server run dev"
+        },
+        "env": [
+          {
+            "key": "EXPO_PUBLIC_COMPANION_URL",
+            "example": "",
+            "required": false,
+            "secret": false,
+            "note": "Where the app finds companion-server/. Leave empty in development: the app uses the computer running `npm start`, port 3000. Set it to your deployed https:// URL for a release build. EXPO_PUBLIC_ values are built into the app, so never put a key here"
+          }
+        ],
+        "readme": "COMPANION.fragment.md"
+      },
+      "prerequisites": [
+        "Node.js 20.19.4 or newer (22 LTS recommended)",
+        "A web browser (nothing else needed), or an Android phone with Expo Go, or an Android emulator"
+      ],
+      "readme": "README.fragment.md"
+    },
+    "modules": [
+      {
+        "id": "gemini",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Gemini AI",
+        "summary": "A chat screen that asks Google Gemini through your companion server. The key never ships in the app.",
+        "nav": {
+          "label": "Gemini chat",
+          "href": "/chat"
+        },
+        "requires": [],
+        "companionModules": [
+          "gemini"
+        ],
+        "files": [
+          "lib/ai/client.ts",
+          "app/chat.tsx"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paidapi",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Paid API Example",
+        "summary": "The companion server sells GET /premium-data for devnet USDC; the Premium screen shows the price and lets the companion's agent buy it within its spending limits.",
+        "nav": {
+          "label": "Premium data",
+          "href": "/premium"
+        },
+        "requires": [
+          "payments",
+          "spending"
+        ],
+        "companionModules": [
+          "paidapi"
+        ],
+        "files": [
+          "lib/paidapi/client.ts",
+          "app/premium.tsx"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "payments",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+        "summary": "Your companion server charges for endpoints with x402 V2 and pays with a devnet wallet. The app reads prices; keys stay on the server. Test money only.",
+        "requires": [],
+        "companionModules": [
+          "payments"
+        ],
+        "files": [
+          "lib/payments/client.ts"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "paysh",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Pay.sh",
+        "summary": "Pay your companion server's GET /premium-data (or any x402 API) with the Pay.sh `pay` CLI, let Claude Code pay through it, and draft a Pay.sh catalog listing.",
+        "requires": [
+          "paidapi"
+        ],
+        "companionModules": [
+          "paysh"
+        ],
+        "files": [],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [
+          "The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "race",
+        "kind": "module",
+        "framework": "expo",
+        "name": "AI Race adapter",
+        "summary": "Your companion server speaks the race protocol (ASRP/1) so the AI Race verifier can test it. You write the AI logic for each task type.",
+        "nav": {
+          "label": "Race readiness",
+          "href": "/race"
+        },
+        "requires": [],
+        "companionModules": [
+          "race"
+        ],
+        "files": [
+          "app/race.tsx"
+        ],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [
+          "A team on Agent Studio (for the verifier token)",
+          "A public https:// URL for the companion server when you race (deploy it, or a tunnel such as ngrok)"
+        ],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "spending",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Spending Controls",
+        "summary": "A total budget and a per-payment cap for the companion server's agent, checked before every automatic payment.",
+        "requires": [
+          "payments"
+        ],
+        "companionModules": [
+          "spending"
+        ],
+        "files": [],
+        "dependencies": {},
+        "devDependencies": {},
+        "scripts": {},
+        "env": [],
+        "prerequisites": [],
+        "readme": "README.fragment.md"
+      },
+      {
+        "id": "wallet",
+        "kind": "module",
+        "framework": "expo",
+        "name": "Wallet Connection",
+        "summary": "People connect a Solana wallet app on their phone (Phantom, Solflare, Backpack, …) through Solana Mobile Wallet Adapter and pay the companion's paid API from it, approving each payment in the wallet. Devnet only. Needs a development build, not Expo Go.",
+        "nav": {
+          "label": "Pay with your wallet",
+          "href": "/wallet"
+        },
+        "requires": [
+          "paidapi"
+        ],
+        "files": [
+          "lib/wallet/crypto-polyfill.ts",
+          "lib/wallet/mobileWallet.ts",
+          "lib/wallet/pay.ts",
+          "app/wallet.tsx"
+        ],
+        "dependencies": {
+          "@solana-mobile/mobile-wallet-adapter-protocol": "3.0.1",
+          "@solana-mobile/mobile-wallet-adapter-protocol-kit": "3.0.1",
+          "@solana/kit": "8.5.0",
+          "@x402/core": "2.28.0",
+          "@x402/fetch": "2.28.0",
+          "@x402/svm": "2.28.0",
+          "expo-crypto": "57.0.3",
+          "expo-dev-client": "57.0.19"
+        },
+        "devDependencies": {},
+        "scripts": {
+          "android:dev": "expo run:android"
+        },
+        "env": [
+          {
+            "key": "EXPO_PUBLIC_SOLANA_RPC_URL",
+            "example": "https://api.devnet.solana.com",
+            "required": false,
+            "secret": false,
+            "note": "Devnet RPC the app uses to build wallet payments. EXPO_PUBLIC_ values ship inside the app, so never put a key here"
+          }
+        ],
+        "prerequisites": [
+          "Android Studio with an emulator, or an Android phone with USB debugging (a development build replaces Expo Go)",
+          "A Solana wallet app with Mobile Wallet Adapter (Phantom, Solflare, Backpack, …) switched to devnet, holding devnet USDC from https://faucet.circle.com (no real money)"
+        ],
+        "readme": "README.fragment.md"
+      }
+    ]
+  }
+]

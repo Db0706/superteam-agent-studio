@@ -1,0 +1,16 @@
+{
+  "id": "payments",
+  "kind": "module",
+  "framework": "expo",
+  "name": "Internet-Native Payments (x402 V2, Solana devnet)",
+  "summary": "Your companion server charges for endpoints with x402 V2 and pays with a devnet wallet. The app reads prices; keys stay on the server. Test money only.",
+  "requires": [],
+  "companionModules": ["payments"],
+  "files": ["lib/payments/client.ts"],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {},
+  "env": [],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

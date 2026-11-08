@@ -1,0 +1,42 @@
+{
+  "id": "spending",
+  "kind": "module",
+  "framework": "node",
+  "name": "Spending Controls",
+  "summary": "A total budget and a per-payment cap, checked before every automatic payment.",
+  "requires": [
+    "payments"
+  ],
+  "files": [
+    "src/lib/spending/policy.ts",
+    "src/lib/spending/tracker.ts",
+    "src/lib/spending/attach.ts",
+    "scripts/test-spending.ts",
+    "scripts/test-spending-x402.ts"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "tsx": "4.23.15"
+  },
+  "scripts": {
+    "test:spending": "tsx --test scripts/test-spending.ts scripts/test-spending-x402.ts"
+  },
+  "env": [
+    {
+      "key": "AGENT_BUDGET_USD",
+      "example": "1.00",
+      "required": false,
+      "secret": false,
+      "note": "Total the buyer may spend before the server or script restarts. Default 1.00."
+    },
+    {
+      "key": "MAX_PAYMENT_USD",
+      "example": "0.10",
+      "required": false,
+      "secret": false,
+      "note": "Largest single payment allowed. Default 0.10."
+    }
+  ],
+  "prerequisites": [],
+  "readme": "README.fragment.md"
+}

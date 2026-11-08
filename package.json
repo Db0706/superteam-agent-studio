@@ -1,0 +1,52 @@
+{
+  "name": "superteam-agent-studio",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:zip": "node scripts/test-zip.mjs",
+    "test:e2e": "playwright test",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "worker": "tsx worker/main.ts",
+    "test:integration": "vitest run --config vitest.integration.mts",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset",
+    "db:seed": "psql \"${DATABASE_URL:-postgresql://postgres:postgres@127.0.0.1:54622/postgres}\" -v ON_ERROR_STOP=1 -f supabase/seed.sql",
+    "test:load": "tsx tests/load/race-load.mts"
+  },
+  "dependencies": {
+    "@solana-program/token": "0.9.0",
+    "@solana/kit": "5.5.1",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.118.0",
+    "next": "16.4.2",
+    "postgres": "3.4.9",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4",
+    "tsx": "4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.3"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}

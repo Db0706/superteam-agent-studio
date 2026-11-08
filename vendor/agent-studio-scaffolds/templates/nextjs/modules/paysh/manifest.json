@@ -1,0 +1,36 @@
+{
+  "id": "paysh",
+  "kind": "module",
+  "framework": "next",
+  "name": "Pay.sh",
+  "summary": "Pay your own GET /api/premium (or any x402 API) with the Pay.sh `pay` CLI, let Claude Code pay through it, and draft a Pay.sh catalog listing.",
+  "requires": [
+    "paidapi"
+  ],
+  "files": [
+    "lib/paysh/listing.ts",
+    "scripts/paysh.ts",
+    "scripts/test-paysh.ts"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "tsx": "4.23.15"
+  },
+  "scripts": {
+    "paysh": "tsx scripts/paysh.ts",
+    "test:paysh": "tsx --test scripts/test-paysh.ts"
+  },
+  "env": [
+    {
+      "key": "PAYSH_SERVICE_URL",
+      "example": "",
+      "required": false,
+      "secret": false,
+      "note": "Your deployed https:// address, used in the Pay.sh catalog listing. Leave empty while you build locally."
+    }
+  ],
+  "prerequisites": [
+    "The Pay.sh CLI: brew install pay, or npm install -g @solana/pay"
+  ],
+  "readme": "README.fragment.md"
+}
